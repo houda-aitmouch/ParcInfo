@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Confirmer la suppression</title></head>
+<body>
+    <h2>Confirmer la suppression</h2>
+    <p>Êtes-vous sûr·e de vouloir supprimer l'équipement "{{ equipement.designation }}" ?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Oui, supprimer</button>
+        <a href="{% url 'equipements:equipement_list' %}">Annuler</a>
+    </form>
+</body>
+</html>

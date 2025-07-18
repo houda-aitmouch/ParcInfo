@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Liste des matériels de bureau</title>
+</head>
+<body>
+
+<h1>Liste des matériels de bureau</h1>
+
+<p>
+    <a href="{% url 'materiel:materiel_create' %}">Ajouter un nouveau matériel</a> |
+    <a href="{% url 'materiel:export_excel_materiel' %}">Exporter en Excel</a>
+</p>
+
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Code Inventaire</th>
+            <th>Date Mise en Service</th>
+            <th>Description</th>
+            <th>Désignation</th>
+            <th>Prix HT (MAD)</th>
+            <th>Fournisseur</th>
+            <th>État Article</th>
+            <th>Lieu d'Affectation</th>
+            <th>Observations</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for materiel in materiels %}
+        <tr>
+            <td>{{ materiel.code_inventaire }}</td>
+            <td>{{ materiel.date_mise_en_service|date:"d/m/Y" }}</td>
+            <td>{{ materiel.description }}</td>
+            <td>{{ materiel.designation }}</td>
+            <td>{{ materiel.prix_ht_mad }}</td>
+            <td>{{ materiel.fournisseur }}</td>
+            <td>{{ materiel.etat_article }}</td>
+            <td>{{ materiel.lieu_affectation }}</td>
+            <td>{{ materiel.observations }}</td>
+            <td>
+                <a href="{% url 'materiel:materiel_update' materiel.id %}">Modifier</a> |
+                <a href="{% url 'materiel:materiel_delete' materiel.id %}">Supprimer</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="10">Aucun matériel trouvé.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

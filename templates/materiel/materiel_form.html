@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>{% if materiel %}Modifier{% else %}Ajouter{% endif %} un matériel</title>
+</head>
+<body>
+
+<h1>{% if materiel %}Modifier{% else %}Ajouter{% endif %} un matériel</h1>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% if materiel %}Modifier{% else %}Ajouter{% endif %}</button>
+    <a href="{% url 'materiel:materiel_list' %}">Annuler</a>
+</form>
+
+</body>
+</html>
