@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1fb4b8a6-81d3-48af-8fa2-214c7a14d521" name="Changes" comment="changes" />
+    <list default="true" id="1fb4b8a6-81d3-48af-8fa2-214c7a14d521" name="Changes" comment="changes">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -106,7 +108,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1752844004289</updated>
-      <workItem from="1752844005310" duration="22135000" />
+      <workItem from="1752844005310" duration="22436000" />
     </task>
     <task id="LOCAL-00001" summary="changes">
       <option name="closed" value="true" />
@@ -123,9 +125,19 @@
     <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="b449f704-02da-4970-b397-d2198e29f3fb" value="TOOL_WINDOW" />
+      </map>
+    </option>
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+        <entry key="b449f704-02da-4970-b397-d2198e29f3fb">
           <value>
             <State />
           </value>
