@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Dashboard Gestionnaire Bureau</title>
+</head>
+<body>
+<nav>
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="logout-link">Se déconnecter</a>
+        <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+            {% csrf_token %}
+        </form>
+    </nav>
+
+    <h1>Bienvenue Gestionnaire Bureau</h1>
+    <p>Contenu spécifique au Gestionnaire Bureau.</p>
+<a href="{% url 'equipements:materiel_list' %}">La liste des matériels de bureau</a>
+</body>
+</html>

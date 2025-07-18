@@ -1,0 +1,20 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Dashboard Gestionnaire Informatique</title>
+</head>
+<body>
+<nav>
+    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="logout-link">Se déconnecter</a>
+    <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+        {% csrf_token %}
+    </form>
+</nav>
+
+<h1>Bienvenue Gestionnaire Informatique</h1>
+<p>Contenu spécifique au Gestionnaire Informatique.</p>
+<a href="{% url 'equipements:equipement_list' %}">La liste des équipements</a>
+</body>
+</html>

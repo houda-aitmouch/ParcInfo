@@ -1,0 +1,19 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Employé</title>
+</head>
+<body>
+    <nav>
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="logout-link">Se déconnecter</a>
+        <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+            {% csrf_token %}
+        </form>
+    </nav>
+
+    <h1>Bienvenue Employé</h1>
+    <p>Contenu spécifique à l’employé.</p>
+</body>
+</html>
