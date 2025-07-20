@@ -1,0 +1,315 @@
+/* ===== ANIMATIONS PERSONNALISÉES ===== */
+@keyframes slideInFromTop {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+@keyframes slideInLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ===== CLASSES D'ANIMATION POUR LES LIGNES DU TABLEAU ===== */
+.equipment-row {
+    animation: slideInFromTop 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+.equipment-row:nth-child(1) { animation-delay: 0.1s; }
+.equipment-row:nth-child(2) { animation-delay: 0.2s; }
+.equipment-row:nth-child(3) { animation-delay: 0.3s; }
+.equipment-row:nth-child(4) { animation-delay: 0.4s; }
+.equipment-row:nth-child(5) { animation-delay: 0.5s; }
+.equipment-row:nth-child(6) { animation-delay: 0.6s; }
+.equipment-row:nth-child(7) { animation-delay: 0.7s; }
+.equipment-row:nth-child(8) { animation-delay: 0.8s; }
+
+/* ===== BADGES DE STATUT AVEC EFFETS ===== */
+.status-badge {
+    @apply relative overflow-hidden transition-all duration-300 ease-in-out;
+    background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+}
+
+.status-badge::before {
+    content: '';
+    @apply absolute top-0 w-full h-full transition-all duration-500;
+    left: -100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+}
+
+.status-badge:hover::before {
+    left: 100%;
+}
+
+.status-badge:hover {
+    @apply transform -translate-y-1;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Variables CSS pour les couleurs de statut */
+.status-active {
+    --bg-primary: #10b981;
+    --bg-secondary: #059669;
+}
+
+.status-inactive {
+    --bg-primary: #ef4444;
+    --bg-secondary: #dc2626;
+}
+
+.status-maintenance {
+    --bg-primary: #f59e0b;
+    --bg-secondary: #d97706;
+}
+
+.status-pending {
+    --bg-primary: #6366f1;
+    --bg-secondary: #4f46e5;
+}
+
+/* ===== EFFETS GLASSMORPHISM ===== */
+.glass-effect {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.glass-dark {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===== SCROLLBAR PERSONNALISÉE ===== */
+.custom-scrollbar::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-gray-200 rounded;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+    @apply rounded;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(90deg, #7c3aed, #2563eb);
+}
+
+/* ===== EFFETS DE HOVER POUR LES BOUTONS ===== */
+.btn-hover {
+    @apply relative overflow-hidden transition-all duration-300 ease-in-out;
+}
+
+.btn-hover::before {
+    content: '';
+    @apply absolute top-0 w-full h-full transition-all duration-500;
+    left: -100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+}
+
+.btn-hover:hover::before {
+    left: 100%;
+}
+
+.btn-hover:hover {
+    @apply transform -translate-y-1;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== ANIMATIONS POUR LES ICÔNES ===== */
+.icon-animate {
+    @apply transition-all duration-300 ease-in-out;
+}
+
+.icon-animate:hover {
+    @apply transform rotate-6 scale-110;
+}
+
+.icon-spin {
+    animation: spin 2s linear infinite;
+}
+
+/* ===== EFFETS DE FOCUS AMÉLIORÉS ===== */
+.focus-ring:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+}
+
+/* ===== ANIMATIONS DE CHARGEMENT ===== */
+.loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.loading-dark {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* ===== EFFETS DE TABLEAU RESPONSIVE ===== */
+.table-hover tbody tr {
+    @apply transition-all duration-200 ease-in-out;
+}
+
+.table-hover tbody tr:hover {
+    @apply bg-gradient-to-r from-blue-50 to-purple-50 transform scale-[1.01];
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== ANIMATIONS D'ENTRÉE POUR DIFFÉRENTS ÉLÉMENTS ===== */
+.fade-in {
+    animation: fadeInScale 0.8s ease-out forwards;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.6s ease-out forwards;
+}
+
+.bounce-in {
+    animation: bounceIn 0.8s ease-out forwards;
+}
+
+/* ===== EFFETS DE GRADIENT ANIMÉS ===== */
+.gradient-animate {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradientShift 4s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+    .container {
+        @apply px-4;
+    }
+
+    .equipment-row {
+        animation-duration: 0.4s;
+    }
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        @apply text-sm;
+    }
+
+    .equipment-row {
+        animation-duration: 0.3s;
+    }
+
+    .status-badge {
+        @apply text-xs px-2 py-1;
+    }
+}
+
+@media (max-width: 640px) {
+    .equipment-row {
+        animation-duration: 0.2s;
+    }
+
+    .glass-effect {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+}
+
+/* ===== UTILITAIRES SUPPLÉMENTAIRES ===== */
+.shadow-glow {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+.shadow-glow-green {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.shadow-glow-red {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.border-gradient {
+    border: 2px solid transparent;
+    background: linear-gradient(45deg, #f3f4f6, #f3f4f6) padding-box,
+                linear-gradient(45deg, #8b5cf6, #3b82f6) border-box;
+}

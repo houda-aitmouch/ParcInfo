@@ -1,0 +1,365 @@
+/* Variables CSS personnalisées */
+:root {
+    --brand-blue: #3399FF;
+    --brand-purple: #8B5CF6;
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --red-400: #F87171;
+    --red-500: #EF4444;
+    --red-700: #B91C1C;
+    --green-400: #34D399;
+    --green-500: #10B981;
+    --green-700: #047857;
+    --blue-50: #EFF6FF;
+    --red-50: #FEF2F2;
+    --green-50: #ECFDF5;
+}
+
+/* Animations */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes fadeInError {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Classes d'animation */
+.animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+.animate-spin-slow {
+    animation: spin-slow 2s linear infinite;
+}
+
+.error-fade-in {
+    animation: fadeInError 0.3s ease-in;
+}
+
+/* Overlay de focus */
+.focus-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 0.75rem; /* rounded-xl */
+    background-color: var(--blue-50);
+    opacity: 0.1;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Messages d'erreur */
+.error-message {
+    margin-top: 0.25rem;
+    color: var(--red-500);
+    font-size: 0.875rem;
+}
+
+/* Bouton toggle mot de passe */
+.password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    transition: color 0.2s ease-in-out;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.password-toggle:hover {
+    color: var(--gray-600);
+}
+
+/* Lien mot de passe oublié */
+.forgot-password-link {
+    color: var(--brand-blue);
+    font-weight: 500;
+    transition: color 0.2s ease-in-out;
+    text-decoration: none;
+}
+
+.forgot-password-link:hover {
+    color: var(--brand-purple);
+}
+
+/* Alertes */
+.alert {
+    border-left: 4px solid;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.alert-error {
+    background-color: var(--red-50);
+    border-color: var(--red-400);
+    color: var(--red-700);
+}
+
+.alert-success {
+    background-color: var(--green-50);
+    border-color: var(--green-400);
+    color: var(--green-700);
+}
+
+.alert-info {
+    background-color: var(--blue-50);
+    border-color: var(--brand-blue);
+    color: var(--gray-700);
+}
+
+/* Bouton de connexion */
+.login-button {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary {
+    background: linear-gradient(to right, var(--brand-blue), var(--brand-purple));
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(to right, #2563EB, #7C3AED);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: scale(1.02);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-disabled {
+    background-color: var(--gray-400);
+    color: white;
+    cursor: not-allowed;
+}
+
+/* Animation de shimmer pour le bouton */
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+/* Effet de survol pour les boutons */
+.btn-hover-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-hover-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-hover-effect:hover::before {
+    left: 100%;
+}
+
+/* Spinner de chargement */
+.loading-spinner {
+    animation: spin 1s linear infinite;
+    margin-left: -0.25rem;
+    margin-right: 0.75rem;
+    height: 1.25rem;
+    width: 1.25rem;
+    color: white;
+}
+
+/* Lien d'inscription */
+.register-link {
+    color: var(--brand-blue);
+    font-weight: 500;
+    transition: color 0.2s ease-in-out;
+    text-decoration: none;
+}
+
+.register-link:hover {
+    color: var(--brand-purple);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    margin-top: 2rem;
+    color: var(--gray-500);
+    font-size: 0.875rem;
+}
+
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+}
+
+.social-links a {
+    color: var(--gray-400);
+    transition: color 0.2s ease-in-out;
+    text-decoration: none;
+    padding: 0.5rem;
+}
+
+.social-links a:hover {
+    color: var(--brand-blue);
+    transform: translateY(-2px);
+}
+
+/* Animation de focus pour les champs */
+.input-focus-ring {
+    position: relative;
+}
+
+.input-focus-ring::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 0.75rem;
+    pointer-events: none;
+    transition: all 0.2s ease-in-out;
+}
+
+/* États de focus améliorés */
+input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+input:focus + .focus-overlay {
+    opacity: 0.2;
+}
+
+/* Animation au survol des champs */
+input {
+    transition: all 0.2s ease-in-out;
+}
+
+input:hover {
+    border-color: var(--gray-400);
+}
+
+/* Animation d'entrée pour le formulaire */
+.bg-white {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+    body {
+        padding: 1rem;
+    }
+
+    .bg-white {
+        padding: 1.5rem;
+    }
+
+    .login-button {
+        padding: 1rem;
+    }
+}
+
+/* Amélioration de l'accessibilité */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Mode sombre (optionnel) */
+@media (prefers-color-scheme: dark) {
+    .dark-mode {
+        --gray-50: #18181B;
+        --gray-100: #27272A;
+        --gray-300: #52525B;
+        --gray-400: #A1A1AA;
+        --gray-500: #71717A;
+        --gray-600: #52525B;
+        --gray-700: #3F3F46;
+        --gray-900: #FAFAFA;
+    }
+}
+
+/* Améliorations pour les écrans haute résolution */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .login-button {
+        border-radius: 0.75rem;
+    }
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des fournisseurs</title>
+</head>
+<body>
+{% if messages %}
+    <div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+        {% for message in messages %}
+            <div class="notification" style="background-color: #4caf50; color: white; padding: 10px 20px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+        setTimeout(function() {
+            var container = document.getElementById('notification-container');
+            if (container) {
+                container.style.display = 'none';
+            }
+        }, 3000);
+    </script>
+{% endif %}
+    <h1>Liste des fournisseurs</h1>
+
+    <p><a href="{% url 'fournisseur:fournisseur_create' %}">Ajouter un fournisseur</a></p>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Contrat</th>
+                <th>Date dernière commande</th>
+                <th>Catégorie</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in fournisseurs %}
+                <tr>
+                    <td>{{ f.nom }}</td>
+                    <td>{{ f.email }}</td>
+                    <td>{{ f.numero_contrat }}</td>
+                    <td>{{ f.derniere_commande|date:"d/m/Y" }}</td>
+                    <td>{{ f.categorie }}</td>
+                    <td>
+                        <a href="{% url 'fournisseur:fournisseur_update' f.id %}">Modifier</a> |
+                        <a href="{% url 'fournisseur:fournisseur_delete' f.id %}">Supprimer</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6">Aucun fournisseur.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

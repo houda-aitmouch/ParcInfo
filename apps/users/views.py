@@ -39,3 +39,9 @@ def employe_dashboard(request):
 def custom_logout_view(request):
     logout(request)
     return redirect('login')
+
+
+
+@login_required
+def profile_view(request):
+    return render(request, "users/profile.html", {"user": request.user})

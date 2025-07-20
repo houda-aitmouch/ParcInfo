@@ -3,6 +3,8 @@ from django.shortcuts import redirect
 from . import views
 from .views import custom_logout_view
 
+app_name = 'users'
+
 urlpatterns = [
     path('', lambda request: redirect('redirect_user'), name='root'),  # Redirect root to redirect_user
     path('redirect-user/', views.redirect_user, name='redirect_user'),
@@ -11,4 +13,6 @@ urlpatterns = [
     path('gestionnaire_bureau/', views.gestionnaire_bureau_dashboard, name='gestionnaire_bureau_dashboard'),
     path('employe/', views.employe_dashboard, name='employe_dashboard'),
  path('logout/', custom_logout_view, name='logout'),
+    path("profil/", views.profile_view, name="profil"),
+
 ]

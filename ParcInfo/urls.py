@@ -13,6 +13,7 @@ urlpatterns = [
     # Inclure toutes les URLs liées à équipements ET matériel dans apps.equipements.urls
     path('', include('apps.equipements.urls', namespace='equiçpements')),
     path('materiel/', include(('apps.equipements.urls', 'materiel'), namespace='materiel')),
+path('fournisseurs/', include(('apps.fournisseur.urls', 'fournisseur'), namespace='fournisseur')),
 
 ]
 

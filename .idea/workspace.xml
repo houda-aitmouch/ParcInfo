@@ -5,7 +5,37 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1fb4b8a6-81d3-48af-8fa2-214c7a14d521" name="Changes" comment="changes">
+      <change afterPath="$PROJECT_DIR$/apps/fournisseur/forms.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/fournisseur/urls.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/css/equipement.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/css/login.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/css/profile.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/css/superadmin.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/images/ADD.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/js/equipement.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/js/login.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/js/profile.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/js/superadmin.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/fournisseur/fournisseur_confirm_delete.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/fournisseur/fournisseur_form.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/fournisseur/fournisseur_list.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/users/profile.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ParcInfo/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ParcInfo/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ParcInfo/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/ParcInfo/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/equipements/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/equipements/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/equipements/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/equipements/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/equipements/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/equipements/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/users/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/users/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/users/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/users/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/dashboards/gestionnaire_bureau.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboards/gestionnaire_bureau.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/dashboards/gestionnaire_info.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboards/gestionnaire_info.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/dashboards/superadmin.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboards/superadmin.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/equipements/list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/equipements/list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/materiel/materiel_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/materiel/materiel_form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/materiel/materiel_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/materiel/materiel_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/registration/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/registration/login.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,7 +49,9 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Python Script" />
+        <option value="HTML File" />
         <option value="JavaScript File" />
+        <option value="CSS File" />
       </list>
     </option>
   </component>
@@ -40,6 +72,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "DefaultHtmlFileTemplate": "HTML File",
     "Django Server.ParcInfo.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
@@ -49,6 +82,7 @@
     "django.template.preview.state": "SHOW_EDITOR",
     "git-widget-placeholder": "main",
     "last_opened_file_path": "/Users/HouDa/PycharmProjects/ParcInfo/static/images",
+    "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -108,7 +142,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1752844004289</updated>
-      <workItem from="1752844005310" duration="22436000" />
+      <workItem from="1752844005310" duration="43220000" />
     </task>
     <task id="LOCAL-00001" summary="changes">
       <option name="closed" value="true" />
@@ -154,7 +188,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/ParcInfo/settings.py</url>
-          <line>97</line>
+          <line>98</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

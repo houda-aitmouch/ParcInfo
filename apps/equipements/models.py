@@ -39,9 +39,9 @@ class Equipement(models.Model):
 
 class Materiel(models.Model):
     code_inventaire = models.CharField(max_length=100, unique=True)
-    date_mise_en_service = models.DateField(null=True, blank=True)
-    description = models.CharField(max_length=255, null=True, blank=True)
-    designation = models.TextField(null=True, blank=True)
+    date_service = models.DateField(null=True, blank=True, verbose_name="Date de service")
+    description = models.TextField(null=True, blank=True)
+    designation = models.CharField(max_length=255, null=True, blank=True)
     prix_ht_mad = models.FloatField(null=True, blank=True)
     fournisseur = models.CharField(max_length=255, null=True, blank=True)
 

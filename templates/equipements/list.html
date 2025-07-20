@@ -6,14 +6,12 @@
 </head>
 <body>
     <h1>Liste des équipements</h1>
-
-   <a href="{% url 'equipements:export_excel' %}" class="inline-flex items-center gap-2 bg-[#7965BF] hover:bg-[#7578BF] text-white font-semibold py-2 px-4 rounded-xl shadow-md transition">
+   <a href="{% url 'equipements:export_excel_equipement' %}" class="inline-flex items-center gap-2 bg-[#7965BF] hover:bg-[#7578BF] text-white font-semibold py-2 px-4 rounded-xl shadow-md transition">
      Exporter en Excel
 </a>
     <p>
         <a href="{% url 'equipements:equipement_create' %}">➕ Ajouter un équipement</a>
     </p>
-
     <table border="1" cellspacing="0" cellpadding="5">
         <thead>
             <tr>
@@ -60,7 +58,6 @@
                 <td>{{ eq.get_lieu_affectation_display }}</td>
                 <td>{{ eq.utilisateur }}</td>
                 <td>{{ eq.observations }}</td>
-
                 <td></td>
                 <td>
                     <a href="{% url 'equipements:equipement_update' eq.pk %}">✏️ Modifier</a><br>

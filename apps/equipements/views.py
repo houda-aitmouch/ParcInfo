@@ -148,7 +148,6 @@ def export_excel_equipement(request):
 
 
 # --- Vues Matériel Bureau ---
-
 @user_passes_test(is_superadmin_or_gestionnaire_bureau)
 def materiel_list(request):
     materiels = Materiel.objects.all()
@@ -161,11 +160,10 @@ def materiel_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Matériel ajouté avec succès.")
-            return redirect('materiel_list')
+            return redirect('materiel:materiel_list')
     else:
         form = MaterielForm()
     return render(request, 'materiel/materiel_form.html', {'form': form})
-
 @user_passes_test(is_superadmin_or_gestionnaire_bureau)
 def materiel_update(request, materiel_id):
     materiel = get_object_or_404(Materiel, id=materiel_id)
@@ -174,20 +172,18 @@ def materiel_update(request, materiel_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Matériel modifié avec succès.")
-            return redirect('materiel_list')
+            return redirect('materiel:materiel_list')
     else:
         form = MaterielForm(instance=materiel)
     return render(request, 'materiel/materiel_form.html', {'form': form, 'materiel': materiel})
-
 @user_passes_test(is_superadmin_or_gestionnaire_bureau)
 def materiel_delete(request, materiel_id):
     materiel = get_object_or_404(Materiel, id=materiel_id)
     if request.method == 'POST':
         materiel.delete()
         messages.success(request, "Matériel supprimé avec succès.")
-        return redirect('materiel_list')
+        return redirect('materiel:materiel_list')
     return render(request, 'materiel/materiel_confirm_delete.html', {'materiel': materiel})
-
 @user_passes_test(is_superadmin_or_gestionnaire_bureau)
 def export_excel_materiel(request):
     wb = Workbook()
@@ -215,7 +211,7 @@ def export_excel_materiel(request):
     for row_num, m in enumerate(Materiel.objects.all(), start=2):
         row = [
             m.code_inventaire,
-            m.date_mise_en_service.strftime("%d/%m/%Y") if m.date_mise_en_service else "",
+            m.date_service.strftime("%d/%m/%Y") if m.date_service else "",
             m.description,
             m.designation,
             float(m.prix_ht_mad) if m.prix_ht_mad else "",

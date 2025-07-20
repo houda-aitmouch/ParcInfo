@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" x-data="profileCard" x-init="init()">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil | ADD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Styles -->
+    <link href="{% static 'css/profile.css' %}" rel="stylesheet">
+
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="{% static 'js/profile.js' %}"></script>
+</head>
+<body class="bg-gradient-to-tr from-blue-50 via-white to-cyan-100 min-h-screen font-sans antialiased">
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <img src="{% static 'images/ADD.png' %}" alt="Logo ADD" class="logo">
+    </nav>
+
+    <!-- Profil utilisateur -->
+    <section class="profile-card" x-show="open" x-transition>
+        <div class="text-center">
+            <div class="avatar">
+                <span>{{ user.username|slice:":1"|upper }}</span>
+            </div>
+            <h2>Profil de l'utilisateur</h2>
+        </div>
+        <div class="profile-details">
+            <p><strong>Nom d'utilisateur :</strong> <span>{{ user.username }}</span></p>
+            <p><strong>Email :</strong> <span>{{ user.email }}</span></p>
+            <p><strong>Nom complet :</strong> <span>{{ user.get_full_name }}</span></p>
+            <p><strong>Rôles :</strong>
+                {% for group in user.groups.all %}
+                    <span>{{ group.name }}</span>{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                    <span class="text-gray-500">Aucun rôle attribué</span>
+                {% endfor %}
+            </p>
+        </div>
+        <div class="actions">
+            <a href="#" class="logout-link">Déconnexion</a>
+        </div>
+    </section>
+
+</body>
+</html>
