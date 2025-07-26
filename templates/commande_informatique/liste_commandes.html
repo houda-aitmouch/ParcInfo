@@ -1,0 +1,271 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Liste des commandes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans text-gray-800" x-data="{ search: '' }">
+  <!-- Header moderne -->
+  <header class="bg-white shadow-sm border-b border-gray-200 w-full">
+    <div class="max-w-7xl mx-auto flex justify-between items-center py-3 px-6">
+      <!-- Logo + nom + baseline -->
+      <div class="flex items-center space-x-4">
+        <img src="{% static 'images/ADD.png' %}" alt="Logo ADD" class="h-10 w-auto">
+      </div>
+      <!-- Menu utilisateur -->
+      <div class="flex items-center space-x-4">
+        <a href="{% url 'users:profil' %}" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+          <svg class="w-5 h-5 mr-1 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+          </svg>
+          Mon profil
+        </a>
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+          <svg class="w-5 h-5 mr-1 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7"></path>
+          </svg>
+          Se déconnecter
+        </a>
+      </div>
+    </div>
+  </header>
+  <main class="w-full max-w-screen-2xl mx-auto px-2 md:px-8 py-8">
+    <div class="bg-white p-4 rounded shadow w-full">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Liste des commandes</h1>
+        <div class="flex gap-3">
+          <a href="{% url 'commandes_informatique:ajouter_commande' %}"
+             class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition duration-200">
+            + Ajouter une commande
+          </a>
+          <a href="{% url 'commandes_informatique:export_excel' %}"
+             class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-semibold rounded shadow hover:from-indigo-600 hover:to-blue-600 transition">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 16v6M8 16v6M12 12v10M4 4h16v4H4V4z"/>
+            </svg>
+            Exporter en Excel
+          </a>
+        </div>
+      </div>
+
+      <div class="flex justify-center mb-8">
+        <div class="relative w-full max-w-md">
+          <input
+            type="search"
+            placeholder="Rechercher..."
+            class="w-full pl-10 pr-4 py-2 rounded-full border border-indigo-200 shadow focus:outline-none focus:ring-2 focus:ring-indigo-300 transition text-sm"
+            x-model="search"
+          />
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200 w-full">
+        <table class="w-full table-auto bg-white rounded-lg text-sm">
+          <thead class="bg-gradient-to-r from-indigo-600 to-blue-500 text-white sticky top-0 z-10 shadow">
+            <tr>
+              <th class="px-4 py-3 text-left font-semibold rounded-tl-lg">Mode de passation</th>
+              <th class="px-4 py-3 text-left font-semibold">Numéro</th>
+              <th class="px-4 py-3 text-left font-semibold">Fournisseur</th>
+              <th class="px-4 py-3 text-left font-semibold">Date commande</th>
+              <th class="px-4 py-3 text-left font-semibold">Date réception</th>
+              <th class="px-4 py-3 text-left font-semibold">N° Facture</th>
+              <th class="px-4 py-3 text-left font-semibold">Durée garantie</th>
+              <th class="px-4 py-3 text-left font-semibold">Désignation</th>
+              <th class="px-4 py-3 text-left font-semibold">Description</th>
+              <th class="px-4 py-3 text-center font-semibold">Quantité</th>
+              <th class="px-4 py-3 text-right font-semibold">Prix unitaire</th>
+              <th class="px-4 py-3 text-center font-semibold rounded-tr-lg">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for commande in commandes %}
+              {% with lignes=commande.lignes.all %}
+              {% with ligne_count=lignes.count %}
+                {% if ligne_count > 0 %}
+                  {% for ligne in lignes %}
+                    <tr
+                      x-show="
+                        (
+                          '{{ commande.numero_commande|escapejs }} {{ commande.fournisseur.nom|escapejs }} {{ commande.mode_passation|escapejs }} {{ commande.numero_facture|escapejs }} {% for ligne in commande.lignes.all %}{{ ligne.designation.nom|escapejs }} {{ ligne.description.nom|escapejs }} {% endfor %} {{ commande.fournisseur.adresse|escapejs }}'
+                          .toLowerCase()
+                          .includes(search.toLowerCase())
+                        ) || search === ''
+                      "
+                      class="transition-all duration-200 {% cycle 'bg-white' 'bg-gray-50' %} hover:bg-blue-50 hover:shadow-md group"
+                    >
+                      {% if forloop.first %}
+                        <td class="border-b border-gray-200 px-4 py-3 align-top" rowspan="{{ ligne_count }}">
+                          {{ commande.mode_passation }}
+                        </td>
+                        <td class="border-b border-gray-200 px-4 py-3 align-top font-medium" rowspan="{{ ligne_count }}">
+                          {{ commande.numero_commande }}
+                        </td>
+                        <td class="border-b border-gray-200 px-4 py-3 align-top" rowspan="{{ ligne_count }}">
+                          {{ commande.fournisseur.nom }}
+                        </td>
+                        <td class="border-b border-gray-200 px-4 py-3 align-top" rowspan="{{ ligne_count }}">
+                          {% if commande.date_commande %}
+                            {{ commande.date_commande|date:"d/m/Y" }}
+                          {% else %}
+                            <span class="text-gray-400">-</span>
+                          {% endif %}
+                        </td>
+                        <td class="border-b border-gray-200 px-4 py-3 align-top" rowspan="{{ ligne_count }}">
+                          {% if commande.date_reception %}
+                            {{ commande.date_reception|date:"d/m/Y" }}
+                          {% else %}
+                            <span class="text-gray-400">-</span>
+                          {% endif %}
+                        </td>
+                        <td class="border-b border-gray-200 px-4 py-3 align-top" rowspan="{{ ligne_count }}">
+                          {{ commande.numero_facture|default:"-" }}
+                        </td>
+                        <td class="border-b border-gray-200 px-4 py-3 align-top" rowspan="{{ ligne_count }}">
+                          {{ commande.duree_garantie_valeur }} {{ commande.get_duree_garantie_unite_display }}
+                        </td>
+                      {% endif %}
+                      <td class="border-b border-gray-200 px-4 py-3">{{ ligne.designation.nom }}</td>
+                      <td class="border-b border-gray-200 px-4 py-3">{{ ligne.description.nom }}</td>
+                      <td class="border-b border-gray-200 px-4 py-3 text-center font-medium">{{ ligne.quantite }}</td>
+                      <td class="border-b border-gray-200 px-4 py-3 text-right font-medium">{{ ligne.prix_unitaire|floatformat:2 }} MAD</td>
+                      {% if forloop.first %}
+                        <td class="border-b border-gray-200 px-4 py-3 text-center align-top" rowspan="{{ ligne_count }}">
+                          <div class="flex flex-col space-y-2">
+                            <a href="{% url 'commandes_informatique:modifier_commande' commande.id %}"
+                               class="inline-flex items-center justify-center px-3 py-1 text-sm bg-blue-500 text-white hover:bg-blue-600 rounded shadow transition">
+                              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                              </svg>
+                              Modifier
+                            </a>
+                            <form method="post" action="{% url 'commandes_informatique:supprimer_commande' commande.id %}" class="inline-block">
+                              {% csrf_token %}
+                              <button type="submit"
+                                      class="inline-flex items-center justify-center px-3 py-1 text-sm bg-red-500 text-white hover:bg-red-600 rounded shadow transition w-full"
+                                      onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette commande ?');">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                Supprimer
+                              </button>
+                            </form>
+                          </div>
+                        </td>
+                      {% endif %}
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <!-- Commande sans lignes -->
+                  <tr class="hover:bg-indigo-50 transition-colors duration-200 {% cycle 'bg-gray-50' 'bg-white' %}">
+                    <td class="border border-gray-300 px-4 py-3 text-center font-medium">{{ commande.id }}</td>
+                    <td class="border border-gray-300 px-4 py-3">{{ commande.mode_passation }}</td>
+                    <td class="border border-gray-300 px-4 py-3 font-medium">{{ commande.numero_commande }}</td>
+                    <td class="border border-gray-300 px-4 py-3">{{ commande.fournisseur.nom }}</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      {% if commande.date_commande %}
+                        {{ commande.date_commande|date:"d/m/Y" }}
+                      {% else %}
+                        <span class="text-gray-400">-</span>
+                      {% endif %}
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      {% if commande.date_reception %}
+                        {{ commande.date_reception|date:"d/m/Y" }}
+                      {% else %}
+                        <span class="text-gray-400">-</span>
+                      {% endif %}
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">{{ commande.numero_facture|default:"-" }}</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      {{ commande.duree_garantie_valeur }} {{ commande.get_duree_garantie_unite_display }}
+                    </td>
+                    <td colspan="4" class="border border-gray-300 px-4 py-3 text-center italic text-gray-500">
+                      Aucune ligne de commande
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3 text-center">
+                      <div class="flex flex-col space-y-2">
+                        <a href="{% url 'commandes:modifier_commande' commande.pk %}"
+                           class="inline-flex items-center justify-center px-3 py-1 text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 rounded transition duration-200">
+                          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                          </svg>
+                          Modifier
+                        </a>
+                        <form method="post" action="{% url 'commandes:supprimer_commande' commande.id %}" class="inline-block">
+                          {% csrf_token %}
+                          <button type="submit"
+                                  class="inline-flex items-center justify-center px-3 py-1 text-sm bg-red-100 text-red-700 hover:bg-red-200 rounded transition duration-200 w-full"
+                                  onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette commande ?');">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            Supprimer
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                {% endif %}
+              {% endwith %}
+              {% endwith %}
+            {% empty %}
+              <tr>
+                <td colspan="13" class="text-center p-8 text-gray-500">
+                  <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p class="text-lg font-medium">Aucune commande trouvée</p>
+                    <p class="text-sm text-gray-400 mt-1">Commencez par ajouter votre première commande</p>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+    {% csrf_token %}
+  </form>
+
+  <script>
+    // Amélioration de l'expérience utilisateur
+    document.addEventListener('DOMContentLoaded', function() {
+      // Ajouter une confirmation personnalisée pour la suppression
+      const deleteButtons = document.querySelectorAll('button[onclick*="confirm"]');
+      deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (confirm('⚠️ Attention : Cette action est irréversible.\n\nÊtes-vous sûr de vouloir supprimer cette commande et toutes ses lignes associées ?')) {
+            this.closest('form').submit();
+          }
+        });
+        // Supprimer l'attribut onclick pour éviter la double confirmation
+        button.removeAttribute('onclick');
+      });
+
+      // Ajouter un indicateur visuel lors du survol des lignes de commande
+      const rows = document.querySelectorAll('tbody tr');
+      rows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+          this.style.transform = 'scale(1.005)';
+          this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        });
+        row.addEventListener('mouseleave', function() {
+          this.style.transform = 'scale(1)';
+          this.style.boxShadow = 'none';
+        });
+      });
+    });
+  </script>
+</body>
+</html>

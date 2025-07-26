@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Modifier un matériel de bureau</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+  <div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">
+        {% if is_edit %}Modifier{% else %}Ajouter{% endif %} un matériel de bureau
+      </h1>
+    </div>
+    <form method="post" x-data="materielForm()" x-init="init()">
+      {% csrf_token %}
+      {% if form.errors %}
+        <div class="mb-4 bg-red-100 text-red-700 p-2 rounded">
+          <ul>
+            {% for field, errors in form.errors.items %}
+              <li><strong>{{ field }}:</strong> {{ errors|join:", " }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      <!-- 1. Commande (lecture seule) -->
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Numero de Commande</label>
+        <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100" value="{{ materiel.commande }}" readonly>
+        <input type="hidden" name="commande" value="{{ materiel.commande.id }}">
+      </div>
+      <input type="hidden" name="ligne_commande" value="{{ materiel.ligne_commande.id }}">
+
+      <!-- 3. Code inventaire -->
+      <div class="mb-4">{{ form.code_inventaire.label_tag }}{{ form.code_inventaire }}</div>
+      <!-- 4. Date service (lecture seule, calculée dynamiquement) -->
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Date service</label>
+        <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100" value="{% if materiel.date_service_calculee %}{{ materiel.date_service_calculee|date:'d/m/Y' }}{% else %}-{% endif %}" readonly>
+      </div>
+      <!-- 5. Désignation (lecture seule) -->
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Désignation</label>
+        <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100" value="{{ materiel.ligne_commande.designation.nom }}" readonly>
+      </div>
+      <!-- 6. Description (lecture seule) -->
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Description</label>
+        <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100" value="{{ materiel.ligne_commande.description.nom }}" readonly>
+      </div>
+      <!-- 7. Prix unitaire (lecture seule) -->
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Prix unitaire</label>
+        <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100" value="{{ materiel.ligne_commande.prix_unitaire|floatformat:'2' }}" readonly>
+      </div>
+      <!-- 8. Fournisseur (lecture seule) -->
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Fournisseur</label>
+        <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100" value="{{ materiel.ligne_commande.commande.fournisseur.nom }}" readonly>
+      </div>
+      <!-- 9. N° Facture (lecture seule) -->
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">N° Facture</label>
+        <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100" value="{{ materiel.ligne_commande.commande.numero_facture }}" readonly>
+      </div>
+      <!-- 10. Date fin garantie (lecture seule, calculée dynamiquement) -->
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Date fin garantie</label>
+        <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100" value="{% if materiel.date_fin_garantie_calculee %}{{ materiel.date_fin_garantie_calculee|date:'d/m/Y' }}{% else %}-{% endif %}" readonly>
+      </div>
+      <!-- 11. Statut (liste déroulante) -->
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Statut</label>
+        <select name="statut" class="w-full border rounded px-3 py-2" required>
+          <option value="Opérationnel" {% if form.instance.statut == 'Opérationnel' %}selected{% endif %}>Opérationnel</option>
+          <option value="Réparation" {% if form.instance.statut == 'Réparation' %}selected{% endif %}>Réparation</option>
+          <option value="Réforme" {% if form.instance.statut == 'Réforme' %}selected{% endif %}>Réforme</option>
+        </select>
+      </div>
+      <!-- 12. Utilisateur -->
+      <div class="mb-4">{{ form.utilisateur.label_tag }}{{ form.utilisateur }}</div>
+      <!-- 13. Lieu stockage (liste déroulante) -->
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Lieu stockage</label>
+        <select name="lieu_stockage" class="w-full border rounded px-3 py-2">
+          <option value="">---------</option>
+          <option value="etage1" {% if form.instance.lieu_stockage == 'etage1' %}selected{% endif %}>Etage 1</option>
+          <option value="etage2" {% if form.instance.lieu_stockage == 'etage2' %}selected{% endif %}>Etage 2</option>
+          <option value="etage3" {% if form.instance.lieu_stockage == 'etage3' %}selected{% endif %}>Etage 3</option>
+        </select>
+      </div>
+
+      <!-- 15. Observation -->
+      <div class="mb-4">{{ form.observation.label_tag }}{{ form.observation }}</div>
+      <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition duration-200 mt-4">
+        {% if is_edit %}Enregistrer les modifications{% else %}Ajouter{% endif %}
+      </button>
+    </form>
+  </div>
+  <script>
+document.addEventListener('alpine:init', () => {
+  Alpine.data('materielForm', () => ({
+    commandeId: '{{ materiel.commande.id|default_if_none:"" }}',
+    ligneCommandeId: '{{ materiel.ligne_commande.id|default_if_none:"" }}',
+    lignesCommande: [],
+    ligneChoisie: {},
+    // ... autres champs initiaux
+    // puis ta logique existante
+    init() {
+      if (this.commandeId) {
+        fetch(`/materiels-bureau/api/lignes-commande/${this.commandeId}/`)
+          .then(r => r.json())
+          .then(data => {
+            this.lignesCommande = data;
+            const initialId = String('{{ materiel.ligne_commande.id|default_if_none:"" }}');
+            if (data.length > 0) {
+              this.ligneCommandeId = data.find(l => String(l.id) === initialId) ? initialId : String(data[0].id);
+            } else {
+              this.ligneCommandeId = '';
+            }
+            this.$nextTick(() => {
+              this.updateLigneFields();
+            });
+          });
+      } else {
+        this.lignesCommande = [];
+        this.ligneCommandeId = '';
+        this.ligneChoisie = {};
+      }
+    },
+    updateLignes() {
+      if (!this.commandeId) {
+        this.lignesCommande = [];
+        this.ligneCommandeId = '';
+        this.ligneChoisie = {};
+        return;
+      }
+      fetch(`/materiels-bureau/api/lignes-commande/${this.commandeId}/`)
+        .then(r => r.json())
+        .then(data => {
+          this.lignesCommande = data;
+          // Si on change de commande, réinitialiser la sélection
+          this.ligneCommandeId = '';
+          this.ligneChoisie = {};
+        });
+    },
+    updateLigneFields() {
+      this.ligneChoisie = this.lignesCommande.find(l => String(l.id) === String(this.ligneCommandeId)) || {};
+    },
+  }));
+});
+</script>
+</body>
+</html> 

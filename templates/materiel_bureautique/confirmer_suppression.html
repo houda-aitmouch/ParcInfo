@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Confirmer la suppression - Matériel de bureau</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded shadow max-w-md w-full">
+    <h1 class="text-2xl font-bold text-red-600 mb-4">Confirmer la suppression</h1>
+    <p class="mb-6 text-gray-700">Êtes-vous sûr de vouloir supprimer le matériel de bureau suivant&nbsp;?</p>
+    <ul class="mb-6 text-gray-800">
+
+      <li><strong>Code inventaire :</strong> {{ materiel.code_inventaire }}</li>
+      <li><strong>Désignation :</strong> {{ materiel.ligne_commande.designation.nom }}</li>
+      <li><strong>Description :</strong> {{ materiel.ligne_commande.description.nom }}</li>
+    </ul>
+    <form method="post" class="flex justify-between items-center">
+      {% csrf_token %}
+      <a href="{% url 'materiel_bureautique:liste_materiels' %}" class="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 transition">Annuler</a>
+      <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition">Supprimer</button>
+    </form>
+  </div>
+</body>
+</html> 

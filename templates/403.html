@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accès refusé</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-blue-100 to-white min-h-screen flex items-center justify-center">
+  <div class="bg-white p-10 rounded-2xl shadow-2xl max-w-lg w-full flex flex-col items-center">
+    <svg class="w-20 h-20 text-red-400 mb-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="#fee2e2"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l6 6m0-6l-6 6" stroke="#ef4444" stroke-width="2"/>
+    </svg>
+    <h1 class="text-3xl font-bold text-red-600 mb-4">403 - Accès interdit</h1>
+    <p class="text-gray-700 text-center mb-6">Vous n'avez pas les droits nécessaires pour accéder à cette page.<br>
+      <span class="font-semibold text-indigo-700">Seuls les gestionnaires informatiques ou super administrateurs peuvent accéder à cette fonctionnalité.</span>
+    </p>
+    <a href="/" class="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">Retour à l'accueil</a>
+  </div>
+</body>
+</html> 

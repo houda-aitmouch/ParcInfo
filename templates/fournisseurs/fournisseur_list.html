@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" x-data="{ search: '' }" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <title>Liste des fournisseurs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-white min-h-screen font-sans text-gray-800">
+  <!-- Header moderne (déjà présent) -->
+  <header class="bg-white shadow-sm border-b border-gray-200 w-full">
+    <div class="max-w-7xl mx-auto flex justify-between items-center py-3 px-6">
+      <!-- Logo + nom + baseline -->
+      <div class="flex items-center space-x-4">
+        <img src="{% static 'images/ADD.png' %}" alt="Logo ADD" class="h-10 w-auto">
+      </div>
+      <!-- Menu utilisateur -->
+      <div class="flex items-center space-x-4">
+        <a href="{% url 'users:profil' %}" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+          <svg class="w-5 h-5 mr-1 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+          </svg>
+          Mon profil
+        </a>
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+          <svg class="w-5 h-5 mr-1 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7"></path>
+          </svg>
+          Se déconnecter
+        </a>
+      </div>
+    </div>
+    </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-8">
+    <!-- Titre et total -->
+    <div class="mb-8 text-center">
+      <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Liste des fournisseurs</h1>
+      <p class="mt-2 text-base text-indigo-500">Total : <span class="font-semibold">{{ total }}</span></p>
+    </div>
+
+    <!-- Barre d'actions -->
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+      <div class="flex gap-3">
+        <a href="{% url 'fournisseurs:fournisseur_create' %}"
+           class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition px-4 py-2 text-white font-semibold rounded shadow flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          Ajouter
+        </a>
+        <a href="{% url 'fournisseurs:exporter_excel' %}"
+           class="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 active:scale-95 transition px-4 py-2 text-white font-semibold rounded shadow flex items-center gap-2">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v18m9-9H3"/></svg>
+          Exporter
+        </a>
+      </div>
+      <input type="search" placeholder="🔍 Rechercher..."
+             class="border border-indigo-200 rounded px-4 py-2 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-indigo-300 transition text-sm shadow"
+             x-model="search" />
+    </div>
+
+    <!-- Tableau fournisseurs -->
+    <div class="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
+      <table class="w-full table-auto bg-white rounded-lg text-sm">
+        <thead class="bg-gradient-to-r from-indigo-600 to-blue-500 text-white sticky top-0 z-10 shadow">
+          <tr>
+            <th class="px-4 py-3 text-left font-semibold rounded-tl-lg whitespace-nowrap">Nom</th>
+            <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">IF</th>
+            <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">ICE</th>
+            <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">RC</th>
+            <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Adresse</th>
+            <th class="px-4 py-3 text-center font-semibold rounded-tr-lg whitespace-nowrap">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="text-gray-700">
+          {% for fournisseur in fournisseurs %}
+          <tr
+            x-data="{ nom: '{{ fournisseur.nom|escapejs }}'.toLowerCase() }"
+            x-show="nom.includes(search.toLowerCase()) || search === ''"
+            class="transition-all duration-200 {% cycle 'bg-white' 'bg-gray-50' %} hover:bg-blue-50 hover:shadow-md group"
+          >
+            <td class="px-4 py-3 whitespace-normal font-medium border-b border-gray-200">{{ fournisseur.nom }}</td>
+            <td class="px-4 py-3 whitespace-nowrap border-b border-gray-200">{{ fournisseur.if_fiscal }}</td>
+            <td class="px-4 py-3 whitespace-nowrap border-b border-gray-200">{{ fournisseur.ice }}</td>
+            <td class="px-4 py-3 whitespace-nowrap border-b border-gray-200">{{ fournisseur.registre_commerce }}</td>
+            <td class="px-4 py-3 whitespace-normal border-b border-gray-200">{{ fournisseur.adresse }}</td>
+            <td class="px-4 py-3 text-center border-b border-gray-200">
+              <div class="flex justify-center gap-1">
+              <a href="{% url 'fournisseurs:fournisseur_update' fournisseur.pk %}"
+                   class="inline-flex items-center justify-center px-3 py-1 text-sm bg-blue-500 text-white hover:bg-blue-600 rounded shadow transition" title="Modifier">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15H9v-2.828z" />
+                </svg>
+                Modifier
+              </a>
+              <button
+                @click="if(confirm('Confirmer la suppression de {{ fournisseur.nom }} ?')) { $refs['form-delete-{{ fournisseur.pk }}'].submit() }"
+                  class="inline-flex items-center justify-center px-3 py-1 text-sm bg-red-500 text-white hover:bg-red-600 rounded shadow transition" title="Supprimer">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Supprimer
+              </button>
+              <form method="post" action="{% url 'fournisseurs:fournisseur_delete' fournisseur.pk %}"
+                    class="hidden" x-ref="form-delete-{{ fournisseur.pk }}">
+                {% csrf_token %}
+              </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center py-10 text-gray-400 font-medium">Aucun fournisseur trouvé.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+  <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+    {% csrf_token %}
+  </form>
+</body>
+</html>

@@ -39,9 +39,15 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'apps.users.apps.UsersConfig',
-    'apps.equipements',
-    'apps.fournisseur',
+    'apps.fournisseurs',
+    'apps.commande_informatique',
+    'apps.materiel_informatique',
+    'apps.commande_bureau',
+    'apps.materiel_bureautique',
+    "widget_tweaks",
+    'django.contrib.humanize',
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
