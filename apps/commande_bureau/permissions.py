@@ -15,12 +15,14 @@ class CommandeBureauPermissions:
         commande_ct = ContentType.objects.get_for_model(CommandeBureau)
         
         permissions_commande = [
-            ('view_commande_bureau', 'Peut voir les commandes bureau'),
-            ('add_commande_bureau', 'Peut ajouter des commandes bureau'),
-            ('change_commande_bureau', 'Peut modifier les commandes bureau'),
-            ('delete_commande_bureau', 'Peut supprimer les commandes bureau'),
-            ('export_commande_bureau', 'Peut exporter les commandes bureau'),
-            ('approve_commande_bureau', 'Peut approuver les commandes bureau'),
+            ('view_commande_bureau', 'Consulter les commandes bureau'),
+            ('add_commande_bureau', 'Ajouter des commandes bureau'),
+            ('change_commande_bureau', 'Modifier les commandes bureau'),
+            ('delete_commande_bureau', 'Supprimer les commandes bureau'),
+            ('export_commande_bureau', 'Exporter les commandes bureau en Excel'),
+            ('approve_commande_bureau', 'Approuver les commandes bureau'),
+            ('validate_commande_bureau', 'Valider les commandes bureau'),
+            ('cancel_commande_bureau', 'Annuler les commandes bureau'),
         ]
         
         for codename, name in permissions_commande:
@@ -34,10 +36,10 @@ class CommandeBureauPermissions:
         ligne_ct = ContentType.objects.get_for_model(LigneCommandeBureau)
         
         permissions_ligne = [
-            ('view_ligne_commande_bureau', 'Peut voir les lignes de commande bureau'),
-            ('add_ligne_commande_bureau', 'Peut ajouter des lignes de commande bureau'),
-            ('change_ligne_commande_bureau', 'Peut modifier les lignes de commande bureau'),
-            ('delete_ligne_commande_bureau', 'Peut supprimer les lignes de commande bureau'),
+            ('view_ligne_commande_bureau', 'Consulter les lignes de commande bureau'),
+            ('add_ligne_commande_bureau', 'Ajouter des lignes de commande bureau'),
+            ('change_ligne_commande_bureau', 'Modifier les lignes de commande bureau'),
+            ('delete_ligne_commande_bureau', 'Supprimer les lignes de commande bureau'),
         ]
         
         for codename, name in permissions_ligne:
@@ -57,6 +59,8 @@ class CommandeBureauPermissions:
             'delete_commande_bureau',
             'export_commande_bureau',
             'approve_commande_bureau',
+            'validate_commande_bureau',
+            'cancel_commande_bureau',
             'view_ligne_commande_bureau',
             'add_ligne_commande_bureau',
             'change_ligne_commande_bureau', 

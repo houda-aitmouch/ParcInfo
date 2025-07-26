@@ -68,50 +68,9 @@ def modifier_materiel(request, pk):
     if request.method == 'POST':
         form = MaterielBureauForm(request.POST, instance=materiel)
         if form.is_valid():
-            # Récupérer la ligne de commande depuis les champs cachés
-            designation_id = request.POST.get('designation')
-            description_id = request.POST.get('description')
-            
-            if designation_id and description_id:
-                try:
-                    ligne_commande = LigneCommandeBureau.objects.get(
-                        designation_id=designation_id,
-                        description_id=description_id,
-                        commande=form.cleaned_data['commande']
-                    )
-                    
-                    # Compter le nombre de matériels existants pour cette ligne (excluant le matériel en cours de modification)
-                    materiels_existants = MaterielBureau.objects.filter(ligne_commande=ligne_commande).exclude(pk=materiel.pk).count()
-                    
-                    # Vérifier si on peut encore ajouter des matériels
-                    if materiels_existants >= ligne_commande.quantite:
-                        form.add_error(None, f"Impossible d'ajouter plus de matériels. Quantité commandée: {ligne_commande.quantite}, Matériels existants: {materiels_existants}")
-                        return render(request, 'materiel_bureautique/modifier_materiel.html', {
-                            'form': form,
-                            'is_edit': True,
-                            'materiel': materiel,
-                        })
-                    
-                    # Mettre à jour le matériel avec la ligne de commande trouvée
-                    materiel = form.save(commit=False)
-                    materiel.ligne_commande = ligne_commande
-                    materiel.save()
-                    return redirect('materiel_bureautique:liste_materiels')
-                    
-                except LigneCommandeBureau.DoesNotExist:
-                    form.add_error(None, "Ligne de commande introuvable")
-                    return render(request, 'materiel_bureautique/modifier_materiel.html', {
-                        'form': form,
-                        'is_edit': True,
-                        'materiel': materiel,
-                    })
-            else:
-                form.add_error(None, "Veuillez sélectionner une désignation et une description")
-                return render(request, 'materiel_bureautique/modifier_materiel.html', {
-                    'form': form,
-                    'is_edit': True,
-                    'materiel': materiel,
-                })
+            # Sauvegarder directement le matériel avec les données du formulaire
+            materiel = form.save()
+            return redirect('materiel_bureautique:liste_materiels')
     else:
         form = MaterielBureauForm(instance=materiel)
     return render(request, 'materiel_bureautique/modifier_materiel.html', {

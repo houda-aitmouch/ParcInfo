@@ -15,13 +15,16 @@ class MaterielBureautiquePermissions:
         materiel_ct = ContentType.objects.get_for_model(MaterielBureau)
         
         permissions_materiel = [
-            ('view_materiel_bureautique', 'Peut voir les matériels bureautiques'),
-            ('add_materiel_bureautique', 'Peut ajouter des matériels bureautiques'),
-            ('change_materiel_bureautique', 'Peut modifier les matériels bureautiques'),
-            ('delete_materiel_bureautique', 'Peut supprimer les matériels bureautiques'),
-            ('export_materiel_bureautique', 'Peut exporter les matériels bureautiques'),
-            ('assign_materiel_bureautique', 'Peut assigner des matériels bureautiques'),
-            ('maintenance_materiel_bureautique', 'Peut gérer la maintenance des matériels bureautiques'),
+            ('view_materiel_bureautique', 'Consulter les matériels bureautiques'),
+            ('add_materiel_bureautique', 'Ajouter des matériels bureautiques'),
+            ('change_materiel_bureautique', 'Modifier les matériels bureautiques'),
+            ('delete_materiel_bureautique', 'Supprimer les matériels bureautiques'),
+            ('export_materiel_bureautique', 'Exporter les matériels bureautiques en Excel'),
+            ('assign_materiel_bureautique', 'Assigner des matériels bureautiques aux utilisateurs'),
+            ('maintenance_materiel_bureautique', 'Gérer la maintenance des matériels bureautiques'),
+            ('inventory_materiel_bureautique', 'Effectuer l\'inventaire des matériels bureautiques'),
+            ('repair_materiel_bureautique', 'Marquer les matériels bureautiques en réparation'),
+            ('retire_materiel_bureautique', 'Mettre à la retraite les matériels bureautiques'),
         ]
         
         for codename, name in permissions_materiel:
@@ -42,4 +45,7 @@ class MaterielBureautiquePermissions:
             'export_materiel_bureautique',
             'assign_materiel_bureautique',
             'maintenance_materiel_bureautique',
+            'inventory_materiel_bureautique',
+            'repair_materiel_bureautique',
+            'retire_materiel_bureautique',
         ] 

@@ -29,7 +29,7 @@ class MaterielBureau(models.Model):
             ('etage3', 'Etage 3'),
         ],
         blank=True,
-        null=True
+        default=''
     )
     observation = models.TextField(blank=True)
     date_creation = models.DateTimeField(auto_now_add=True)

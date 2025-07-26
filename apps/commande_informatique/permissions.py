@@ -15,12 +15,14 @@ class CommandeInformatiquePermissions:
         commande_ct = ContentType.objects.get_for_model(Commande)
         
         permissions_commande = [
-            ('view_commande_informatique', 'Peut voir les commandes informatiques'),
-            ('add_commande_informatique', 'Peut ajouter des commandes informatiques'),
-            ('change_commande_informatique', 'Peut modifier les commandes informatiques'),
-            ('delete_commande_informatique', 'Peut supprimer les commandes informatiques'),
-            ('export_commande_informatique', 'Peut exporter les commandes informatiques'),
-            ('approve_commande_informatique', 'Peut approuver les commandes informatiques'),
+            ('view_commande_informatique', 'Consulter les commandes informatiques'),
+            ('add_commande_informatique', 'Ajouter des commandes informatiques'),
+            ('change_commande_informatique', 'Modifier les commandes informatiques'),
+            ('delete_commande_informatique', 'Supprimer les commandes informatiques'),
+            ('export_commande_informatique', 'Exporter les commandes informatiques en Excel'),
+            ('approve_commande_informatique', 'Approuver les commandes informatiques'),
+            ('validate_commande_informatique', 'Valider les commandes informatiques'),
+            ('cancel_commande_informatique', 'Annuler les commandes informatiques'),
         ]
         
         for codename, name in permissions_commande:
@@ -34,10 +36,10 @@ class CommandeInformatiquePermissions:
         ligne_ct = ContentType.objects.get_for_model(LigneCommande)
         
         permissions_ligne = [
-            ('view_ligne_commande_informatique', 'Peut voir les lignes de commande informatiques'),
-            ('add_ligne_commande_informatique', 'Peut ajouter des lignes de commande informatiques'),
-            ('change_ligne_commande_informatique', 'Peut modifier les lignes de commande informatiques'),
-            ('delete_ligne_commande_informatique', 'Peut supprimer les lignes de commande informatiques'),
+            ('view_ligne_commande_informatique', 'Consulter les lignes de commande informatiques'),
+            ('add_ligne_commande_informatique', 'Ajouter des lignes de commande informatiques'),
+            ('change_ligne_commande_informatique', 'Modifier les lignes de commande informatiques'),
+            ('delete_ligne_commande_informatique', 'Supprimer les lignes de commande informatiques'),
         ]
         
         for codename, name in permissions_ligne:
@@ -57,6 +59,8 @@ class CommandeInformatiquePermissions:
             'delete_commande_informatique',
             'export_commande_informatique',
             'approve_commande_informatique',
+            'validate_commande_informatique',
+            'cancel_commande_informatique',
             'view_ligne_commande_informatique',
             'add_ligne_commande_informatique',
             'change_ligne_commande_informatique', 

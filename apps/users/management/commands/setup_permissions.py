@@ -57,6 +57,14 @@ class Command(BaseCommand):
             self.stdout.write('✓ Permissions materiel_bureautique créées')
         except Exception as e:
             self.stdout.write(f'⚠ Erreur permissions materiel_bureautique: {e}')
+        
+        # Permissions pour les fournisseurs
+        try:
+            from apps.fournisseurs.permissions import FournisseursPermissions
+            FournisseursPermissions.create_permissions()
+            self.stdout.write('✓ Permissions fournisseurs créées')
+        except Exception as e:
+            self.stdout.write(f'⚠ Erreur permissions fournisseurs: {e}')
 
     def create_groups_with_permissions(self):
         """Crée les groupes avec leurs permissions spécifiques"""
@@ -84,13 +92,15 @@ class Command(BaseCommand):
                 'view_commande_informatique', 'add_commande_informatique', 
                 'change_commande_informatique', 'delete_commande_informatique',
                 'export_commande_informatique', 'approve_commande_informatique',
+                'validate_commande_informatique', 'cancel_commande_informatique',
                 'view_ligne_commande_informatique', 'add_ligne_commande_informatique',
                 'change_ligne_commande_informatique', 'delete_ligne_commande_informatique',
                 # Matériels informatiques
                 'view_materiel_informatique', 'add_materiel_informatique',
                 'change_materiel_informatique', 'delete_materiel_informatique',
                 'export_materiel_informatique', 'assign_materiel_informatique',
-                'maintenance_materiel_informatique',
+                'maintenance_materiel_informatique', 'inventory_materiel_informatique',
+                'repair_materiel_informatique', 'retire_materiel_informatique',
                 # Fournisseurs (lecture seule)
                 'view_fournisseur',
             ]
@@ -110,13 +120,15 @@ class Command(BaseCommand):
                 'view_commande_bureau', 'add_commande_bureau',
                 'change_commande_bureau', 'delete_commande_bureau',
                 'export_commande_bureau', 'approve_commande_bureau',
+                'validate_commande_bureau', 'cancel_commande_bureau',
                 'view_ligne_commande_bureau', 'add_ligne_commande_bureau',
                 'change_ligne_commande_bureau', 'delete_ligne_commande_bureau',
                 # Matériels bureautiques
                 'view_materiel_bureautique', 'add_materiel_bureautique',
                 'change_materiel_bureautique', 'delete_materiel_bureautique',
                 'export_materiel_bureautique', 'assign_materiel_bureautique',
-                'maintenance_materiel_bureautique',
+                'maintenance_materiel_bureautique', 'inventory_materiel_bureautique',
+                'repair_materiel_bureautique', 'retire_materiel_bureautique',
                 # Fournisseurs (lecture seule)
                 'view_fournisseur',
             ]
