@@ -10,7 +10,7 @@ from .forms import FournisseurForm
 
 
 def is_gestionnaire_ou_superadmin(user):
-    return user.groups.filter(name__in=['Gestionnaire Informatique', 'Super Admin']).exists()
+    return user.groups.filter(name__in=['Gestionnaire Informatique', 'Super Admin', 'Gestionnaire Bureau']).exists()
 
 
 @user_passes_test(is_gestionnaire_ou_superadmin)
