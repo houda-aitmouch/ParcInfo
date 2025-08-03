@@ -1,0 +1,20 @@
+Django==5.2.4
+psycopg2-binary==2.9.9
+django-widget-tweaks==1.5.0
+django-humanize==0.1.2
+python-dateutil==2.8.2
+Pillow==10.1.0
+reportlab==4.0.7
+# LangChain et LLaMA 3 dependencies
+langchain==0.1.0
+langchain-community==0.0.10
+langchain-core==0.1.10
+llama-cpp-python==0.2.23
+sentence-transformers==2.2.2
+chromadb==0.4.22
+faiss-cpu==1.7.4
+numpy==1.24.3
+pandas==2.0.3
+transformers==4.35.2
+torch==2.1.1
+accelerate==0.24.1

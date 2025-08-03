@@ -13,6 +13,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 
+from django.contrib import staticfiles
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,6 +33,7 @@ SECRET_KEY = "django-insecure-m5semzag-n43pupk0jfsh!x2%vpb53&-=zn4bu+mo_cdw694g0
 DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']  # Add allowed hosts for development
+AUTH_USER_MODEL = 'users.CustomUser'
 
 
 # Application definition
@@ -44,6 +51,9 @@ INSTALLED_APPS = [
     'apps.materiel_informatique',
     'apps.commande_bureau',
     'apps.materiel_bureautique',
+    'apps.demande_equipement',
+    'apps.livraison',
+    'apps.chatbot.apps.ChatbotConfig',
     "widget_tweaks",
     'django.contrib.humanize',
 ]
@@ -140,10 +150,17 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+# Media files (uploads, PDFs, etc.)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Authentication settings
 LOGIN_REDIRECT_URL = '/redirect-user/'
 LOGIN_URL = '/accounts/login/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+# Utilisation du modèle User de Django par défaut
+# AUTH_USER_MODEL = 'users.CustomUser'  # Commenté pour utiliser le modèle User par défaut
 
 
 # Default primary key field type

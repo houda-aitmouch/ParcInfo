@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signer la Décharge - Demande {{ demande.id }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #pdfContainer { width: 100%; height: 600px; overflow-y: auto; }
+        .pdf-page { 
+            margin: 10px auto; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- En-tête -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Signer la Décharge</h1>
+            <p class="text-gray-600">Demande #{{ demande.id }} - {{ demande.get_categorie_display }}</p>
+        </div>
+
+        <!-- Aperçu de la décharge -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Aperçu de la décharge</h2>
+            
+            <!-- PDF Preview -->
+            <div class="border border-gray-300 rounded-lg overflow-hidden">
+                <div class="bg-gray-50 p-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-medium text-gray-900">Aperçu de la décharge</h3>
+                        <a href="{% url 'demande_equipement:telecharger_decharge' demande.pk %}?inline=1" 
+                           target="_blank"
+                           class="text-blue-600 hover:text-blue-900 text-sm font-medium">
+                            👁️ Ouvrir dans un nouvel onglet
+                        </a>
+                    </div>
+                </div>
+                <div id="pdfContainer" class="bg-gray-200 p-4">
+                    <div id="loading" class="text-center py-20">
+                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <p class="mt-2 text-gray-600">Chargement du PDF...</p>
+                    </div>
+                    <div id="pdfContent" class="hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire de signature -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Confirmation de signature</h2>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800">Information importante</h3>
+                        <div class="mt-2 text-sm text-blue-700">
+                            <p>En signant cette décharge, vous confirmez avoir reçu le matériel listé ci-dessus et vous vous engagez à en prendre soin conformément aux règles de l'entreprise.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" class="space-y-6" id="signatureForm">
+                {% csrf_token %}
+                
+                <!-- Zone de signature électronique -->
+                <div class="space-y-4">
+                    <label class="block text-sm font-medium text-gray-700">Signature électronique</label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                        <canvas id="signatureCanvas" width="500" height="200" class="border border-gray-300 rounded bg-white cursor-crosshair"></canvas>
+                        <div class="mt-2 flex space-x-2">
+                            <button type="button" id="clearSignature" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+                                Effacer
+                            </button>
+                            <span id="signatureStatus" class="text-sm text-gray-500">Dessinez votre signature ci-dessus</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="confirm" name="confirm" required class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="confirm" class="ml-2 block text-sm text-gray-900">
+                            Je confirme avoir lu et compris le contenu de cette décharge
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <a href="{% url 'demande_equipement:liste_demandes' %}" 
+                       class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Annuler
+                    </a>
+                    <button type="submit" id="submitBtn"
+                            class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Signer la décharge
+                    </button>
+                </div>
+                
+                <!-- Champ caché pour la signature -->
+                <input type="hidden" name="signature_data" id="signatureData">
+            </form>
+
+            <script>
+                // Signature électronique
+                const canvas = document.getElementById('signatureCanvas');
+                const ctx = canvas.getContext('2d');
+                const clearBtn = document.getElementById('clearSignature');
+                const status = document.getElementById('signatureStatus');
+                const signatureData = document.getElementById('signatureData');
+                const form = document.getElementById('signatureForm');
+                const submitBtn = document.getElementById('submitBtn');
+
+                let isDrawing = false;
+                let hasSignature = false;
+
+                // Configuration du canvas
+                ctx.strokeStyle = '#1e40af';
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                // Événements de souris
+                canvas.addEventListener('mousedown', startDrawing);
+                canvas.addEventListener('mousemove', draw);
+                canvas.addEventListener('mouseup', stopDrawing);
+                canvas.addEventListener('mouseout', stopDrawing);
+
+                // Événements tactiles pour mobile
+                canvas.addEventListener('touchstart', handleTouch);
+                canvas.addEventListener('touchmove', handleTouch);
+                canvas.addEventListener('touchend', stopDrawing);
+
+                function startDrawing(e) {
+                    isDrawing = true;
+                    draw(e);
+                }
+
+                function draw(e) {
+                    if (!isDrawing) return;
+                    
+                    e.preventDefault();
+                    const rect = canvas.getBoundingClientRect();
+                    const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                    const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                    
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    
+                    if (!hasSignature) {
+                        hasSignature = true;
+                        status.textContent = 'Signature enregistrée';
+                        status.className = 'text-sm text-green-600';
+                    }
+                }
+
+                function stopDrawing() {
+                    isDrawing = false;
+                    ctx.beginPath();
+                }
+
+                function handleTouch(e) {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                                   e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    });
+                    canvas.dispatchEvent(mouseEvent);
+                }
+
+                // Effacer la signature
+                clearBtn.addEventListener('click', function() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    hasSignature = false;
+                    status.textContent = 'Dessinez votre signature ci-dessus';
+                    status.className = 'text-sm text-gray-500';
+                });
+
+                // Soumission du formulaire
+                form.addEventListener('submit', function(e) {
+                    if (!hasSignature) {
+                        e.preventDefault();
+                        alert('Veuillez dessiner votre signature avant de soumettre.');
+                        return;
+                    }
+                    
+                    // Convertir la signature en base64
+                    const signatureImage = canvas.toDataURL('image/png');
+                    signatureData.value = signatureImage;
+                });
+
+                // Désactiver le bouton si pas de signature
+                submitBtn.addEventListener('click', function(e) {
+                    if (!hasSignature) {
+                        e.preventDefault();
+                        alert('Veuillez dessiner votre signature avant de soumettre.');
+                    }
+                });
+            </script>
+        </div>
+    </div>
+
+    <script>
+        // Configuration PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // Charger et afficher le PDF
+        async function loadPDF() {
+            const loading = document.getElementById('loading');
+            const pdfContent = document.getElementById('pdfContent');
+            
+            try {
+                // URL du PDF
+                const pdfUrl = "{% url 'demande_equipement:telecharger_decharge' demande.pk %}?inline=1";
+                
+                // Charger le PDF
+                const loadingTask = pdfjsLib.getDocument(pdfUrl);
+                const pdf = await loadingTask.promise;
+                
+                // Masquer le loading
+                loading.classList.add('hidden');
+                pdfContent.classList.remove('hidden');
+                
+                // Afficher toutes les pages
+                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    
+                    // Augmenter la qualité avec un scale plus élevé
+                    const scale = 2.0; // Double la résolution pour une meilleure qualité
+                    const viewport = page.getViewport({ scale: scale });
+                    
+                    // Créer le canvas pour cette page
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    
+                    // Définir la taille du canvas avec la haute résolution
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    canvas.className = 'pdf-page';
+                    
+                    // Définir la taille d'affichage CSS pour maintenir les proportions
+                    canvas.style.width = (viewport.width / scale) + 'px';
+                    canvas.style.height = (viewport.height / scale) + 'px';
+                    
+                    // Améliorer la qualité du rendu
+                    context.imageSmoothingEnabled = true;
+                    context.imageSmoothingQuality = 'high';
+                    
+                    // Rendre la page avec la haute résolution
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    
+                    await page.render(renderContext).promise;
+                    pdfContent.appendChild(canvas);
+                }
+                
+            } catch (error) {
+                console.error('Erreur lors du chargement du PDF:', error);
+                loading.innerHTML = `
+                    <div class="text-center py-20">
+                        <div class="text-red-600 text-lg mb-2">❌ Erreur de chargement</div>
+                        <p class="text-gray-600">Impossible de charger le PDF. Veuillez réessayer.</p>
+                        <a href="${pdfUrl}" target="_blank" class="text-blue-600 hover:text-blue-900 mt-2 inline-block">
+                            Ouvrir dans un nouvel onglet
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        // Charger le PDF au chargement de la page
+        document.addEventListener('DOMContentLoaded', loadPDF);
+    </script>
+</body>
+</html> 

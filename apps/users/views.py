@@ -4,21 +4,30 @@ from django.http import HttpResponseForbidden
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 
+def get_user_dashboard_url(user):
+    """Retourne l'URL du dashboard approprié selon le type d'utilisateur"""
+    if user.is_superuser:
+        return 'users:superadmin_dashboard'
+    elif user.groups.filter(name='Gestionnaire Informatique').exists():
+        return 'users:gestionnaire_info_dashboard'
+    elif user.groups.filter(name='Gestionnaire Bureau').exists():
+        return 'users:gestionnaire_bureau_dashboard'
+    else:
+        return 'users:employe_dashboard'
+
 @login_required
 def redirect_user(request):
     user = request.user
-    groups = user.groups.values_list('name', flat=True)
-
-    if 'Super Admin' in groups:
-        return redirect('users:superadmin_dashboard')  # Add 'users:' prefix
-    elif 'Gestionnaire Informatique' in groups:
-        return redirect('users:gestionnaire_info_dashboard')  # Add 'users:' prefix
-    elif 'Gestionnaire Bureau' in groups:
-        return redirect('users:gestionnaire_bureau_dashboard')  # Add 'users:' prefix
-    elif 'Employe' in groups:
-        return redirect('users:employe_dashboard')  # Add 'users:' prefix
+    
+    # Utiliser les groupes Django par défaut
+    if user.is_superuser:
+        return redirect('users:superadmin_dashboard')
+    elif user.groups.filter(name='Gestionnaire Informatique').exists():
+        return redirect('users:gestionnaire_info_dashboard')
+    elif user.groups.filter(name='Gestionnaire Bureau').exists():
+        return redirect('users:gestionnaire_bureau_dashboard')
     else:
-        return HttpResponseForbidden("Erreur : Vous n'avez pas les permissions nécessaires pour accéder à cette application.")
+        return redirect('users:employe_dashboard')
 
 @login_required
 def superadmin_dashboard(request):

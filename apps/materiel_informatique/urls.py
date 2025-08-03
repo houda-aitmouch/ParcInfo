@@ -10,4 +10,5 @@ urlpatterns = [
     path('modifier/<int:pk>/', views.modifier_materiel, name='modifier_materiel'),
     path('supprimer/<int:pk>/', views.supprimer_materiel, name='supprimer_materiel'),
     path('export_excel/', views.export_materiels_excel, name='export_excel'),
+    path('mes-equipements/', views.mes_equipements_informatiques, name='mes_equipements_informatiques'),
 ]

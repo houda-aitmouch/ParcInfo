@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insights IA - Assistant ParcInfo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .insights-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            max-width: 1000px;
+            overflow: hidden;
+        }
+        
+        .insights-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .insights-header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+        
+        .insights-content {
+            padding: 40px;
+        }
+        
+        .metric-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .metric-title {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .metric-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+        
+        .role-distribution {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .role-item {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .role-count {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .role-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .navbar {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            color: #667eea !important;
+        }
+        
+        .nav-link {
+            color: #667eea !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: #764ba2 !important;
+            transform: translateY(-1px);
+        }
+        
+        .btn-action {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            color: white;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-active {
+            background: #28a745;
+        }
+        
+        .status-initializing {
+            background: #ffc107;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-robot me-2"></i>Assistant IA ParcInfo
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'chatbot:chat_interface' %}">
+                    <i class="fas fa-comments me-1"></i>Chat
+                </a>
+                <a class="nav-link" href="{% url 'chatbot:chat_history' %}">
+                    <i class="fas fa-history me-1"></i>Historique
+                </a>
+                <a class="nav-link" href="{% url 'chatbot:help' %}">
+                    <i class="fas fa-question-circle me-1"></i>Aide
+                </a>
+                <a class="nav-link" href="{% url 'home' %}">
+                    <i class="fas fa-home me-1"></i>Accueil
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Insights Container -->
+    <div class="container">
+        <div class="insights-container">
+            <!-- Header -->
+            <div class="insights-header">
+                <h1><i class="fas fa-brain me-3"></i>Insights d'Apprentissage IA</h1>
+                <p class="mt-3 mb-0">Analyse de l'apprentissage continu du chatbot</p>
+            </div>
+
+            <!-- Content -->
+            <div class="insights-content">
+                {% if insights %}
+                    <!-- Métriques principales -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="metric-card">
+                                <div class="metric-title">
+                                    <i class="fas fa-comments me-2"></i>Total Interactions
+                                </div>
+                                <div class="metric-value">{{ insights.total_interactions|default:"0" }}</div>
+                                <div class="metric-description">Nombre total de conversations avec l'IA</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: {% widthratio insights.total_interactions 1000 100 %}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="metric-card">
+                                <div class="metric-title">
+                                    <i class="fas fa-chart-line me-2"></i>Longueur Moyenne Réponse
+                                </div>
+                                <div class="metric-value">{{ insights.avg_response_length|floatformat:0|default:"0" }}</div>
+                                <div class="metric-description">Caractères par réponse en moyenne</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activité récente -->
+                    <div class="metric-card">
+                        <div class="metric-title">
+                            <i class="fas fa-clock me-2"></i>Activité Récente
+                        </div>
+                        <div class="metric-value">{{ insights.recent_activity|default:"0" }}</div>
+                        <div class="metric-description">Interactions dans les 7 derniers jours</div>
+                    </div>
+
+                    <!-- Statut d'apprentissage -->
+                    <div class="metric-card">
+                        <div class="metric-title">
+                            <i class="fas fa-graduation-cap me-2"></i>Statut d'Apprentissage
+                        </div>
+                        <div class="metric-value">
+                            <span class="status-indicator {% if insights.learning_progress == 'Actif' %}status-active{% else %}status-initializing{% endif %}"></span>
+                            {{ insights.learning_progress|default:"En cours d'initialisation" }}
+                        </div>
+                        <div class="metric-description">État du système d'apprentissage continu</div>
+                    </div>
+
+                    <!-- Distribution des rôles -->
+                    {% if insights.user_role_distribution %}
+                    <div class="metric-card">
+                        <div class="metric-title">
+                            <i class="fas fa-users me-2"></i>Distribution par Rôle
+                        </div>
+                        <div class="role-distribution">
+                            {% for role, count in insights.user_role_distribution.items %}
+                            <div class="role-item">
+                                <div class="role-count">{{ count }}</div>
+                                <div class="role-label">{{ role }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="metric-description">Répartition des interactions par type d'utilisateur</div>
+                    </div>
+                    {% endif %}
+
+                {% else %}
+                    <!-- État vide -->
+                    <div class="empty-state">
+                        <i class="fas fa-brain"></i>
+                        <h3>Aucune donnée d'apprentissage disponible</h3>
+                        <p>Le système d'apprentissage continu commence à collecter des données.</p>
+                        <a href="{% url 'chatbot:chat_interface' %}" class="btn btn-action">
+                            <i class="fas fa-comments me-2"></i>Commencer une conversation
+                        </a>
+                    </div>
+                {% endif %}
+
+                <!-- Actions -->
+                <div class="text-center mt-4">
+                    <a href="{% url 'chatbot:chat_interface' %}" class="btn btn-action me-3">
+                        <i class="fas fa-comments me-2"></i>Nouvelle conversation
+                    </a>
+                    <a href="{% url 'chatbot:chat_history' %}" class="btn btn-action">
+                        <i class="fas fa-history me-2"></i>Voir l'historique
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

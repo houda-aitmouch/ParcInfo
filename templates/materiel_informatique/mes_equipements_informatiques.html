@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mes équipements informatiques</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-indigo-50 to-white min-h-screen font-sans">
+    <div class="max-w-3xl mx-auto py-10 px-4">
+        <h1 class="text-3xl md:text-4xl font-bold text-center mb-10 bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+            Mes équipements informatiques
+        </h1>
+        {% if equipements and equipements|length > 0 %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-indigo-200 bg-white rounded-xl shadow">
+                    <thead>
+                        <tr class="bg-indigo-100">
+                            <th class="px-4 py-2 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Désignation</th>
+                            <th class="px-4 py-2 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Description</th>
+                            <th class="px-4 py-2 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-indigo-50">
+                        {% for eq in equipements %}
+                            <tr>
+                                <td class="px-4 py-2 font-medium text-indigo-800">
+                                    {{ eq.ligne_commande.designation.nom|default:"-" }}
+                                </td>
+                                <td class="px-4 py-2 text-gray-600">
+                                    {{ eq.ligne_commande.description.nom|default:"-" }}
+                                </td>
+                                <td class="px-4 py-2">
+                                    <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-indigo-600 text-white">
+                                        {{ eq.get_statut_display|default:eq.statut }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center text-gray-500 text-lg mt-12">
+                Aucun équipement informatique affecté.
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

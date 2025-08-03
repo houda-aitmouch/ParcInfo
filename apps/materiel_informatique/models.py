@@ -7,8 +7,8 @@ from dateutil.relativedelta import relativedelta
 User = get_user_model()
 
 class MaterielInformatique(models.Model):
-    numero_serie = models.CharField(max_length=100)
-    code_inventaire = models.CharField(max_length=100)
+    numero_serie = models.CharField(max_length=100, unique=True)
+    code_inventaire = models.CharField(max_length=100, unique=True)
     commande = models.ForeignKey(Commande, on_delete=models.PROTECT, related_name='materiels')
     ligne_commande = models.ForeignKey(LigneCommande, on_delete=models.PROTECT, related_name='materiels')
     utilisateur = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)

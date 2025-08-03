@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détail livraison - Gestion des Livraisons</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-gray-900">Détail de la livraison</h1>
+                <div class="flex gap-2">
+                    <a href="{% url 'livraison:modifier_livraison' livraison.pk %}" 
+                       class="inline-flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        Modifier
+                    </a>
+                    <a href="{% url 'livraison:liste_livraisons' %}" 
+                       class="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Informations de la livraison -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Informations de la livraison</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Numéro de commande:</span>
+                        <span class="font-semibold">{{ livraison.numero_commande }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Type:</span>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold
+                            {% if livraison.type_commande == 'informatique' %}
+                                bg-blue-100 text-blue-800
+                            {% else %}
+                                bg-green-100 text-green-800
+                            {% endif %}">
+                            {{ livraison.get_type_commande_display }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Fournisseur:</span>
+                        <span class="font-semibold">{{ livraison.fournisseur.nom|default:"-" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Date prévue:</span>
+                        <span class="font-semibold">{{ livraison.date_livraison_prevue|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Date effective:</span>
+                        <span class="font-semibold">{{ livraison.date_livraison_effective|date:"d/m/Y"|default:"-" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Statut:</span>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold
+                            {% if livraison.statut_livraison == 'livree' %}
+                                bg-green-100 text-green-800
+                            {% elif livraison.statut_livraison == 'en_cours' %}
+                                bg-yellow-100 text-yellow-800
+                            {% elif livraison.statut_livraison == 'retardee' %}
+                                bg-red-100 text-red-800
+                            {% else %}
+                                bg-gray-100 text-gray-800
+                            {% endif %}">
+                            {{ livraison.get_statut_livraison_display }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Conforme:</span>
+                        <span class="font-semibold">
+                            {% if livraison.conforme %}
+                                <span class="text-green-600">✓ Oui</span>
+                            {% else %}
+                                <span class="text-red-600">✗ Non</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">PV réception:</span>
+                        <span class="font-semibold">
+                            {% if livraison.pv_reception_recu %}
+                                <span class="text-green-600">✓ Validé</span>
+                            {% else %}
+                                <span class="text-red-600">✗ Non validé</span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Actions et traçabilité -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Actions</h2>
+                
+                <!-- Actions rapides -->
+                <div class="space-y-3 mb-6">
+                    {% if livraison.statut_livraison != 'livree' %}
+                    <a href="{% url 'livraison:marquer_livree' livraison.pk %}" 
+                       class="block w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 text-center">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Marquer comme livrée
+                    </a>
+                    {% endif %}
+                    
+                    {% if not livraison.pv_reception_recu %}
+                    <a href="{% url 'livraison:valider_pv_reception' livraison.pk %}" 
+                       class="block w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 text-center">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Valider PV réception
+                    </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'livraison:modifier_livraison' livraison.pk %}" 
+                       class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 text-center">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        Modifier la livraison
+                    </a>
+                    
+                    <a href="{% url 'livraison:supprimer_livraison' livraison.pk %}" 
+                       class="block w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 text-center">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Supprimer
+                    </a>
+                </div>
+
+                <!-- Traçabilité -->
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Traçabilité</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Créé par:</span>
+                        <span class="font-medium">{{ livraison.cree_par.get_full_name|default:livraison.cree_par.username }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Date création:</span>
+                        <span class="font-medium">{{ livraison.date_creation|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    {% if livraison.modifie_par %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Modifié par:</span>
+                        <span class="font-medium">{{ livraison.modifie_par.get_full_name|default:livraison.modifie_par.username }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Date modification:</span>
+                        <span class="font-medium">{{ livraison.date_modification|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Matériels de la commande -->
+        <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">Matériels de la commande</h2>
+            
+            {% if materiels %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Désignation</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantité</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix unitaire</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for materiel in materiels %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ materiel.designation.nom }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ materiel.description.nom }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ materiel.quantite }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ materiel.prix_unitaire }} MAD</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ materiel.total }} MAD</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-8">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                </div>
+                <p class="text-gray-500">Aucun matériel trouvé pour cette commande</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Notes -->
+        {% if livraison.notes %}
+        <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Notes</h2>
+            <div class="bg-gray-50 rounded-lg p-4">
+                <p class="text-gray-700 whitespace-pre-wrap">{{ livraison.notes }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html> 

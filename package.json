@@ -1,21 +1,30 @@
 {
   "name": "parcinfo",
   "version": "1.0.0",
-  "description": "",
+  "description": "ParcInfo est une application web Django pour la gestion complète du parc informatique d'une entreprise. Elle permet de gérer les demandes d'équipement, les décharges électroniques, et l'archivage automatique des documents.",
   "main": "index.js",
-  "type": "commonjs",
+  "directories": {
+    "doc": "docs"
+  },
   "scripts": {
-    "build-css": "tailwindcss -i ./assets/css/styles.css -o ./static/css/styles.css --watch",
-    "build": "esbuild assets/js/app.js --bundle --outfile=static/js/app.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/houda-aitmouch/ParcInfo.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/houda-aitmouch/ParcInfo/issues"
+  },
+  "homepage": "https://github.com/houda-aitmouch/ParcInfo#readme",
   "devDependencies": {
     "autoprefixer": "^10.4.21",
-    "esbuild": "^0.25.6",
     "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.3.2"
   },
   "dependencies": {
     "alpinejs": "^3.14.9"

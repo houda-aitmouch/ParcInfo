@@ -8,6 +8,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
 from django.http import HttpResponse
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 
 def is_gestionnaire_ou_superadmin(user):
     return user.groups.filter(name__in=['Gestionnaire Informatique', 'Super Admin']).exists()
@@ -149,3 +151,8 @@ def export_materiels_excel(request):
     response['Content-Disposition'] = 'attachment; filename=liste_materiels.xlsx'
     wb.save(response)
     return response
+
+@login_required
+def mes_equipements_informatiques(request):
+    equipements = MaterielInformatique.objects.filter(utilisateur=request.user, statut='affecte')
+    return render(request, 'materiel_informatique/mes_equipements_informatiques.html', {'equipements': equipements})
