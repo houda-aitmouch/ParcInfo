@@ -209,8 +209,8 @@ Thumbs.db
 # AI Models and cache
 models_cache/
 storage/
-*.jsonl
 logs/
+*.jsonl
 
 # Large data files
 export_all_tables.json
