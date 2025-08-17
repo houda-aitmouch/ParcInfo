@@ -49,7 +49,8 @@
                 <!-- Menu desktop -->
                 <div class="hidden md:flex items-center space-x-6">
                     <a href="{% url 'users:profil' %}" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Mon profil</a>
-                    <a href="{% url 'materiel_informatique:mes_equipements_informatiques' %}" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Mes équipements</a>
+                    <a href="{% url 'materiel_informatique:mes_equipements_informatiques' %}" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Mes équipements informatiques</a>
+                    <a href="{% url 'materiel_bureautique:mes_equipements_bureautiques' %}" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Mes équipements bureautiques</a>
                     <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="text-red-600 hover:text-red-800 font-medium transition">Se déconnecter</a>
                 </div>
                 <!-- Bouton menu mobile -->
@@ -76,7 +77,8 @@
                  class="md:hidden border-t border-gray-200">
                 <div class="px-2 pt-2 pb-3 space-y-1">
                     <a href="{% url 'users:profil' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Mon profil</a>
-                    <a href="{% url 'materiel_informatique:mes_equipements_informatiques' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Mes équipements</a>
+                    <a href="{% url 'materiel_informatique:mes_equipements_informatiques' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Mes équipements informatiques</a>
+                    <a href="{% url 'materiel_bureautique:mes_equipements_bureautiques' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Mes équipements bureautiques</a>
                     <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="block px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-800 hover:bg-gray-50">Se déconnecter</a>
                 </div>
             </div>
@@ -94,7 +96,7 @@
             <p class="text-gray-600">Gérez vos demandes d'équipement et consultez vos équipements affectés.</p>
         </div>
         <!-- Cartes de navigation -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8" x-data="{ hoveredCard: null }">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" x-data="{ hoveredCard: null }">
             <!-- Carte Nouvelle Demande -->
             <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
                  @mouseenter="hoveredCard = 'nouvelle_demande'"
@@ -145,15 +147,15 @@
                 </a>
             </div>
             
-            <!-- Carte Mes Équipements -->
+            <!-- Carte Mes Équipements Informatiques -->
             <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'equipements'"
+                 @mouseenter="hoveredCard = 'equipements_info'"
                  @mouseleave="hoveredCard = null">
                 <a href="{% url 'materiel_informatique:mes_equipements_informatiques' %}" class="block p-6">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-3">
                             <div class="icon-bg bg-blue-100 p-4 rounded-full shadow-lg">
-                                <!-- Icône équipements -->
+                                <!-- Icône équipements informatiques -->
                                 <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <rect x="3" y="5" width="18" height="12" rx="2" stroke-width="2" stroke="currentColor" fill="none"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2 17h20M8 21h8" />
@@ -161,13 +163,38 @@
                             </div>
                         </div>
                         <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'equipements'}"
+                             :class="{'translate-x-1': hoveredCard === 'equipements_info'}"
                              fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Mes Équipements informatiques</h3>
-                    <p class="text-gray-600 text-sm">Voir la liste des équipements qui me sont affectés</p>
+                    <p class="text-gray-600 text-sm">Voir la liste des équipements informatiques qui me sont affectés</p>
+                </a>
+            </div>
+            
+            <!-- Carte Mes Équipements Bureautiques -->
+            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
+                 @mouseenter="hoveredCard = 'equipements_bureau'"
+                 @mouseleave="hoveredCard = null">
+                <a href="{% url 'materiel_bureautique:mes_equipements_bureautiques' %}" class="block p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="icon-bg bg-purple-100 p-4 rounded-full shadow-lg">
+                                <!-- Icône équipements bureautiques -->
+                                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
+                             :class="{'translate-x-1': hoveredCard === 'equipements_bureau'}"
+                             fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Mes Équipements bureautiques</h3>
+                    <p class="text-gray-600 text-sm">Voir la liste des équipements bureautiques qui me sont affectés</p>
                 </a>
             </div>
         </div>

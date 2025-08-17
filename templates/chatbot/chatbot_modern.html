@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant ParcInfo - Chatbot Intelligent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .chat-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .message-bubble {
+            animation: slideIn 0.3s ease-out;
+        }
+        .typing-indicator {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        .suggestion-chip {
+            transition: all 0.2s ease;
+        }
+        .suggestion-chip:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .markdown-content ul, .markdown-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .markdown-content li {
+            margin-bottom: 0.25rem;
+        }
+        .markdown-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1rem 0;
+        }
+        .markdown-content th, .markdown-content td {
+            border: 1px solid #e5e7eb;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        .markdown-content th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div x-data="chatbotApp()" class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-robot text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-gray-900">Assistant ParcInfo</h1>
+                            <p class="text-sm text-gray-500">Gestion intelligente du parc informatique</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button @click="toggleTheme()" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-moon text-gray-600"></i>
+                        </button>
+                        <button @click="showHelp = !showHelp" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-question-circle text-gray-600"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Sidebar -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-sm border p-6 sticky top-6">
+                
+                        <!-- Quick Actions -->
+                        <!-- Recent Queries -->
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-medium text-gray-700">Questions Récentes</h4>
+                            <div class="space-y-2 max-h-40 overflow-y-auto">
+                                <template x-for="query in recentQueries.slice(0, 5)" :key="query">
+                                    <button @click="sendMessage(query)" 
+                                            class="suggestion-chip w-full bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs px-3 py-2 rounded-lg transition-all text-left truncate">
+                                        <i class="fas fa-history mr-2"></i>
+                                        <span x-text="query"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="lg:col-span-3">
+                    <div class="bg-white rounded-lg shadow-sm border h-[600px] flex flex-col">
+                        <!-- Chat Header -->
+                        <div class="p-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-robot text-white text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Assistant IA</h3>
+                                        <p class="text-xs text-gray-500" x-text="isOnline ? 'En ligne' : 'Hors ligne'"></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-2 h-2 rounded-full" :class="isOnline ? 'bg-green-500' : 'bg-gray-400'"></div>
+                                    <span class="text-xs text-gray-500" x-text="isOnline ? 'Connecté' : 'Déconnecté'"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Messages Container -->
+                        <div class="flex-1 overflow-y-auto p-4 space-y-4" id="messages-container">
+                            <!-- Welcome Message -->
+                            <div class="message-bubble bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-lg max-w-3xl">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-robot text-white"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold mb-2">Bienvenue sur l'Assistant ParcInfo ! 🤖</h4>
+                                        <p class="text-blue-50 mb-3">Je peux vous aider à gérer votre parc informatique et bureautique. Posez-moi vos questions !</p>
+                                        <div class="space-y-2">
+                                            <p class="text-sm text-blue-100"><strong>Exemples :</strong></p>
+                                            <ul class="text-sm text-blue-100 space-y-1">
+                                                <li>• "Liste du matériel informatique"</li>
+                                                <li>• "Statut des livraisons en retard"</li>
+                                                <li>• "Analyse de performance des fournisseurs"</li>
+                                                <li>• "Évolution temporelle du parc"</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Messages -->
+                            <template x-for="(message, index) in messages" :key="index">
+                                <div class="message-bubble" :class="message.isUser ? 'ml-auto bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'">
+                                    <div class="flex items-start space-x-3 max-w-3xl">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" 
+                                             :class="message.isUser ? 'bg-blue-600' : 'bg-gray-300'">
+                                            <i :class="message.isUser ? 'fas fa-user text-white' : 'fas fa-robot text-gray-600'"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <span class="font-semibold" x-text="message.isUser ? 'Vous' : 'Assistant'"></span>
+                                                <span class="text-xs opacity-75" x-text="message.timestamp"></span>
+                                            </div>
+                                            <div class="markdown-content" x-html="formatMessage(message.content)"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Typing Indicator -->
+                            <div x-show="isTyping" class="message-bubble bg-gray-100 p-4 rounded-lg max-w-3xl">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-robot text-gray-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2">
+                                            <div class="typing-indicator w-2 h-2 bg-gray-400 rounded-full"></div>
+                                            <div class="typing-indicator w-2 h-2 bg-gray-400 rounded-full" style="animation-delay: 0.2s"></div>
+                                            <div class="typing-indicator w-2 h-2 bg-gray-400 rounded-full" style="animation-delay: 0.4s"></div>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mt-2">Assistant en train d'écrire...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Input Area -->
+                        <div class="p-4 border-t bg-gray-50">
+                            <form @submit.prevent="sendMessage()" class="flex space-x-3">
+                                <div class="flex-1 relative">
+                                    <input type="text" 
+                                           x-model="currentMessage" 
+                                           @keydown.enter.prevent="sendMessage()"
+                                           placeholder="Posez votre question sur le parc informatique..."
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                                           :disabled="isTyping">
+                                    <div class="absolute right-3 top-3 text-gray-400">
+                                        <i class="fas fa-microphone"></i>
+                                    </div>
+                                </div>
+                                <button type="submit" 
+                                        :disabled="!currentMessage.trim() || isTyping"
+                                        class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i class="fas fa-paper-plane mr-2"></i>
+                                    Envoyer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Help Modal -->
+        <div x-show="showHelp"
+             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            <i class="fas fa-question-circle text-blue-500 mr-2"></i>
+                            Aide - Assistant ParcInfo
+                        </h3>
+                        <button @click="showHelp = false" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4 text-sm text-gray-600">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Que puis-je faire ?</h4>
+                            <ul class="space-y-1 ml-4">
+                                <li>• Lister et rechercher du matériel informatique et bureautique</li>
+                                <li>• Suivre les commandes et livraisons</li>
+                                <li>• Analyser les fournisseurs et leurs performances</li>
+                                <li>• Générer des statistiques et rapports</li>
+                                <li>• Évaluer les risques et opportunités d'optimisation</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Exemples de questions</h4>
+                            <ul class="space-y-1 ml-4">
+                                <li>• "Où est le matériel PC-123 ?"</li>
+                                <li>• "Quels fournisseurs ont livré en retard ?"</li>
+                                <li>• "Analyse de performance des fournisseurs"</li>
+                                <li>• "Évolution temporelle du parc informatique"</li>
+                                <li>• "Calcul du ROI des matériels"</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Conseils d'utilisation</h4>
+                            <ul class="space-y-1 ml-4">
+                                <li>• Soyez précis dans vos questions pour des réponses plus pertinentes</li>
+                                <li>• Utilisez les suggestions rapides pour les questions fréquentes</li>
+                                <li>• Les analyses complexes peuvent prendre quelques secondes</li>
+                                <li>• Toutes les réponses sont basées sur votre base de données</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function chatbotApp() {
+            return {
+                currentMessage: '',
+                messages: [],
+                isTyping: false,
+                isOnline: true,
+                showHelp: false,
+                recentQueries: [],
+
+                init() {
+                    this.loadRecentQueries();
+                    this.scrollToBottom();
+                },
+
+                async sendMessage(customMessage = null) {
+                    const message = customMessage || this.currentMessage.trim();
+                    if (!message) return;
+
+                    // Add user message
+                    this.messages.push({
+                        content: message,
+                        isUser: true,
+                        timestamp: this.getCurrentTime()
+                    });
+
+                    // Add to recent queries
+                    if (!this.recentQueries.includes(message)) {
+                        this.recentQueries.unshift(message);
+                        this.recentQueries = this.recentQueries.slice(0, 10);
+                        this.saveRecentQueries();
+                    }
+
+                    // Clear input
+                    this.currentMessage = '';
+                    
+                    // Show typing indicator
+                    this.isTyping = true;
+                    this.scrollToBottom();
+
+                    try {
+                        const response = await fetch('/chatbot/process_query/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': this.getCSRFToken()
+                            },
+                            body: JSON.stringify({ query: message })
+                        });
+
+                        const data = await response.json();
+                        
+                        // Add assistant response
+                        this.messages.push({
+                            content: data.response || 'Désolé, je n\'ai pas pu traiter votre demande.',
+                            isUser: false,
+                            timestamp: this.getCurrentTime()
+                        });
+
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.messages.push({
+                            content: 'Erreur de connexion. Veuillez réessayer.',
+                            isUser: false,
+                            timestamp: this.getCurrentTime()
+                        });
+                    } finally {
+                        this.isTyping = false;
+                        this.scrollToBottom();
+                    }
+                },
+
+                formatMessage(content) {
+                    // Simple markdown formatting
+                    return content
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/•/g, '•')
+                        .replace(/\n/g, '<br>')
+                        .replace(/\|/g, ' | ')
+                        .replace(/## (.*?)(\n|$)/g, '<h2 class="text-lg font-semibold mt-4 mb-2">$1</h2>')
+                        .replace(/### (.*?)(\n|$)/g, '<h3 class="text-base font-semibold mt-3 mb-1">$1</h3>');
+                },
+
+                getCurrentTime() {
+                    return new Date().toLocaleTimeString('fr-FR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                },
+
+                scrollToBottom() {
+                    this.$nextTick(() => {
+                        const container = document.getElementById('messages-container');
+                        if (container) {
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    });
+                },
+
+                toggleTheme() {
+                    // Theme toggle functionality
+                    document.documentElement.classList.toggle('dark');
+                },
+
+                getCSRFToken() {
+                    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+                },
+
+                loadRecentQueries() {
+                    const saved = localStorage.getItem('recentQueries');
+                    if (saved) {
+                        this.recentQueries = JSON.parse(saved);
+                    }
+                },
+
+                saveRecentQueries() {
+                    localStorage.setItem('recentQueries', JSON.stringify(this.recentQueries));
+                }
+            }
+        }
+    </script>
+</body>
+</html>

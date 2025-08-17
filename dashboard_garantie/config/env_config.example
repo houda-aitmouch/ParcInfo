@@ -1,0 +1,19 @@
+# Configuration de l'environnement pour le Dashboard Garantie
+# Copiez ce fichier vers .env et modifiez les valeurs selon votre configuration
+
+# Configuration Django
+DJANGO_SETTINGS_MODULE=ParcInfo.settings
+
+# Configuration de la base de données (si nécessaire)
+# DATABASE_URL=postgresql://user:password@localhost:5432/parcinfo
+
+# Configuration Streamlit
+STREAMLIT_SERVER_PORT=8501
+STREAMLIT_SERVER_ADDRESS=0.0.0.0
+
+# Configuration de développement
+DEBUG=True
+SECRET_KEY=your-secret-key-here
+
+# Configuration des logs
+LOG_LEVEL=INFO

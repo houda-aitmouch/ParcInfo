@@ -80,8 +80,15 @@
                                             {% else %}
                                                 <span class="text-gray-400">-</span>
                                             {% endif %}
+                                        {% elif demande.type_article == 'fourniture' %}
+                                            {% if demande.fourniture %}
+                                                <div class="font-medium">{{ demande.fourniture.nom }}</div>
+                                                <div class="text-gray-500">{{ demande.fourniture.numero_serie }}</div>
+                                            {% else %}
+                                                <span class="text-red-400">Fourniture non sélectionnée</span>
+                                            {% endif %}
                                         {% else %}
-                                            <span class="text-gray-400">Fourniture</span>
+                                            <span class="text-gray-400">-</span>
                                         {% endif %}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -164,8 +171,15 @@
                                             {% else %}
                                                 <span class="text-gray-400">-</span>
                                             {% endif %}
+                                        {% elif demande.type_article == 'fourniture' %}
+                                            {% if demande.fourniture %}
+                                                <div class="font-medium">{{ demande.fourniture.nom }}</div>
+                                                <div class="text-gray-500">{{ demande.fourniture.numero_serie }}</div>
+                                            {% else %}
+                                                <span class="text-red-400">Fourniture non sélectionnée</span>
+                                            {% endif %}
                                         {% else %}
-                                            <span class="text-gray-400">Fourniture</span>
+                                            <span class="text-gray-400">-</span>
                                         {% endif %}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">

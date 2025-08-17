@@ -1,0 +1,197 @@
+{
+  "🟢 Questions Faciles (Corrigées)": [
+    {
+      "question": "Qui est le super admin ?",
+      "response": "Erreur technique. Veuillez réessayer.",
+      "processing_time": 0.00015,
+      "confidence": 0,
+      "method": "unknown",
+      "quality_score": 25,
+      "success": false
+    },
+    {
+      "question": "Liste des fournisseurs",
+      "response": "**Matériel informatique :**\n• ADD/INFO/010 - Statut: nouveau (Série: 123456, Lieu: etage1)\n• ADD/INFO/01000 - Statut: nouveau (Série: 12345, Lieu: etage1)\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))\n\n**Matériel bureautique :**\n• ADD/INFO/01094 - Statut: affecte (Lieu: etage2 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.086022,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 70,
+      "success": true
+    },
+    {
+      "question": "Donne-moi les commandes récentes",
+      "response": "Erreur lors de la récupération des commandes : 'Commande' object has no attribute 'numero'",
+      "processing_time": 0.00386,
+      "confidence": 80,
+      "method": "intent_handler",
+      "quality_score": 40,
+      "success": false
+    },
+    {
+      "question": "Montre-moi la liste du matériel en service",
+      "response": "**Matériel informatique :**\n• ADD/INFO/010 - Statut: nouveau (Série: 123456, Lieu: etage1)\n• ADD/INFO/01000 - Statut: nouveau (Série: 12345, Lieu: etage1)\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))\n\n**Matériel bureautique :**\n• ADD/INFO/01094 - Statut: affecte (Lieu: etage2 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.002333,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 77,
+      "success": true
+    },
+    {
+      "question": "Quels sont les utilisateurs du système ?",
+      "response": "**Utilisateurs du système :**\n• **employe anonyme**\n  Nom: employe anonyme\n\n• **gestionnaire bureau**\n  Nom: gestionnaire bureau\n\n• **gestionnaire info**\n  Nom: gestionnaire info\n\n• **superadmin**\n  Nom: super admin\n",
+      "processing_time": 0.000892,
+      "confidence": 75,
+      "method": "intent_handler",
+      "quality_score": 100,
+      "success": true
+    },
+    {
+      "question": "Livraisons à venir",
+      "response": "Erreur lors de la récupération du statut des livraisons : 'Livraison' object has no attribute 'date_livraison_effectif'",
+      "processing_time": 0.001487,
+      "confidence": 70,
+      "method": "intent_handler",
+      "quality_score": 50,
+      "success": false
+    },
+    {
+      "question": "Code inventaire de la baie",
+      "response": "**Matériel informatique :**\n• ADD/INFO/010 - Statut: nouveau (Série: 123456, Lieu: etage1)\n• ADD/INFO/01000 - Statut: nouveau (Série: 12345, Lieu: etage1)\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.001988,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 70,
+      "success": true
+    }
+  ],
+  "🟡 Questions Intermédiaires (Corrigées)": [
+    {
+      "question": "Quels sont les équipements non affectés ?",
+      "response": "**Matériel informatique :**\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))\n\n**Matériel bureautique :**\n• ADD/INFO/01094 - Statut: affecte (Lieu: etage2 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.002899,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 80,
+      "success": true
+    },
+    {
+      "question": "Quels utilisateurs n'ont encore rien reçu comme matériel ?",
+      "response": "**Matériel informatique :**\n• ADD/INFO/010 - Statut: nouveau (Série: 123456, Lieu: etage1)\n• ADD/INFO/01000 - Statut: nouveau (Série: 12345, Lieu: etage1)\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))\n\n**Matériel bureautique :**\n• ADD/INFO/01094 - Statut: affecte (Lieu: etage2 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.002258,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 74,
+      "success": true
+    },
+    {
+      "question": "Qui utilise le matériel avec le code inventaire cd12 ?",
+      "response": "**Matériel informatique :**\n• ADD/INFO/010 - Statut: nouveau (Série: 123456, Lieu: etage1)\n• ADD/INFO/01000 - Statut: nouveau (Série: 12345, Lieu: etage1)\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))\n\n**Matériel bureautique :**\n• ADD/INFO/01094 - Statut: affecte (Lieu: etage2 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.002648,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 82,
+      "success": true
+    },
+    {
+      "question": "Donne-moi les équipements du type 'PC' stockés à l'étage 1",
+      "response": "**Matériel informatique :**\n• ADD/INFO/010 - Statut: nouveau (Série: 123456, Lieu: etage1)\n• ADD/INFO/01000 - Statut: nouveau (Série: 12345, Lieu: etage1)\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.001932,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 70,
+      "success": true
+    },
+    {
+      "question": "Quels fournisseurs ont livré plus de 3 équipements ?",
+      "response": "**Matériel informatique :**\n• ADD/INFO/010 - Statut: nouveau (Série: 123456, Lieu: etage1)\n• ADD/INFO/01000 - Statut: nouveau (Série: 12345, Lieu: etage1)\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))\n\n**Matériel bureautique :**\n• ADD/INFO/01094 - Statut: affecte (Lieu: etage2 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.002564,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 70,
+      "success": true
+    },
+    {
+      "question": "Quel est le nom du fournisseur qui a livré l'équipement eq18 ?",
+      "response": "**Matériel informatique :**\n• ADD/INFO/010 - Statut: nouveau (Série: 123456, Lieu: etage1)\n• ADD/INFO/01000 - Statut: nouveau (Série: 12345, Lieu: etage1)\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))\n\n**Matériel bureautique :**\n• ADD/INFO/01094 - Statut: affecte (Lieu: etage2 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.002376,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 70,
+      "success": true
+    },
+    {
+      "question": "Commandes livrées mais avec un équipement non encore affecté",
+      "response": "**Matériel informatique :**\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))\n\n**Matériel bureautique :**\n• ADD/INFO/01094 - Statut: affecte (Lieu: etage2 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.002932,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 74,
+      "success": true
+    }
+  ],
+  "🔴 Questions Complexes (Corrigées)": [
+    {
+      "question": "Quel est le fournisseur ayant livré le plus de matériel au total ?",
+      "response": "**Matériel informatique :**\n• ADD/INFO/010 - Statut: nouveau (Série: 123456, Lieu: etage1)\n• ADD/INFO/01000 - Statut: nouveau (Série: 12345, Lieu: etage1)\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))\n\n**Matériel bureautique :**\n• ADD/INFO/01094 - Statut: affecte (Lieu: etage2 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.002149,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 75,
+      "success": true
+    },
+    {
+      "question": "Taux de livraison des commandes contenant du matériel informatique",
+      "response": "**Matériel informatique :**\n• ADD/INFO/010 - Statut: nouveau (Série: 123456, Lieu: etage1)\n• ADD/INFO/01000 - Statut: nouveau (Série: 12345, Lieu: etage1)\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.001427,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 80,
+      "success": true
+    },
+    {
+      "question": "Combien d'équipements en bon état, non affectés, sont actuellement en stock ?",
+      "response": "**Matériel informatique :**\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))\n\n**Matériel bureautique :**\n• ADD/INFO/01094 - Statut: affecte (Lieu: etage2 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.003391,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 73,
+      "success": true
+    },
+    {
+      "question": "Pourcentage des équipements affectés qui ont été commandés en 2023",
+      "response": "**Matériel informatique :**\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))\n\n**Matériel bureautique :**\n• ADD/INFO/01094 - Statut: affecte (Lieu: etage2 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.003028,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 70,
+      "success": true
+    },
+    {
+      "question": "Historique complet de l'équipement EQ18 : commande, livraison, affectation",
+      "response": "**Matériel informatique :**\n• ADD/INFO/010 - Statut: nouveau (Série: 123456, Lieu: etage1)\n• ADD/INFO/01000 - Statut: nouveau (Série: 12345, Lieu: etage1)\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))\n\n**Matériel bureautique :**\n• ADD/INFO/01094 - Statut: affecte (Lieu: etage2 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.002453,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 70,
+      "success": true
+    },
+    {
+      "question": "Fournisseurs ayant livré à la fois du matériel informatique et bureautique",
+      "response": "**Matériel informatique :**\n• ADD/INFO/010 - Statut: nouveau (Série: 123456, Lieu: etage1)\n• ADD/INFO/01000 - Statut: nouveau (Série: 12345, Lieu: etage1)\n• cd14 - Statut: affecte (Série: sn14, Lieu: etage1 (Utilisateur: superadmin))\n• cd12 - Statut: affecte (Série: sn12, Lieu: etage1 (Utilisateur: employe anonyme))\n• cd13 - Statut: affecte (Série: sn13, Lieu: etage1 (Utilisateur: gestionnaire bureau))\n\n**Matériel bureautique :**\n• ADD/INFO/01094 - Statut: affecte (Lieu: etage2 (Utilisateur: gestionnaire bureau))",
+      "processing_time": 0.003327,
+      "confidence": 90,
+      "method": "intent_handler",
+      "quality_score": 82,
+      "success": true
+    },
+    {
+      "question": "Résumé par type (PC, serveur, imprimante) avec nombre total, livrés et affectés",
+      "response": "Je peux analyser :\n• Les fournisseurs les plus actifs\n• Les taux de livraison\n• Les statistiques du matériel\n\nPrécisez votre demande.",
+      "processing_time": 7.5e-05,
+      "confidence": 60,
+      "method": "intent_handler",
+      "quality_score": 60,
+      "success": false
+    }
+  ]
+}

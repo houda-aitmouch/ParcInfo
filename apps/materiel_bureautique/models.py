@@ -15,6 +15,7 @@ class MaterielBureau(models.Model):
         max_length=50,
         choices=[
             ('Opérationnel', 'Opérationnel'),
+            ('affecte', 'Affecté'),
             ('Réparation', 'Réparation'),
             ('Réforme', 'Réforme'),
         ],

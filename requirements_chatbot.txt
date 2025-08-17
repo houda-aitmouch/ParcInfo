@@ -1,0 +1,22 @@
+# Chatbot Core Dependencies
+django>=3.2,<5.0
+pgvector>=0.2.0
+
+# NLP and Embeddings (Optional - for advanced features)
+sentence-transformers>=2.2.0
+
+# Fuzzy Matching
+rapidfuzz>=3.0.0
+
+# HTTP Client for LLM
+requests>=2.25.0
+
+# Environment Variables
+python-dotenv>=0.19.0
+
+# Development and Testing
+pytest>=6.0.0
+pytest-django>=4.0.0
+
+# Optional: For advanced LLM features
+# ollama>=0.1.0  # If using Ollama Python client

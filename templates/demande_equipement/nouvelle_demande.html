@@ -29,6 +29,9 @@
             margin: 0;
             padding: 0;
         }
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="form-bg">
@@ -43,7 +46,7 @@
             </div>
 
             <!-- Formulaire -->
-            <div class="form-card rounded-2xl shadow-xl p-8" x-data="demandeForm()">
+            <div class="form-card rounded-2xl shadow-xl p-8" x-data="demandeForm()" x-init="console.log('Form initialized');">
                 <!-- Affichage des erreurs générales -->
                 {% if form.non_field_errors %}
                     <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -160,7 +163,34 @@
                         </div>
                     </div>
 
-
+                    <!-- Section Fourniture (conditionnelle) -->
+                    <div class="mb-8" 
+                         x-show="showFournitureField" 
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform -translate-y-4"
+                         x-transition:enter-end="opacity-100 transform translate-y-0">
+                        
+                        <!-- Sélection de Fourniture -->
+                        <div class="flex items-end space-x-4">
+                            <div class="flex-1">
+                                <label for="{{ form.fourniture.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Fourniture *
+                                </label>
+                                {{ form.fourniture }}
+                                {% if form.fourniture.errors %}
+                                    <p class="text-red-500 text-sm mt-1">{{ form.fourniture.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <button type="button" 
+                                    @click="openAddFournitureModal()"
+                                    class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center space-x-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                <span>Ajouter</span>
+                            </button>
+                        </div>
+                    </div>
 
                     <!-- Boutons -->
                     <div class="flex justify-end space-x-4">
@@ -178,6 +208,115 @@
         </div>
     </div>
 
+    <!-- Modal Ajouter Fourniture -->
+    <div x-data="{ 
+        showAddFournitureModal: false, 
+        newFourniture: { nom: '', numero_serie: '', type: '' },
+        init() {
+            document.addEventListener('openFournitureModal', (e) => {
+                // Réinitialiser les champs
+                this.newFourniture = {
+                    nom: '',
+                    numero_serie: '',
+                    type: e.detail.categorie === 'informatique' ? 'informatique' : 'bureautique'
+                };
+                this.showAddFournitureModal = true;
+            });
+        },
+        async addFourniture() {
+            try {
+                const formData = new FormData();
+                formData.append('nom', this.newFourniture.nom);
+                formData.append('numero_serie', this.newFourniture.numero_serie);
+                formData.append('type', this.newFourniture.type);
+                
+                const response = await fetch('{% url "demande_equipement:ajouter_fourniture" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Ajouter la nouvelle fourniture à la liste
+                    const fournitureSelect = document.getElementById('id_fourniture');
+                    const optionElement = document.createElement('option');
+                    optionElement.value = data.fourniture.id;
+                    optionElement.textContent = `${data.fourniture.nom} (${data.fourniture.numero_serie})`;
+                    fournitureSelect.appendChild(optionElement);
+                    
+                    // Sélectionner automatiquement la nouvelle fourniture
+                    fournitureSelect.value = data.fourniture.id;
+                    
+                    // Fermer le modal et réinitialiser les champs
+                    this.showAddFournitureModal = false;
+                    this.newFourniture = { nom: '', numero_serie: '', type: '' };
+                    
+                    alert('Fourniture ajoutée avec succès !');
+                } else {
+                    alert('Erreur: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Erreur lors de l\'ajout de la fourniture:', error);
+                alert('Erreur lors de l\'ajout de la fourniture');
+            }
+        }
+    }"
+         x-show="showAddFournitureModal" 
+         x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 z-[9999]"
+         @click.away="showAddFournitureModal = false">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Ajouter une nouvelle fourniture</h3>
+                <form @submit.prevent="addFourniture()">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nom de la fourniture *</label>
+                        <input type="text" 
+                               x-model="newFourniture.nom" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                               required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Numéro de série *</label>
+                        <input type="text" 
+                               x-model="newFourniture.numero_serie" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                               required>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Type *</label>
+                        <input type="text" 
+                               x-model="newFourniture.type" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                               readonly>
+                        <p class="text-sm text-gray-500 mt-1">Type automatiquement défini selon la catégorie sélectionnée</p>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" 
+                                @click="showAddFournitureModal = false"
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Annuler
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                            Ajouter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         function demandeForm() {
             return {
@@ -185,8 +324,10 @@
                 typeArticle: '',
                 typeDemande: '',
                 showDesignationFields: false,
+                showFournitureField: false,
                 
                 init() {
+                    console.log('Initializing form...');
                     // Initialiser les valeurs depuis les champs
                     const categorieSelect = document.getElementById('id_categorie');
                     const typeArticleSelect = document.getElementById('id_type_article');
@@ -195,6 +336,8 @@
                     if (categorieSelect) this.categorie = categorieSelect.value;
                     if (typeArticleSelect) this.typeArticle = typeArticleSelect.value;
                     if (typeDemandeSelect) this.typeDemande = typeDemandeSelect.value;
+                    
+                    
                     
                     this.updateForm();
                     
@@ -262,6 +405,7 @@
                     
                     // Afficher/masquer les champs de désignation
                     this.showDesignationFields = this.typeArticle === 'materiel';
+                    this.showFournitureField = this.typeArticle === 'fourniture';
                     
                     // Vider les champs de désignation et description quand la catégorie change
                     if (this.showDesignationFields) {
@@ -271,6 +415,11 @@
                     // Charger les désignations selon la catégorie
                     if (this.categorie && this.showDesignationFields) {
                         this.loadDesignations();
+                    }
+                    
+                    // Charger les fournitures selon la catégorie
+                    if (this.categorie && this.showFournitureField) {
+                        this.loadFournitures();
                     }
                     
                     // Mettre à jour les types de demande pour les fournitures
@@ -311,15 +460,26 @@
                     typeArticleSelect.innerHTML = '';
                     
                     if (this.categorie === 'informatique') {
-                        // Pour informatique : seulement Matériel
-                        const option = document.createElement('option');
-                        option.value = 'materiel';
-                        option.textContent = 'Matériel';
-                        typeArticleSelect.appendChild(option);
+                        // Pour informatique : Matériel et Fourniture
+                        const optionMateriel = document.createElement('option');
+                        optionMateriel.value = 'materiel';
+                        optionMateriel.textContent = 'Matériel';
+                        typeArticleSelect.appendChild(optionMateriel);
                         
-                        // Forcer la sélection sur "materiel"
-                        typeArticleSelect.value = 'materiel';
-                        this.typeArticle = 'materiel';
+                        const optionFourniture = document.createElement('option');
+                        optionFourniture.value = 'fourniture';
+                        optionFourniture.textContent = 'Fourniture';
+                        typeArticleSelect.appendChild(optionFourniture);
+                        
+                        // Restaurer la valeur précédente si elle était valide
+                        if (currentValue === 'fourniture' || currentValue === 'materiel') {
+                            typeArticleSelect.value = currentValue;
+                            this.typeArticle = currentValue;
+                        } else {
+                            // Par défaut, sélectionner "materiel"
+                            typeArticleSelect.value = 'materiel';
+                            this.typeArticle = 'materiel';
+                        }
                     } else if (this.categorie === 'bureau') {
                         // Pour bureau : Matériel et Fourniture
                         const optionMateriel = document.createElement('option');
@@ -400,6 +560,44 @@
                         select.appendChild(optionElement);
                     });
                 },
+                
+                async loadFournitures() {
+                    try {
+                        console.log('Chargement des fournitures pour:', this.categorie);
+                        const response = await fetch(`{% url 'demande_equipement:get_fournitures' %}?categorie=${this.categorie}`);
+                        const data = await response.json();
+                        console.log('Fournitures reçues:', data);
+                        
+                        this.populateFournitureSelect(data.fournitures);
+                    } catch (error) {
+                        console.error('Erreur lors du chargement des fournitures:', error);
+                    }
+                },
+                
+                populateFournitureSelect(fournitures) {
+                    const select = document.getElementById('id_fourniture');
+                    select.innerHTML = '<option value="">---------</option>';
+                    
+                    fournitures.forEach(fourniture => {
+                        const optionElement = document.createElement('option');
+                        optionElement.value = fourniture.id;
+                        optionElement.textContent = `${fourniture.nom} (${fourniture.numero_serie})`;
+                        select.appendChild(optionElement);
+                    });
+                },
+                
+                openAddFournitureModal() {
+                    console.log('Opening modal...');
+                    // Déclencher un événement personnalisé pour ouvrir le modal
+                    const event = new CustomEvent('openFournitureModal', {
+                        detail: {
+                            categorie: this.categorie
+                        }
+                    });
+                    document.dispatchEvent(event);
+                },
+                
+
                 
                 validateForm(event) {
                     // Validation côté client - temporairement désactivée pour debug

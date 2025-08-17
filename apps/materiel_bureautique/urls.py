@@ -10,6 +10,7 @@ urlpatterns = [
     path('modifier/<int:pk>/', views.modifier_materiel, name='modifier_materiel'),
     path('supprimer/<int:pk>/', views.supprimer_materiel, name='supprimer_materiel'),
     path('export-excel/', views.export_materiels_excel, name='export_excel'),
+    path('mes-equipements/', views.mes_equipements_bureautiques, name='mes_equipements_bureautiques'),
     # URLs API
     path('api/lignes-commande/<int:commande_id>/', views.lignes_commande_par_commande, name='lignes_commande_par_commande'),
 ] 

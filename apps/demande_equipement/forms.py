@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import DemandeEquipement
+from .models import DemandeEquipement, Fourniture
 from apps.commande_informatique.models import Designation as DesignationInfo, Description as DescriptionInfo
 from apps.commande_bureau.models import DesignationBureau, DescriptionBureau
 
@@ -36,7 +36,8 @@ class DemandeEquipementForm(forms.ModelForm):
         fields = [
             'categorie', 'type_article', 'type_demande', 
             'designation_info', 'description_info',
-            'designation_bureau', 'description_bureau'
+            'designation_bureau', 'description_bureau',
+            'fourniture'
         ]
         widgets = {
             'designation_info': forms.Select(attrs={
@@ -55,6 +56,10 @@ class DemandeEquipementForm(forms.ModelForm):
                 'class': 'form-select block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500',
                 'id': 'id_description_bureau'
             }),
+            'fourniture': forms.Select(attrs={
+                'class': 'form-select block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500',
+                'id': 'id_fourniture'
+            }),
         }
     
     def __init__(self, *args, **kwargs):
@@ -69,6 +74,7 @@ class DemandeEquipementForm(forms.ModelForm):
         self.fields['description_info'].widget.attrs['class'] += ' conditional-field'
         self.fields['designation_bureau'].widget.attrs['class'] += ' conditional-field'
         self.fields['description_bureau'].widget.attrs['class'] += ' conditional-field'
+        self.fields['fourniture'].widget.attrs['class'] += ' conditional-field'
     
     def clean(self):
         cleaned_data = super().clean()
@@ -81,6 +87,10 @@ class DemandeEquipementForm(forms.ModelForm):
             if type_demande != 'nouveau':
                 raise ValidationError("Pour les fournitures, le type de demande doit être 'Nouveau'")
             
+            # Vérifier que une fourniture est sélectionnée
+            if not cleaned_data.get('fourniture'):
+                raise ValidationError("La sélection d'une fourniture est obligatoire")
+            
             # Vider les champs de désignation/description pour les fournitures
             cleaned_data['designation_info'] = None
             cleaned_data['description_info'] = None
@@ -89,6 +99,9 @@ class DemandeEquipementForm(forms.ModelForm):
         
         # Validation pour les matériels
         elif type_article == 'materiel':
+            # Vider le champ fourniture pour les matériels
+            cleaned_data['fourniture'] = None
+            
             if categorie == 'informatique':
                 if not cleaned_data.get('designation_info'):
                     raise ValidationError("La désignation est obligatoire pour les matériels informatiques")

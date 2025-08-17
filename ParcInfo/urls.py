@@ -3,6 +3,9 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+# Ajoutez cette route si vous avez besoin d'un service worker
+from django.views.generic import TemplateView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
@@ -15,7 +18,11 @@ urlpatterns = [
     path('materiels-bureau/', include('apps.materiel_bureautique.urls', namespace='materiel_bureautique')),
     path('demandes/', include('apps.demande_equipement.urls', namespace='demande_equipement')),
     path('livraisons/', include('apps.livraison.urls', namespace='livraison')),
-    path('chatbot/', include('apps.chatbot.urls', namespace='chatbot')),
+    path('chatbot/', include('apps.chatbot.urls')),  #
+    path('sw.js', TemplateView.as_view(
+        template_name='sw.js',
+        content_type='application/javascript'
+    )),
 ]
 
 if settings.DEBUG:

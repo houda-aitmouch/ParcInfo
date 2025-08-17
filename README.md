@@ -2,7 +2,7 @@
 
 ## 🎯 **Description**
 
-ParcInfo est une application web Django pour la gestion complète du parc informatique d'une entreprise. Elle permet de gérer les demandes d'équipement, les décharges électroniques, et l'archivage automatique des documents.
+ParcInfo est une application web Django pour la gestion complète du parc informatique d'une entreprise. Elle permet de gérer les demandes d'équipement, les décharges électroniques, et l'archivage automatique des documents. **Nouveau : Assistant IA intégré avec LLaMA 3 !**
 
 ## ✨ **Fonctionnalités Principales**
 
@@ -17,6 +17,15 @@ ParcInfo est une application web Django pour la gestion complète du parc inform
 - ✅ Signature électronique par canvas HTML5
 - ✅ Archivage automatique des décharges signées
 - ✅ Interface unifiée de consultation des archives
+
+### 🤖 **Assistant IA LLaMA 3**
+- ✅ Chatbot intelligent avec LLaMA 3
+- ✅ Réponses contextuelles basées sur les données système
+- ✅ Support NLP avancé pour questions naturelles
+- ✅ Mode fallback si LLaMA 3 indisponible
+- ✅ Adaptation au rôle utilisateur
+- ✅ Historique des conversations
+- ✅ Insights d'apprentissage
 
 ### 👥 **Gestion des Utilisateurs**
 - ✅ Authentification sécurisée
@@ -35,6 +44,7 @@ ParcInfo est une application web Django pour la gestion complète du parc inform
 - Python 3.8+
 - PostgreSQL
 - pip
+- (Optionnel) Modèle LLaMA 3 pour le chatbot IA
 
 ### **Installation Rapide**
 ```bash
@@ -42,26 +52,32 @@ ParcInfo est une application web Django pour la gestion complète du parc inform
 git clone <repository-url>
 cd ParcInfo
 
-# 2. Créer l'environnement virtuel
+# 2. Configuration automatique
+python scripts/setup_project.py
+
+# 3. Créer l'environnement virtuel
 python -m venv .venv
 source .venv/bin/activate  # Linux/Mac
 # ou
 .venv\Scripts\activate  # Windows
 
-# 3. Installer les dépendances
+# 4. Installer les dépendances
 pip install -r requirements.txt
 
-# 4. Configuration de la base de données
-# Modifier settings.py avec vos paramètres DB
+# 5. Configurer les variables d'environnement
+# Modifiez le fichier .env avec vos paramètres
 
-# 5. Migrations
+# 6. Migrations
 python manage.py makemigrations
 python manage.py migrate
 
-# 6. Créer un super utilisateur
+# 7. Créer un super utilisateur
 python manage.py createsuperuser
 
-# 7. Lancer le serveur
+# 8. (Optionnel) Télécharger LLaMA 3 pour le chatbot
+# Placez le modèle dans models/llama-3-8b-instruct.gguf
+
+# 9. Lancer le serveur
 python manage.py runserver
 ```
 
@@ -88,6 +104,24 @@ DATABASES = {
 DEBUG=False
 SECRET_KEY=votre_clé_secrète
 ALLOWED_HOSTS=votre-domaine.com
+
+# Configuration Chatbot LLaMA 3
+LLAMA_MODEL_PATH=models/llama-3-8b-instruct.gguf
+```
+
+### **Configuration LLaMA 3 (Optionnel)**
+```bash
+# 1. Télécharger le modèle depuis HuggingFace
+# https://huggingface.co/TheBloke/Llama-3-8B-Instruct-GGUF
+
+# 2. Créer le dossier models/
+mkdir models
+
+# 3. Placer le fichier .gguf dans models/
+# Exemple: models/llama-3-8b-instruct.gguf
+
+# 4. Le chatbot utilisera automatiquement LLaMA 3
+# Sinon, il fonctionnera en mode fallback
 ```
 
 ## 📁 **Structure du Projet**
@@ -101,13 +135,41 @@ ParcInfo/
 │   ├── materiel_informatique/  # Matériel informatique
 │   ├── materiel_bureautique/   # Matériel de bureau
 │   ├── commande_informatique/  # Commandes informatique
-│   └── commande_bureau/        # Commandes bureau
+│   ├── commande_bureau/        # Commandes bureau
+│   ├── livraison/              # Gestion des livraisons
+│   └── chatbot/                # Assistant IA LLaMA 3
+├── models/                     # Modèles LLaMA 3 (optionnel)
 ├── templates/                  # Templates HTML
 ├── static/                     # Fichiers statiques
 ├── media/                      # Fichiers uploadés
 ├── docs/                       # Documentation
 └── scripts/                    # Scripts utilitaires
 ```
+
+## 🤖 **Assistant IA LLaMA 3**
+
+### **Fonctionnalités**
+- **Réponses intelligentes** : Utilise LLaMA 3 pour comprendre et répondre aux questions
+- **Contexte système** : Accède aux données en temps réel (demandes, matériel, etc.)
+- **Adaptation rôle** : Réponses personnalisées selon le rôle utilisateur
+- **Mode fallback** : Fonctionne même sans LLaMA 3
+- **Interface moderne** : Chat en temps réel avec historique
+
+### **Exemples de Questions**
+```
+"Comment faire une demande d'équipement ?"
+"Quel est le statut de mes demandes ?"
+"Comment gérer le matériel informatique ?"
+"Quels sont les processus de livraison ?"
+"Comment optimiser la gestion du parc ?"
+"Quelles sont les règles d'approbation ?"
+```
+
+### **Accès**
+- **URL** : `/chatbot/`
+- **Permissions** : Tous les utilisateurs connectés
+- **Historique** : `/chatbot/history/`
+- **Aide** : `/chatbot/help/`
 
 ## 🔧 **Commandes Utiles**
 
@@ -169,6 +231,7 @@ python manage.py cleanup_old_files
 - Décharges signées
 - Archives créées
 - Temps de réponse moyen
+- Interactions chatbot IA
 
 ### **Logs**
 - Logs d'application dans `logs/parcinfo.log`
@@ -251,6 +314,8 @@ sudo certbot --nginx -d votre-domaine.com
 
 ---
 
-**Version :** 1.0.0  
+**Version :** 1.1.0  
 **Dernière mise à jour :** 31/07/2025  
 **Développé avec ❤️ pour votre entreprise**
+
+**Nouveau : Assistant IA LLaMA 3 intégré ! 🤖**

@@ -17,6 +17,8 @@ urlpatterns = [
     # APIs pour les champs dépendants
     path('api/designations/', views.get_designations, name='get_designations'),
     path('api/descriptions/', views.get_descriptions, name='get_descriptions'),
+    path('api/fournitures/', views.get_fournitures, name='get_fournitures'),
+    path('api/ajouter-fourniture/', views.ajouter_fourniture, name='ajouter_fourniture'),
     
     # Signature de décharge
     path('signer-decharge/<int:pk>/', views.signer_decharge, name='signer_decharge'),

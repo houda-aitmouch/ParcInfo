@@ -1,0 +1,44 @@
+[server]
+# Port par défaut
+port = 8501
+
+# Adresse d'écoute
+address = "localhost"
+
+# Mode headless pour la production
+headless = true
+
+# Nombre maximum de threads
+maxUploadSize = 200
+
+# Timeout des requêtes
+enableCORS = false
+enableXsrfProtection = false
+
+[browser]
+# Ouvrir automatiquement le navigateur
+gatherUsageStats = false
+
+[theme]
+# Thème personnalisé
+primaryColor = "#60a5fa"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f8fafc"
+textColor = "#1e293b"
+font = "Inter"
+
+[client]
+# Optimisations client
+showErrorDetails = false
+toolbarMode = "minimal"
+
+[runner]
+# Optimisations du runner
+magicEnabled = false
+installTracer = false
+fixMatplotlib = true
+
+[logger]
+# Configuration des logs
+level = "info"
+messageFormat = "%(asctime)s %(message)s"

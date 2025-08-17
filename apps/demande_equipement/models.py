@@ -68,6 +68,16 @@ class DemandeEquipement(models.Model):
         related_name='demandes_bureau'
     )
     
+    # Fourniture (pour fourniture uniquement)
+    fourniture = models.ForeignKey(
+        'Fourniture',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='demandes_fourniture',
+        verbose_name="Fourniture demandée"
+    )
+    
     # Dates
     date_approbation = models.DateTimeField(null=True, blank=True)
     date_affectation = models.DateTimeField(null=True, blank=True)
@@ -114,15 +124,19 @@ class DemandeEquipement(models.Model):
         if self.type_article == 'fourniture' and self.type_demande != 'nouveau':
             raise ValidationError("Pour les fournitures, le type de demande doit être 'Nouveau'")
         
-        # Pour les fournitures, pas de désignation/description
+        # Pour les fournitures, fourniture obligatoire et pas de désignation/description
         if self.type_article == 'fourniture':
+            if not self.fourniture:
+                raise ValidationError("Pour les fournitures, la sélection d'une fourniture est obligatoire")
             if self.designation_info or self.description_info or self.designation_bureau or self.description_bureau:
                 raise ValidationError("Les fournitures ne doivent pas avoir de désignation ou description")
         
-        # Pour les matériels, désignation et description obligatoires
+        # Pour les matériels, désignation et description obligatoires, pas de fourniture
         if self.type_article == 'materiel':
             if not self.designation or not self.description:
                 raise ValidationError("Pour les matériels, la désignation et la description sont obligatoires")
+            if self.fourniture:
+                raise ValidationError("Les matériels ne doivent pas avoir de fourniture sélectionnée")
 
 class ArchiveDecharge(models.Model):
     """Modèle pour l'archivage électronique des décharges signées"""
@@ -161,3 +175,35 @@ class ArchiveDecharge(models.Model):
             ).count() + 1
             self.numero_archive = f'ARCH-{date_str}-{count:04d}'
         super().save(*args, **kwargs)
+
+
+class Fourniture(models.Model):
+    """Modèle pour gérer les fournitures informatiques et bureautiques"""
+    TYPE_CHOICES = [
+        ('informatique', 'Informatique'),
+        ('bureautique', 'Bureautique'),
+    ]
+    
+    nom = models.CharField(max_length=200, verbose_name="Nom de la fourniture")
+    numero_serie = models.CharField(max_length=100, unique=True, verbose_name="Numéro de série")
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, verbose_name="Type de fourniture")
+    date_creation = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+    date_modification = models.DateTimeField(auto_now=True, verbose_name="Date de modification")
+    actif = models.BooleanField(default=True, verbose_name="Actif")
+    
+    class Meta:
+        verbose_name = "Fourniture"
+        verbose_name_plural = "Fournitures"
+        ordering = ['nom']
+    
+    def __str__(self):
+        return f"{self.nom} - {self.numero_serie}"
+    
+    @classmethod
+    def get_by_categorie(cls, categorie):
+        """Retourne les fournitures selon la catégorie (informatique/bureau)"""
+        if categorie == 'informatique':
+            return cls.objects.filter(type='informatique', actif=True)
+        elif categorie == 'bureau':
+            return cls.objects.filter(type='bureautique', actif=True)
+        return cls.objects.none()

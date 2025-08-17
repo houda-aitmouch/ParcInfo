@@ -787,3 +787,52 @@ def telecharger_archive(request, archive_id):
     response = HttpResponse(archive.fichier_pdf, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="archive_{archive.numero_archive}.pdf"'
     return response
+
+
+@login_required
+@require_http_methods(["GET"])
+def get_fournitures(request):
+    """API pour récupérer les fournitures selon la catégorie"""
+    from .models import Fourniture
+    
+    categorie = request.GET.get('categorie')
+    fournitures = Fourniture.get_by_categorie(categorie).values('id', 'nom', 'numero_serie')
+    
+    return JsonResponse({'fournitures': list(fournitures)})
+
+
+@login_required
+@require_http_methods(["POST"])
+def ajouter_fourniture(request):
+    """API pour ajouter une nouvelle fourniture"""
+    from .models import Fourniture
+    from django.core.exceptions import ValidationError
+    
+    try:
+        nom = request.POST.get('nom')
+        numero_serie = request.POST.get('numero_serie')
+        type_fourniture = request.POST.get('type')
+        
+        if not nom or not numero_serie or not type_fourniture:
+            return JsonResponse({'success': False, 'error': 'Tous les champs sont obligatoires'})
+        
+        # Créer la nouvelle fourniture
+        fourniture = Fourniture.objects.create(
+            nom=nom,
+            numero_serie=numero_serie,
+            type=type_fourniture
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'fourniture': {
+                'id': fourniture.id,
+                'nom': fourniture.nom,
+                'numero_serie': fourniture.numero_serie
+            }
+        })
+        
+    except ValidationError as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'Erreur lors de la création de la fourniture'})

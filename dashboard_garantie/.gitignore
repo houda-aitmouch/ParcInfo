@@ -1,0 +1,37 @@
+# Fichiers de configuration locaux
+.env
+*.env
+
+# Fichiers de cache Streamlit
+.streamlit/secrets.toml
+
+# Fichiers temporaires
+*.tmp
+*.temp
+*.log
+
+# Fichiers de données de test (optionnel)
+demo_data_*.json
+test_data_*.csv
+
+# Fichiers de sauvegarde
+*.bak
+*.backup
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Fichiers Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so

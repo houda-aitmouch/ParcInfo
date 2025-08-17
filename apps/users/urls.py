@@ -13,5 +13,6 @@ urlpatterns = [
     path('gestionnaire_bureau/', views.gestionnaire_bureau_dashboard, name='gestionnaire_bureau_dashboard'),
     path('employe/', views.employe_dashboard, name='employe_dashboard'),
     path('logout/', custom_logout_view, name='logout'),
-    path("profil/", views.profile_view, name="profil"),
+    path('profil/', views.profil, name='profil'),
+    path('dashboard-garantie/', views.dashboard_garantie, name='dashboard_garantie'),
 ]

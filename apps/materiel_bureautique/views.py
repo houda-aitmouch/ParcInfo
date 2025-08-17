@@ -8,6 +8,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 
 def is_gestionnaire_ou_superadmin(user):
     return user.groups.filter(name__in=['Gestionnaire Bureau', 'Super Admin']).exists()
@@ -16,8 +17,34 @@ def is_gestionnaire_ou_superadmin(user):
 def liste_materiels(request):
     if not is_gestionnaire_ou_superadmin(request.user):
         raise PermissionDenied
-    materiels = MaterielBureau.objects.all()
-    return render(request, 'materiel_bureautique/liste_materiels.html', {'materiels': materiels})
+    
+    # Récupérer tous les matériels avec leurs informations liées
+    materiels = MaterielBureau.objects.select_related(
+        'utilisateur', 
+        'ligne_commande__designation', 
+        'ligne_commande__description',
+        'commande__fournisseur'
+    ).all()
+    
+    # Compter par statut
+    stats = {}
+    for materiel in materiels:
+        statut = materiel.statut
+        if statut not in stats:
+            stats[statut] = 0
+        stats[statut] += 1
+    
+    # Compter les matériels affectés (avec utilisateur)
+    materiels_affectes = materiels.filter(utilisateur__isnull=False).count()
+    
+    context = {
+        'materiels': materiels,
+        'stats': stats,
+        'materiels_affectes': materiels_affectes,
+        'total_materiels': materiels.count()
+    }
+    
+    return render(request, 'materiel_bureautique/liste_materiels.html', context)
 
 def ajouter_materiel(request):
     if not is_gestionnaire_ou_superadmin(request.user):
@@ -184,3 +211,8 @@ def export_materiels_excel(request):
     response['Content-Disposition'] = 'attachment; filename=liste_materiels_bureau.xlsx'
     wb.save(response)
     return response
+
+@login_required
+def mes_equipements_bureautiques(request):
+    equipements = MaterielBureau.objects.filter(utilisateur=request.user, statut='affecte')
+    return render(request, 'materiel_bureautique/mes_equipements_bureautiques.html', {'equipements': equipements})
