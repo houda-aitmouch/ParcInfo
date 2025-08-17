@@ -204,3 +204,15 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# AI Models and cache
+models_cache/
+storage/
+*.jsonl
+logs/
+
+# Large data files
+export_all_tables.json
+export_all_tables.txt
+improved_chatbot_test_*.json
+progressive_questions_test_*.json
