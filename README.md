@@ -1,102 +1,200 @@
-# 📚 ParcInfo - Gestion de Parc Informatique
+# 🚀 ParcInfo - Gestion Intelligente de Parc Informatique
 
 ## 🎯 **Description**
 
-ParcInfo est une application web Django pour la gestion complète du parc informatique d'une entreprise. Elle permet de gérer les demandes d'équipement, les décharges électroniques, et l'archivage automatique des documents. **Nouveau : Assistant IA intégré avec LLaMA 3 !**
+ParcInfo est une application web Django moderne et intelligente pour la gestion complète du parc informatique d'une entreprise. Elle intègre un **chatbot IA avancé**, des **dashboards interactifs**, et une **gestion automatisée** des équipements, demandes et livraisons.
 
-## ✨ **Fonctionnalités Principales**
+**✨ Nouvelles fonctionnalités : Assistant IA avec RAG, Dashboard Streamlit, et interface moderne !**
 
-### 🔧 **Gestion des Demandes**
-- ✅ Création de demandes d'équipement (Informatique/Bureau)
-- ✅ Approbation par les gestionnaires
-- ✅ Suivi des statuts (En attente, Approuvée, Refusée)
-- ✅ Gestion des matériels et fournitures
+## 🌟 **Fonctionnalités Principales**
 
-### 📄 **Décharges Électroniques**
-- ✅ Génération automatique de PDFs
-- ✅ Signature électronique par canvas HTML5
-- ✅ Archivage automatique des décharges signées
-- ✅ Interface unifiée de consultation des archives
+### 🤖 **Assistant IA Intelligent (RAG)**
+- ✅ **Chatbot IA avancé** avec recherche sémantique
+- ✅ **Système RAG** (Retrieval-Augmented Generation) intégré
+- ✅ **Vectorisation automatique** des modèles et documents
+- ✅ **Réponses contextuelles** basées sur les données système
+- ✅ **Support multilingue** et traitement naturel du langage
+- ✅ **Historique des conversations** et apprentissage continu
+- ✅ **Interface moderne** avec design responsive
 
-### 🤖 **Assistant IA LLaMA 3**
-- ✅ Chatbot intelligent avec LLaMA 3
-- ✅ Réponses contextuelles basées sur les données système
-- ✅ Support NLP avancé pour questions naturelles
-- ✅ Mode fallback si LLaMA 3 indisponible
-- ✅ Adaptation au rôle utilisateur
-- ✅ Historique des conversations
-- ✅ Insights d'apprentissage
+### 📊 **Dashboards Interactifs**
+- ✅ **Dashboard principal** avec métriques en temps réel
+- ✅ **Dashboard de garantie** pour suivi des équipements
+- ✅ **Interface Streamlit** pour analyses avancées
+- ✅ **Graphiques interactifs** et visualisations
+- ✅ **Filtres dynamiques** et export de données
 
-### 👥 **Gestion des Utilisateurs**
-- ✅ Authentification sécurisée
-- ✅ Rôles : Employé, Gestionnaire Informatique, Gestionnaire Bureau, Super Admin
-- ✅ Permissions automatiques selon les catégories
+### 🔧 **Gestion des Demandes & Équipements**
+- ✅ **Demandes d'équipement** (Informatique/Bureau)
+- ✅ **Système d'approbation** par gestionnaires
+- ✅ **Suivi des statuts** en temps réel
+- ✅ **Gestion des matériels** avec codes d'inventaire
+- ✅ **Fournitures et consommables** intégrés
 
-### 📊 **Archives et Rapports**
-- ✅ Archivage électronique automatique
-- ✅ Export Excel des archives
-- ✅ Filtrage par catégorie, type, dates
-- ✅ Statistiques en temps réel
+### 📄 **Décharges & Archives**
+- ✅ **Génération automatique de PDFs**
+- ✅ **Signature électronique** par canvas HTML5
+- ✅ **Archivage automatique** des documents signés
+- ✅ **Interface unifiée** de consultation des archives
+- ✅ **Export Excel** et filtrage avancé
 
-## 🚀 **Installation**
+### 👥 **Gestion des Utilisateurs & Permissions**
+- ✅ **Authentification sécurisée** avec sessions
+- ✅ **Rôles personnalisés** : Employé, Gestionnaire, Super Admin
+- ✅ **Système de permissions** granulaire
+- ✅ **Profils utilisateurs** avec équipements assignés
+
+### 🚚 **Logistique & Livraisons**
+- ✅ **Gestion des fournisseurs** et commandes
+- ✅ **Suivi des livraisons** avec validation
+- ✅ **Processus de réception** automatisé
+- ✅ **Rapports de livraison** et statistiques
+
+## 🚀 **Installation Rapide**
 
 ### **Prérequis**
 - Python 3.8+
-- PostgreSQL
+- PostgreSQL ou SQLite
 - pip
-- (Optionnel) Modèle LLaMA 3 pour le chatbot IA
+- Node.js (pour Tailwind CSS)
 
-### **Installation Rapide**
+### **Installation Automatique**
 ```bash
 # 1. Cloner le projet
-git clone <repository-url>
+git clone https://github.com/houda-aitmouch/ParcInfo.git
 cd ParcInfo
 
-# 2. Configuration automatique
-python scripts/setup_project.py
+# 2. Script de démarrage automatique
+chmod +x startup_parcinfo.sh
+./startup_parcinfo.sh
 
-# 3. Créer l'environnement virtuel
-python -m venv .venv
-source .venv/bin/activate  # Linux/Mac
-# ou
-.venv\Scripts\activate  # Windows
+# 3. Ou installation manuelle :
+python -m venv env
+source env/bin/activate  # Linux/Mac
+# env\Scripts\activate  # Windows
 
-# 4. Installer les dépendances
 pip install -r requirements.txt
+pip install -r requirements_chatbot.txt
+pip install -r requirements_dashboard.txt
 
-# 5. Configurer les variables d'environnement
-# Modifiez le fichier .env avec vos paramètres
+# 4. Configuration
+cp .env.example .env
+# Modifiez .env avec vos paramètres
 
-# 6. Migrations
+# 5. Base de données
 python manage.py makemigrations
 python manage.py migrate
+python manage.py setup_permissions
 
-# 7. Créer un super utilisateur
+# 6. Super utilisateur
 python manage.py createsuperuser
 
-# 8. (Optionnel) Télécharger LLaMA 3 pour le chatbot
-# Placez le modèle dans models/llama-3-8b-instruct.gguf
-
-# 9. Lancer le serveur
+# 7. Lancer l'application
 python manage.py runserver
 ```
 
-## ⚙️ **Configuration**
+## 🎨 **Interface & Design**
 
-### **Base de Données**
-```python
-# settings.py
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'parcinfo_db',
-        'USER': 'votre_utilisateur',
-        'PASSWORD': 'votre_mot_de_passe',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
+### **Technologies Frontend**
+- **Tailwind CSS** pour un design moderne et responsive
+- **Alpine.js** pour l'interactivité
+- **Templates Django** optimisés
+- **Interface mobile-first** et accessible
+
+### **Thèmes & Personnalisation**
+- **Thème sombre/clair** automatique
+- **Couleurs personnalisables** par application
+- **Composants réutilisables** et modulaires
+- **Animations fluides** et transitions
+
+## 🤖 **Assistant IA RAG**
+
+### **Fonctionnalités Avancées**
+- **Recherche sémantique** dans les modèles et documents
+- **Vectorisation automatique** des données
+- **Réponses contextuelles** basées sur l'historique
+- **Apprentissage continu** des interactions
+- **Support multilingue** (français, anglais, etc.)
+
+### **Commandes de Gestion**
+```bash
+# Vectoriser tous les modèles
+python manage.py vectorize_all_models
+
+# Peupler l'index RAG
+python manage.py populate_rag_index
+
+# Tester la connexion Ollama
+python manage.py test_ollama
 ```
+
+### **Exemples d'Utilisation**
+```
+"Comment créer une demande d'équipement informatique ?"
+"Quel est le statut de mes demandes en cours ?"
+"Comment gérer le matériel de bureau ?"
+"Quels sont les processus de livraison ?"
+"Comment optimiser la gestion du parc ?"
+```
+
+## 📊 **Dashboards & Analytics**
+
+### **Dashboard Principal**
+- **Métriques en temps réel** des demandes
+- **Statistiques des équipements** par catégorie
+- **Graphiques interactifs** des tendances
+- **Alertes et notifications** automatiques
+
+### **Dashboard de Garantie**
+- **Suivi des garanties** des équipements
+- **Alertes d'expiration** proche
+- **Historique des maintenances**
+- **Coûts et budgets** de remplacement
+
+### **Lancement des Dashboards**
+```bash
+# Dashboard principal
+python dashboard_garantie/dashboard_garantie.py
+
+# Dashboard simple
+python dashboard_garantie/dashboard_simple.py
+
+# Dashboard amélioré
+python dashboard_garantie/launch_improved_dashboard.py
+```
+
+## 📁 **Structure du Projet**
+
+```
+ParcInfo/
+├── apps/                          # Applications Django
+│   ├── chatbot/                   # Assistant IA RAG
+│   │   ├── core_chatbot.py       # Logique principale
+│   │   ├── rag_manager.py        # Gestion RAG
+│   │   ├── structured_search.py  # Recherche structurée
+│   │   └── management/           # Commandes de gestion
+│   ├── demande_equipement/       # Gestion des demandes
+│   ├── users/                    # Gestion des utilisateurs
+│   ├── fournisseurs/             # Gestion des fournisseurs
+│   ├── materiel_informatique/    # Matériel informatique
+│   ├── materiel_bureautique/     # Matériel de bureau
+│   ├── commande_informatique/    # Commandes informatique
+│   ├── commande_bureau/          # Commandes bureau
+│   └── livraison/                # Gestion des livraisons
+├── dashboard_garantie/           # Dashboards Streamlit
+├── templates/                    # Templates HTML
+├── static/                       # Fichiers statiques
+│   ├── css/                      # Styles Tailwind
+│   ├── js/                       # JavaScript
+│   └── images/                   # Images et icônes
+├── docs/                         # Documentation
+├── scripts/                      # Scripts utilitaires
+├── storage/                      # Stockage RAG (exclu de Git)
+├── models_cache/                 # Cache des modèles IA (exclu)
+└── logs/                         # Fichiers de logs (exclu)
+```
+
+## ⚙️ **Configuration Avancée**
 
 ### **Variables d'Environnement**
 ```bash
@@ -105,96 +203,57 @@ DEBUG=False
 SECRET_KEY=votre_clé_secrète
 ALLOWED_HOSTS=votre-domaine.com
 
-# Configuration Chatbot LLaMA 3
-LLAMA_MODEL_PATH=models/llama-3-8b-instruct.gguf
+# Configuration Chatbot IA
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=llama3.1:8b
+EMBEDDING_MODEL=paraphrase-multilingual-MiniLM-L12-v2
+
+# Base de données
+DATABASE_URL=postgresql://user:pass@localhost/parcinfo
 ```
 
-### **Configuration LLaMA 3 (Optionnel)**
-```bash
-# 1. Télécharger le modèle depuis HuggingFace
-# https://huggingface.co/TheBloke/Llama-3-8B-Instruct-GGUF
-
-# 2. Créer le dossier models/
-mkdir models
-
-# 3. Placer le fichier .gguf dans models/
-# Exemple: models/llama-3-8b-instruct.gguf
-
-# 4. Le chatbot utilisera automatiquement LLaMA 3
-# Sinon, il fonctionnera en mode fallback
+### **Configuration RAG**
+```python
+# settings.py
+RAG_SETTINGS = {
+    'vector_store_path': 'storage/',
+    'embedding_model': 'paraphrase-multilingual-MiniLM-L12-v2',
+    'chunk_size': 1000,
+    'chunk_overlap': 200,
+    'similarity_threshold': 0.7,
+}
 ```
-
-## 📁 **Structure du Projet**
-
-```
-ParcInfo/
-├── apps/
-│   ├── demande_equipement/     # Gestion des demandes
-│   ├── users/                  # Gestion des utilisateurs
-│   ├── fournisseurs/           # Gestion des fournisseurs
-│   ├── materiel_informatique/  # Matériel informatique
-│   ├── materiel_bureautique/   # Matériel de bureau
-│   ├── commande_informatique/  # Commandes informatique
-│   ├── commande_bureau/        # Commandes bureau
-│   ├── livraison/              # Gestion des livraisons
-│   └── chatbot/                # Assistant IA LLaMA 3
-├── models/                     # Modèles LLaMA 3 (optionnel)
-├── templates/                  # Templates HTML
-├── static/                     # Fichiers statiques
-├── media/                      # Fichiers uploadés
-├── docs/                       # Documentation
-└── scripts/                    # Scripts utilitaires
-```
-
-## 🤖 **Assistant IA LLaMA 3**
-
-### **Fonctionnalités**
-- **Réponses intelligentes** : Utilise LLaMA 3 pour comprendre et répondre aux questions
-- **Contexte système** : Accède aux données en temps réel (demandes, matériel, etc.)
-- **Adaptation rôle** : Réponses personnalisées selon le rôle utilisateur
-- **Mode fallback** : Fonctionne même sans LLaMA 3
-- **Interface moderne** : Chat en temps réel avec historique
-
-### **Exemples de Questions**
-```
-"Comment faire une demande d'équipement ?"
-"Quel est le statut de mes demandes ?"
-"Comment gérer le matériel informatique ?"
-"Quels sont les processus de livraison ?"
-"Comment optimiser la gestion du parc ?"
-"Quelles sont les règles d'approbation ?"
-```
-
-### **Accès**
-- **URL** : `/chatbot/`
-- **Permissions** : Tous les utilisateurs connectés
-- **Historique** : `/chatbot/history/`
-- **Aide** : `/chatbot/help/`
 
 ## 🔧 **Commandes Utiles**
 
-### **Sauvegarde**
+### **Gestion du Chatbot IA**
+```bash
+# Vectoriser les modèles
+python manage.py vectorize_all_models
+
+# Peupler l'index RAG
+python manage.py populate_rag_index
+
+# Tester la connexion Ollama
+python manage.py test_ollama
+
+# Analyser les performances
+python scripts/analyse_performances_chatbot.py
+```
+
+### **Maintenance & Sauvegarde**
 ```bash
 # Sauvegarde complète
 python manage.py backup_simple
 
-# Sauvegarde base de données seulement
-python manage.py backup_simple --db-only
-
-# Sauvegarde fichiers seulement
-python manage.py backup_simple --files-only
-```
-
-### **Archivage**
-```bash
-# Archiver toutes les demandes signées
+# Archivage automatique
 python manage.py archiver_demandes_signees
 
-# Mode test (dry-run)
-python manage.py archiver_demandes_signees --dry-run
+# Nettoyage des fournitures orphelines
+python manage.py nettoyer_fournitures_orphelines
 ```
 
-### **Maintenance**
+### **Développement**
 ```bash
 # Vérification du système
 python manage.py check
@@ -202,120 +261,109 @@ python manage.py check
 # Collecter les fichiers statiques
 python manage.py collectstatic
 
-# Nettoyer les anciens fichiers
-python manage.py cleanup_old_files
+# Compiler Tailwind CSS
+npx tailwindcss -i ./src/input.css -o ./static/css/tailwind.css --watch
 ```
-
-## 🔐 **Sécurité**
-
-### **Authentification**
-- Sessions sécurisées (1 heure d'expiration)
-- Mots de passe forts (minimum 10 caractères)
-- Protection CSRF activée
-
-### **Permissions**
-- Gestionnaire Informatique : Accès aux archives informatiques
-- Gestionnaire Bureau : Accès aux archives bureau
-- Super Admin : Accès complet à toutes les fonctionnalités
-
-### **Sauvegarde**
-- Sauvegarde automatique de la base de données
-- Archivage des fichiers media
-- Rétention des sauvegardes (30 jours)
-
-## 📊 **Monitoring**
-
-### **Métriques Disponibles**
-- Nombre total de demandes
-- Demandes en attente
-- Décharges signées
-- Archives créées
-- Temps de réponse moyen
-- Interactions chatbot IA
-
-### **Logs**
-- Logs d'application dans `logs/parcinfo.log`
-- Logs d'erreur automatiques
-- Monitoring des performances
 
 ## 🚀 **Déploiement Production**
 
-### **Serveur Web**
+### **Serveur Web (Gunicorn)**
 ```bash
-# Installation Gunicorn
+# Installation
 pip install gunicorn
 
 # Configuration
-gunicorn --bind 0.0.0.0:8000 ParcInfo.wsgi:application
+gunicorn --bind 0.0.0.0:8000 --workers 4 --timeout 120 ParcInfo.wsgi:application
+
+# Service systemd
+sudo systemctl enable parcinfo
+sudo systemctl start parcinfo
 ```
 
-### **Nginx**
+### **Nginx Configuration**
 ```nginx
 server {
     listen 80;
     server_name votre-domaine.com;
     
+    # Fichiers statiques
     location /static/ {
         alias /chemin/vers/static/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
     }
     
+    # Fichiers media
     location /media/ {
         alias /chemin/vers/media/;
+        expires 1d;
     }
     
+    # Proxy vers Django
     location / {
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
 
-### **SSL (Let's Encrypt)**
+### **SSL avec Let's Encrypt**
 ```bash
 # Installation Certbot
 sudo apt install certbot python3-certbot-nginx
 
 # Obtention du certificat
 sudo certbot --nginx -d votre-domaine.com
+
+# Renouvellement automatique
+sudo crontab -e
+# Ajouter : 0 12 * * * /usr/bin/certbot renew --quiet
 ```
 
-## 🛠️ **Maintenance**
+## 📊 **Monitoring & Performance**
 
-### **Tâches Quotidiennes**
-- Sauvegarde automatique
-- Nettoyage des logs
-- Vérification de l'intégrité
+### **Métriques Disponibles**
+- **Demandes** : total, en attente, approuvées, refusées
+- **Équipements** : par catégorie, statut, garantie
+- **Chatbot IA** : interactions, temps de réponse, satisfaction
+- **Performance** : temps de chargement, utilisation mémoire
 
-### **Tâches Hebdomadaires**
-- Archivage des anciennes données
-- Optimisation de la base de données
-- Mise à jour des statistiques
+### **Logs & Debugging**
+- **Logs d'application** : `logs/parcinfo.log`
+- **Logs d'erreur** : `logs/error.log`
+- **Logs du chatbot** : `logs/query_analysis_*.jsonl`
+- **Monitoring temps réel** avec `monitor_dashboard.py`
 
-### **Tâches Mensuelles**
-- Révision des permissions
-- Audit de sécurité
-- Sauvegarde complète
+## 🛠️ **Maintenance & Support**
 
-## 📞 **Support**
+### **Tâches Automatisées**
+- **Sauvegarde quotidienne** de la base de données
+- **Archivage automatique** des demandes signées
+- **Nettoyage des logs** et fichiers temporaires
+- **Vérification d'intégrité** des données
 
-### **Contact Technique**
-- Email : support@votre-entreprise.com
-- Téléphone : +33 1 23 45 67 89
+### **Support Technique**
+- **Documentation complète** dans le dossier `docs/`
+- **Guides d'installation** et de configuration
+- **Scripts de diagnostic** et de réparation
+- **Support communautaire** via GitHub Issues
 
-### **Documentation**
-- Guide utilisateur : `/docs/GUIDE_UTILISATEUR.md`
-- Guide administrateur : `/docs/GUIDE_ADMINISTRATEUR.md`
-- API documentation : `/docs/API.md`
+## 📄 **Licence & Contribution**
 
-## 📄 **Licence**
+© 2025 ParcInfo. Tous droits réservés.
 
-© 2025 Votre Entreprise. Tous droits réservés.
+**Contributions bienvenues !** 🚀
+- Signaler des bugs via GitHub Issues
+- Proposer des améliorations via Pull Requests
+- Partager des idées et suggestions
 
 ---
 
-**Version :** 1.1.0  
-**Dernière mise à jour :** 31/07/2025  
-**Développé avec ❤️ pour votre entreprise**
+**Version :** 2.0.0  
+**Dernière mise à jour :** 15/08/2025  
+**Développé avec ❤️ et IA 🤖**
 
-**Nouveau : Assistant IA LLaMA 3 intégré ! 🤖**
+**✨ Nouveau : Assistant IA RAG, Dashboards Streamlit, et interface moderne !**
