@@ -55,6 +55,46 @@
                     <a href="{% url 'materiel_informatique:mes_equipements_informatiques' %}" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Mes équipements informatiques</a>
                     <a href="{% url 'materiel_bureautique:mes_equipements_bureautiques' %}" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Mes équipements bureautiques</a>
                     <a href="{% url 'users:dashboard_garantie' %}" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">🛡️ Dashboard Garantie</a>
+
+                    <!-- Notifications -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="relative rounded-full p-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            {% if warranty_notifications %}
+                            <span class="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-medium leading-none text-white bg-red-600 rounded-full">{{ warranty_notifications|length }}</span>
+                            {% endif %}
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute right-0 mt-2 w-96 max-w-[90vw] bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            <div class="p-3 border-b border-gray-100 flex items-center justify-between">
+                                <h3 class="text-sm font-semibold text-gray-800">Notifications garanties</h3>
+                                <span class="text-xs text-gray-500">{{ warranty_notifications|length }} élément(s)</span>
+                            </div>
+                            <div class="max-h-80 overflow-auto divide-y divide-gray-100">
+                                {% if warranty_notifications %}
+                                    {% for n in warranty_notifications %}
+                                    <div class="p-3 hover:bg-gray-50">
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Bureau</span>
+                                                <span class="text-sm font-medium text-gray-900">Commande {{ n.numero_commande }}</span>
+                                            </div>
+                                            <span class="text-xs font-medium text-yellow-700">{{ n.jours_restants }} j</span>
+                                        </div>
+                                        <div class="mt-1 text-xs text-gray-600">Fournisseur: {{ n.fournisseur }} · Fin: {{ n.fin_garantie|date:'d/m/Y' }}</div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="p-4 text-sm text-gray-600">Aucune notification</div>
+                                {% endif %}
+                            </div>
+                            <div class="p-2 border-t border-gray-100 text-right">
+                                <a href="{% url 'users:dashboard_garantie' %}" class="text-xs font-medium text-blue-600 hover:text-blue-700">Voir le dashboard garantie</a>
+                            </div>
+                        </div>
+                    </div>
+
                     <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="text-red-600 hover:text-red-800 font-medium transition">Se déconnecter</a>
                 </div>
                 <!-- Bouton menu mobile -->
@@ -103,6 +143,7 @@
             <h1 class="text-4xl dashboard-title-gradient mb-2">Tableau de bord Gestionnaire Bureau</h1>
             <p class="text-gray-600">Gérez les fournisseurs, commandes et matériels de bureau</p>
         </div>
+        
         <!-- Cartes de navigation -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" x-data="{ hoveredCard: null }">
             <!-- Carte Fournisseurs -->

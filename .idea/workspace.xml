@@ -6,6 +6,17 @@
   <component name="ChangeListManager">
     <list default="true" id="1fb4b8a6-81d3-48af-8fa2-214c7a14d521" name="Changes" comment="changes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/INSTALLATION_DEMARRAGE_AUTO.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/chatbot/core_chatbot.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/chatbot/core_chatbot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/users/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/users/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dashboard_garantie/dashboard_garantie.py" beforeDir="false" afterPath="$PROJECT_DIR$/dashboard_garantie/dashboard_garantie.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dashboard_garantie/dashboard_simple.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/launch_with_rag.sh" beforeDir="false" afterPath="$PROJECT_DIR$/launch_with_rag.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/chatbot/chatbot_modern.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/chatbot/chatbot_modern.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/dashboards/gestionnaire_bureau.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboards/gestionnaire_bureau.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/dashboards/gestionnaire_info.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboards/gestionnaire_info.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/dashboards/superadmin.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboards/superadmin.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +82,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
     "settings.editor.splitter.proportion": "0.23445463",
     "to.speed.mode.migration.done": "true",
     "vue.rearranger.settings.migration": "true"
@@ -233,7 +244,7 @@
       <workItem from="1755431696370" duration="6024000" />
       <workItem from="1755444411990" duration="9591000" />
       <workItem from="1755464406173" duration="23000" />
-      <workItem from="1755464431285" duration="2409000" />
+      <workItem from="1755464431285" duration="25798000" />
     </task>
     <task id="LOCAL-00001" summary="changes">
       <option name="closed" value="true" />

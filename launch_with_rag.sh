@@ -1,8 +1,6 @@
 #!/bin/bash
-"""
-Script de lancement de ParcInfo avec RAG activé
-Utilise l'environnement virtuel avec sentence-transformers
-"""
+# Script de lancement de ParcInfo avec RAG activé
+# Utilise l'environnement virtuel avec sentence-transformers
 
 echo "🚀 Lancement de ParcInfo avec RAG activé"
 echo "=========================================="
@@ -35,9 +33,19 @@ python -c "import django; print(f'✅ Django {django.get_version()} disponible')
     exit 1
 }
 
-# Test du système RAG
+# Test du système RAG avec Django configuré
 echo "🧪 Test du système RAG..."
 python -c "
+import sys
+import os
+import django
+
+# Configuration Django
+project_root = '/Users/HouDa/PycharmProjects/ParcInfo'
+sys.path.insert(0, project_root)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ParcInfo.settings')
+django.setup()
+
 from apps.chatbot.rag_manager import RAGManager
 from apps.chatbot.core_chatbot import ParcInfoChatbot
 

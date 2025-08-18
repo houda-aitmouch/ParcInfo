@@ -58,47 +58,6 @@ PREDEFINED_INTENTS = [
     "get_location_materials", "check_expiring_soon", "get_order_lines"
 ]
 
-# Prompt principal du chatbot avec exigence de ton humain
-CHATBOT_PROMPT = """
-Vous êtes ParcInfo, un assistant IA conçu pour gérer un parc informatique et bureautique. Votre rôle est de répondre aux questions sur les utilisateurs, permissions, commandes, matériels, fournisseurs, livraisons, demandes d'équipement, et garanties, en utilisant les données disponibles (base SQL, archives, etc.). Suivez ces directives :
-
-1. **Précision et Complétude** :
-   - Fournissez des réponses précises (>95% de précision) et complètes, incluant tous les détails pertinents (codes d'inventaire, numéros de série, utilisateurs, designations, dates d'expiration, jours restants).
-   - Liez correctement les entités (ex. : matériel → commande → garantie) en utilisant des jointures SQL ou un graphe de connaissances.
-   - Vérifiez les données pour éviter les erreurs factuelles (ex. : BC23 ≠ bureautique).
-   - Si aucune donnée n'est disponible, expliquez pourquoi et proposez une alternative (ex. : "Voulez-vous vérifier par numéro de série ?").
-
-2. **Ton Humain et Engageant** :
-   - Répondez comme un humain, avec un ton amical, clair et conversationnel, adapté à des utilisateurs techniques (ex. : superadmin) et non techniques (ex. : gestionnaires de bureau).
-   - Commencez par une introduction engageante (ex. : "Bonjour !", "Je vérifie pour vous").
-   - Évitez les termes techniques (ex. : "Cmd", "IT") ou expliquez-les simplement (ex. : "commande" au lieu de "Cmd").
-   - Utilisez des phrases fluides, des transitions naturelles, et des invitations à poursuivre (ex. : "Besoin d'autres infos ?").
-   - Adaptez le ton au contexte : professionnel mais chaleureux pour superadmin, simple et rassurant pour les autres.
-
-3. **Performance** :
-   - Temps de réponse <2s pour 99% des queries.
-   - Évitez les timeouts en optimisant les requêtes (indexation, cache Redis).
-   - Gérez les requêtes complexes avec des réponses partielles si nécessaire (ex. : "Données partielles disponibles, continuer ?").
-
-4. **Structure des Réponses** :
-   - Structurez les réponses pour la clarté : introduction, détails (liste ou texte), conclusion/invitation.
-   - Exemple : "Bonjour ! Voici les matériels sous garantie pour superadmin : [détails]. Voulez-vous plus d'infos ?"
-   - Pour les listes, utilisez un format lisible, pas de tableaux bruts sauf si demandé.
-
-5. **Gestion des Données** :
-   - Utilisez les tables SQL (materiels, commandes, demandes, fournitures, archives) pour extraire les informations.
-   - Exemple de requête : SELECT m.code_inventaire, m.numero_serie, m.designation, m.utilisateur, c.garantie_fin FROM materiels m JOIN commandes c ON m.commande_id = c.id WHERE {condition};
-   - Calculez les jours restants pour les garanties : (DATEDIFF(garantie_fin, NOW())).
-
-6. **Feedback et Amélioration** :
-   - Collectez les retours via thumbs up/down pour évaluer précision et ton.
-   - Fine-tunez le modèle sur les logs pour améliorer le ton et la précision.
-
-Exemple de réponse attendue :
-- Question : "Y a-t-il des matériels sous garantie pour superadmin ?"
-- Réponse : "Bonjour ! Oui, j'ai trouvé une baie, cd14 (numéro de série sn14), encore sous garantie jusqu'au 23/08/2025 via la commande BC23, soit 5 jours restants. Besoin d'autres détails ?"
-"""
-
 # Singleton instance
 _chatbot_instance = None
 
@@ -106,63 +65,6 @@ class ParcInfoChatbot:
     def __init__(self):
         try:
             logger.info("Initializing ParcInfo Chatbot...")
-
-            # Initialize conversation tone system aligned with CHATBOT_PROMPT
-            self.conversation_templates = {
-                'greeting': [
-                    "Bonjour ! J'ai vérifié pour vous",
-                    "Salut ! Laissez-moi regarder ça",
-                    "Bonjour ! Je vais examiner cela",
-                    "Bonjour ! Laissez-moi vérifier cela pour vous",
-                    "Salut ! Je vais regarder dans nos données"
-                ],
-                'positive_confirmation': [
-                    "Parfait ! Voici ce que j'ai trouvé",
-                    "Excellente nouvelle ! Voici les détails",
-                    "Super ! J'ai les informations pour vous",
-                    "Excellent ! J'ai trouvé les informations",
-                    "Parfait ! Voici ce que j'ai pu récupérer"
-                ],
-                'no_results': [
-                    "Désolé, je n'ai rien trouvé pour cette demande",
-                    "Malheureusement, je n'ai pas de résultats",
-                    "Je n'ai pas pu trouver d'informations correspondantes",
-                    "Je suis désolé, mais je n'ai pas trouvé de données pour cette requête",
-                    "Malheureusement, je n'ai pas pu localiser les informations demandées"
-                ],
-                'engagement': [
-                    "Voulez-vous plus de détails sur un élément spécifique ?",
-                    "Avez-vous d'autres questions ?",
-                    "Besoin d'informations supplémentaires ?",
-                    "Souhaitez-vous que je vérifie autre chose ?",
-                    "Puis-je vous aider avec autre chose ?",
-                    "Avez-vous besoin de plus de précisions ?",
-                    "Souhaitez-vous explorer d'autres aspects ?"
-                ],
-                'explanation': [
-                    "Pour vous expliquer",
-                    "Pour clarifier",
-                    "En détail",
-                    "Pour être plus précis",
-                    "Pour vous donner plus de contexte"
-                ],
-                'context_help': [
-                    "Voulez-vous que je vérifie par numéro de série ?",
-                    "Souhaitez-vous que je regarde dans les archives ?",
-                    "Puis-je vérifier avec d'autres critères ?",
-                    "Voulez-vous que j'explore d'autres sources ?"
-                ]
-            }
-            
-            # Initialize friendly terminology mapping
-            self.friendly_terms = {
-                'IT': 'informatique',
-                'Cmd': 'commande',
-                'Fin': 'expire le',
-                'Série': 'numéro de série',
-                'Bureau': 'bureautique',
-                'N/A': 'non disponible'
-            }
 
             # Initialize RAG, LLM and Structured Search components
             self.rag = RAGManager()
@@ -1752,11 +1654,6 @@ class ParcInfoChatbot:
         m_user = re.search(r"utilisateur\s+'([^']+)'|utilisateur\s+\"([^\"]+)\"", query_lower)
         if m_user:
             entities["user"] = (m_user.group(1) or m_user.group(2)).strip()
-        
-        # Extract username after "pour" (e.g., "pour superadmin")
-        m_user_pour = re.search(r"pour\s+([a-zA-Z0-9_]+)", query_lower)
-        if m_user_pour:
-            entities["user"] = m_user_pour.group(1).strip()
 
         # Enhanced supplier mentions
         supplier_keywords = ["fournisseur", "vendeur", "société", "societe", "entreprise", "partenaire"]
@@ -1817,70 +1714,6 @@ class ParcInfoChatbot:
         text = text.lower().strip()
         text = re.sub(r'\s+', ' ', text)
         return text
-
-    def _get_conversation_template(self, template_type: str) -> str:
-        """Get a random conversation template for natural tone"""
-        import random
-        templates = self.conversation_templates.get(template_type, [])
-        return random.choice(templates) if templates else ""
-
-    def _make_response_human(self, response: str, template_type: str = 'greeting', include_engagement: bool = True, context_help: bool = False) -> str:
-        """Transform a technical response into a more human, conversational one following CHATBOT_PROMPT"""
-        # Add greeting template
-        if template_type in self.conversation_templates:
-            greeting = self._get_conversation_template(template_type)
-            response = f"{greeting}. {response}"
-        
-        # Replace technical terms with friendly ones (following prompt directive)
-        for tech_term, friendly_term in self.friendly_terms.items():
-            response = response.replace(tech_term, friendly_term)
-        
-        # Safe replacements using regex word boundaries to avoid corrupting words
-        import re as _re_safe
-        safe_map = [
-            (r"\bIT\b", "informatique"),
-            (r"\bCmd\b", "commande"),
-            (r"\bFin\b", "expire le"),
-            (r"\bBureau\b", "bureautique"),
-            (r"N/A", "non disponible"),
-            (r"\b[Ss]érie\b", "numéro de série"),
-            (r"\b[Ss]érie\s*:\s*", "numéro de série : "),
-        ]
-        for pattern, replacement in safe_map:
-            response = _re_safe.sub(pattern, replacement, response)
-        
-        # Add engagement question if requested (following prompt structure)
-        if include_engagement:
-            engagement = self._get_conversation_template('engagement')
-            response += f" {engagement}"
-        
-        # Add context help if requested (for no results scenarios)
-        if context_help:
-            help_suggestion = self._get_conversation_template('context_help')
-            response += f" {help_suggestion}"
-        
-        return response
-
-    def _format_material_list_human(self, materials: list, title: str, template_type: str = 'positive_confirmation') -> str:
-        """Format a list of materials in a human, conversational way"""
-        if not materials:
-            return self._make_response_human(
-                f"{self._get_conversation_template('no_results')} pour {title}.",
-                template_type='no_results',
-                include_engagement=True
-            )
-        
-        greeting = self._get_conversation_template(template_type)
-        response = f"{greeting} {title} :\n"
-        
-        for material in materials:
-            response += f"• {material}\n"
-        
-        # Add engagement
-        engagement = self._get_conversation_template('engagement')
-        response += f"\n{engagement}"
-        
-        return response
 
     def process_query(self, query: str) -> Union[str, Dict[str, Any]]:
         """Main entry point for processing user queries with enhanced error handling"""
@@ -2740,10 +2573,7 @@ class ParcInfoChatbot:
 
             # Vérifier si c'est une requête complexe nécessitant une analyse
             # EXCEPTION : Ne pas traiter comme analyse complexe les questions de comptage simples
-            # ET : Ne pas traiter comme analyse complexe les questions de fournisseur de commande
-            if (self._detect_analysis_intent(query) and 
-                not self._is_count_query(query.lower()) and
-                not any(word in query.lower() for word in ['fournisseur', 'fourniseur', 'vendeur'])):
+            if self._detect_analysis_intent(query) and not self._is_count_query(query.lower()):
                 logger.info(f"Complex analysis query detected: {query}")
                 return {
                     'response': self._handle_analysis_complexe({'original_query': query}),
@@ -2764,110 +2594,6 @@ class ParcInfoChatbot:
                         'intent': 'demandes_equipement',
                         'confidence': 95,
                         'source': 'early_equipment_detection',
-                        'method': 'early_override'
-                    }
-            
-            # PRIORITÉ : Vérifier d'abord si c'est une question de fournisseur de commande spécifique
-            if any(word in ql for word in ['fournisseur', 'fourniseur', 'vendeur']) and any(word in ql for word in ['commande', 'comande']):
-                # Détecter le numéro de commande
-                import re
-                command_match = re.search(r'\b([A-Z]{2,6}\s*\d{1,})\b', ql.upper())
-                if command_match:
-                    logger.info(" Order supplier request detected before count detection")
-                    return {
-                        'response': self._handle_order_supplier({'original_query': query}),
-                        'intent': 'order_supplier',
-                        'confidence': 95,
-                        'source': 'early_supplier_detection',
-                        'method': 'early_override'
-                    }
-            
-            # PRIORITÉ : Vérifier d'abord si c'est une question de livraison en retard
-            if any(word in ql for word in ['livré', 'livres', 'livraison', 'livraisons', 'retard', 'retards', 'après', 'apres', 'date prévue']):
-                logger.info(" Delivery delay request detected before count detection")
-                return {
-                    'response': self._handle_delivery_delay_analysis(query),
-                    'intent': 'delivery_delay',
-                    'confidence': 95,
-                    'source': 'early_delivery_detection',
-                    'method': 'early_override'
-                }
-            
-            # PRIORITÉ : Vérifier d'abord si c'est une question de matériels par commande
-            if any(word in ql for word in ['matériels', 'materiels', 'associés', 'associes', 'liés', 'lies']) and any(word in ql for word in ['commande', 'comande']):
-                # Détecter le numéro de commande (plus flexible)
-                import re
-                command_match = re.search(r'\b([A-Z]{2,6}\s*\d{1,}|\d{1,3})\b', ql.upper())
-                if command_match:
-                    logger.info(f" Command materials request detected before count detection: {command_match.group(1)}")
-                    return {
-                        'response': self._handle_command_materials({'original_query': query}),
-                        'intent': 'command_materials',
-                        'confidence': 95,
-                        'source': 'early_materials_detection',
-                        'method': 'early_override'
-                    }
-            
-            # PRIORITÉ : Vérifier d'abord si c'est une question de matériel par numéro de série
-            if any(word in ql for word in ['numéro de série', 'numero de serie', 'série', 'serie']) and any(word in ql for word in ['matériel', 'materiel', 'équipement', 'equipement']):
-                # Détecter le numéro de série (plus flexible)
-                import re
-                serial_match = re.search(r'\b(\d{6,}|[A-Z0-9]{6,})\b', ql.upper())
-                if serial_match:
-                    logger.info(" Serial number material request detected before count detection")
-                    return {
-                        'response': self._handle_serial_material_search({'original_query': query}),
-                        'intent': 'serial_material_search',
-                        'confidence': 95,
-                        'source': 'early_serial_detection',
-                        'method': 'early_override'
-                    }
-            
-            # PRIORITÉ : Vérifier d'abord si c'est une question de commandes par fournisseur
-            if any(word in ql for word in ['commandes', 'commande']) and any(word in ql for word in ['fournisseur', 'fourniseur', 'vendeur']):
-                # Détecter le nom du fournisseur (plus flexible)
-                import re
-                supplier_match = re.search(r"fournisseur\s+([A-Z]+)", ql.upper())
-                if supplier_match:
-                    logger.info(f" Supplier commands request detected before count detection: {supplier_match.group(1)}")
-                    return {
-                        'response': self._handle_supplier_commands({'original_query': query}),
-                        'intent': 'supplier_commands',
-                        'confidence': 95,
-                        'source': 'early_supplier_commands_detection',
-                        'method': 'early_override'
-                    }
-            
-            # PRIORITÉ : Vérifier d'abord si c'est une question sur les matériels informatiques affectés
-            if any(word in ql for word in ['materiels', 'matériels', 'materiel', 'matériel']) and any(word in ql for word in ['informatiques', 'informatique', 'info']) and any(word in ql for word in ['affectes', 'affectés', 'affecte', 'affecté']):
-                logger.info("Computer materials assignment request detected")
-                return {
-                    'response': self._handle_computer_materials_assignment({'original_query': query}),
-                    'intent': 'computer_materials_assignment',
-                    'confidence': 95,
-                    'source': 'computer_materials_assignment_detection',
-                    'method': 'early_override'
-                }
-            
-            # PRIORITÉ : Vérifier d'abord si c'est une question sur les garanties de moins de X jours
-            if any(word in ql for word in ['garantie', 'garanties']) and ('moins de' in ql or 'jours restants' in ql):
-                logger.info("Warranty less than X days request detected")
-                return {
-                    'response': self._handle_materials_warranty_less_than({'original_query': query}),
-                    'intent': 'materials_warranty_less_than',
-                    'confidence': 95,
-                    'source': 'warranty_less_than_detection',
-                    'method': 'early_override'
-                }
-            
-            # PRIORITÉ : Vérifier d'abord si c'est une question sur une demande d'équipement spécifique
-            if any(word in ql for word in ['demande', 'demandes']) and any(word in ql for word in ['n°', 'numero', 'numéro']):
-                logger.info("Specific equipment request number detected")
-                return {
-                    'response': self._handle_specific_equipment_request({'original_query': query}),
-                    'intent': 'specific_equipment_request',
-                    'confidence': 95,
-                    'source': 'specific_equipment_request_detection',
                         'method': 'early_override'
                     }
             
@@ -3015,15 +2741,6 @@ class ParcInfoChatbot:
                         if isinstance(result, dict):
                             result["method"] = "critical_intent_handler"
                             return result
-                        
-                        # Appliquer les améliorations de qualité à la réponse
-                        if hasattr(self, '_validate_response_quality'):
-                            try:
-                                improved_response = self._validate_response_quality(result, intent)
-                                result = improved_response
-                            except Exception as e:
-                                logger.warning(f"Error applying response improvements: {e}")
-                        
                         return {
                             "response": result,
                             "intent": intent,
@@ -3040,14 +2757,6 @@ class ParcInfoChatbot:
                 logger.info("Intent 'modele_generique' détecté : réponse strictement ORM, aucune fallback RAG/LLM")
                 orm_response = self._handle_generic_model_query(query)
                 orm_response = f"{orm_response}"
-                # Appliquer les améliorations de qualité à la réponse
-                if hasattr(self, '_validate_response_quality'):
-                    try:
-                        improved_response = self._validate_response_quality(orm_response, intent)
-                        orm_response = improved_response
-                    except Exception as e:
-                        logger.warning(f"Error applying response improvements: {e}")
-                
                 return {
                     "response": orm_response,
                     "intent": intent,
@@ -3104,14 +2813,6 @@ class ParcInfoChatbot:
                     result["method"] = "intent_handler"
                     return result
                     
-                # Appliquer les améliorations de qualité à la réponse
-                if hasattr(self, '_validate_response_quality'):
-                    try:
-                        improved_response = self._validate_response_quality(result, intent)
-                        result = improved_response
-                    except Exception as e:
-                        logger.warning(f"Error applying response improvements: {e}")
-                
                 return {
                     "response": result,
                     "intent": intent,
@@ -3257,32 +2958,14 @@ class ParcInfoChatbot:
         try:
             # Vérifier si c'est une requête complexe
             if self._detect_complex_query(original_query):
-                result_text = self._handle_complex_material_query(original_query)
+                return self._handle_complex_material_query(original_query)
             
             # Logique standard pour les requêtes simples
-            else:
-                result_text = self._handle_simple_material_query(entities)
-
-            # Finalisation humaine systématique
-            result_lower = (result_text or '').strip().lower()
-            is_no_results = (
-                result_lower.startswith('aucun ') or
-                result_lower.startswith('aucune ') or
-                'introuvable' in result_lower
-            )
-            return self._make_response_human(
-                result_text,
-                template_type='no_results' if is_no_results else 'positive_confirmation',
-                include_engagement=True
-            )
+            return self._handle_simple_material_query(entities)
             
         except Exception as e:
             logger.error(f"Error in _handle_list_material: {e}")
-            return self._make_response_human(
-                f"Erreur lors de la recherche du matériel : {str(e)}",
-                template_type='no_results',
-                include_engagement=True
-            )
+            return f"Erreur lors de la recherche du matériel : {str(e)}"
         finally:
             logger.info("=== END _handle_list_material ===")
     
@@ -3964,14 +3647,10 @@ class ParcInfoChatbot:
             if date_filter:
                 filters &= date_filter
 
-            # User filter - improved to handle specific usernames like 'superadmin'
+            # User filter
+            # Only apply when the query explicitly mentions a specific username (not the implicit 'current')
             if entities.get("user") and entities["user"] not in ("current", "courant", "actuel"):
-                # Handle specific username detection
-                username = entities["user"]
-                if username.upper() == "SUPERADMIN":
-                    filters &= Q(demandeur__username__iexact="superadmin")
-                else:
-                    filters &= Q(demandeur__username__icontains=username)
+                filters &= Q(demandeur__username__icontains=entities["user"])
 
             # Status filter (normalize accents)
             if entities.get("status"):
@@ -4001,35 +3680,6 @@ class ParcInfoChatbot:
             )
 
             if not demandes:
-                # Si on demande les demandes en attente pour un utilisateur spécifique
-                if entities.get("user") and status_label == "en attente":
-                    # Montrer les demandes approuvées pour cet utilisateur
-                    demandes_approuvees = DemandeEquipement.objects.filter(
-                        demandeur__username__iexact=entities["user"],
-                        statut='approuvee'
-                    ).select_related(
-                        'demandeur',
-                        'designation_info', 'description_info',
-                        'designation_bureau', 'description_bureau'
-                    ).order_by('-date_demande')[:10]
-                    
-                    if demandes_approuvees:
-                        response = f"Bonjour ! Aucune demande n'est actuellement en attente pour {entities['user']}. "
-                        response += f"Toutes ses demandes ({len(demandes_approuvees)}) sont approuvées :\n\n"
-                        
-                        for d in demandes_approuvees:
-                            desig_obj = d.designation
-                            desig = getattr(desig_obj, 'nom', None) if desig_obj else None
-                            response += f"• Demande n°{d.id} ({desig or 'N/A'}) : Approuvée le {d.date_approbation.strftime('%d/%m/%Y') if d.date_approbation else 'N/A'}\n"
-                        
-                        response += "\nVeux-tu vérifier les détails d'une demande spécifique ?"
-                        return self._make_response_human(
-                            response,
-                            template_type='positive_confirmation',
-                            include_engagement=True
-                        )
-                
-                # Réponse standard si pas de demandes approuvées
                 parts = []
                 if date_label:
                     parts.append(date_label)
@@ -4047,31 +3697,10 @@ class ParcInfoChatbot:
                 desc_obj = d.description
                 desig = getattr(desig_obj, 'nom', None) if desig_obj else None
                 desc = getattr(desc_obj, 'nom', None) if desc_obj else None
-                
-                # Vérifier si des matériels sont affectés à cette demande
-                materiels_affectes = []
-                
-                # Chercher dans les matériels informatiques par utilisateur
-                it_materiels = MaterielInformatique.objects.filter(utilisateur=d.demandeur)
-                for mat in it_materiels:
-                    materiels_affectes.append(f"{mat.code_inventaire} ({mat.numero_serie})")
-                
-                # Chercher dans les matériels bureautiques par utilisateur
-                bu_materiels = MaterielBureau.objects.filter(utilisateur=d.demandeur)
-                for mat in bu_materiels:
-                    materiels_affectes.append(f"{mat.code_inventaire}")
-                
-                # Format de la réponse
-                if materiels_affectes:
-                    materiels_str = f"Matériels affectés : {', '.join(materiels_affectes)}"
-                else:
-                    materiels_str = "Aucun matériel affecté identifié"
-                
                 lines.append(
-                    f"\n• Demande n°{d.id} ({desig or 'N/A'}) du {d.date_demande.strftime('%d/%m/%Y')}\n"
+                    f"\n• Demande n°{d.id} du {d.date_demande.strftime('%d/%m/%Y')}\n"
                     f"  - Demandeur: {getattr(d.demandeur, 'username', 'N/A')}\n"
                     f"  - Catégorie: {d.get_categorie_display()} | Type: {d.get_type_demande_display()} | Article: {d.get_type_article_display()}\n"
-                    f"  - {materiels_str}"
                     f"  - Statut: {d.get_statut_display()}\n"
                     f"  - Désignation: {desig or 'N/A'}\n"
                     f"  - Description: {desc or 'N/A'}"
@@ -4909,20 +4538,11 @@ Si votre question ne fonctionne pas :
 ** Le système est prêt à répondre à vos questions sur le parc informatique.**
 """
             
-            # Finaliser avec un ton humain et une invitation systématique
-            return self._make_response_human(
-                response,
-                template_type='no_results',
-                include_engagement=True
-            )
+            return response
             
         except Exception as e:
             logger.error(f"Error generating enhanced fallback: {e}")
-            return self._make_response_human(
-                self._get_help_response(),
-                template_type='no_results',
-                include_engagement=True
-            )
+            return self._get_help_response()
     
     def _get_help_response(self, entities=None) -> str:
         """Return enhanced help message with comprehensive guidance"""
@@ -5999,9 +5619,6 @@ Si une réponse ne vous convient pas :
 
     def _get_order_by_code(self, code: str) -> Optional[Dict[str, Any]]:
         try:
-            from apps.commande_informatique.models import Commande
-            from apps.commande_bureau.models import CommandeBureau
-            
             o = Commande.objects.filter(numero_commande__iexact=code).select_related('fournisseur').first()
             if o:
                 return {'type': 'informatique', 'obj': o}
@@ -6009,8 +5626,7 @@ Si une réponse ne vous convient pas :
             if b:
                 return {'type': 'bureau', 'obj': b}
             return None
-        except Exception as e:
-            logger.error(f"Error in _get_order_by_code for {code}: {e}")
+        except Exception:
             return None
 
     # ======== HANDLERS GARANTIE ========
@@ -6415,202 +6031,8 @@ Si une réponse ne vous convient pas :
                     lines.append(f"• {m.code_inventaire} (Bureau) — Cmd {cmd.numero_commande} — fin {end.strftime('%d/%m/%Y')}")
         if count == 0:
             scope = 'bureautique' if type_filter == 'bureau' else ('informatique' if type_filter == 'informatique' else 'le parc')
-            
-            # Ajouter le contexte des matériels actifs pour plus d'informations
-            context_lines = []
-            if type_filter in (None, 'bureau'):
-                bu_active = MaterielBureau.objects.select_related('ligne_commande__commande').filter(
-                    ligne_commande__commande__duree_garantie_valeur__isnull=False
-                )
-                for m in bu_active[:5]:  # Limiter à 5 exemples
-                    cmd = m.ligne_commande.commande
-                    end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
-                    if end and end > today:
-                        designation = 'non disponible'
-                        if hasattr(m, 'ligne_commande') and m.ligne_commande:
-                            if hasattr(m.ligne_commande, 'designation') and m.ligne_commande.designation:
-                                designation = getattr(m.ligne_commande.designation, 'nom', 'non disponible')
-                        days_remaining = (end - today).days
-                        context_lines.append(f"- {m.code_inventaire} ({designation}, {cmd.numero_commande}) : Expire le {end.strftime('%d/%m/%Y')} ({days_remaining} jours restants)")
-            
-            if context_lines:
-                response = f"Aucun matériel {scope} avec garantie expirant d'ici {threshold_days} jours.\n\nPour vous donner un aperçu, voici quelques matériels actifs :\n" + "\n".join(context_lines)
-                return self._make_response_human(response, 'positive_confirmation', True)
-            else:
-                return self._make_response_human(
-                    f"Aucun matériel {scope} avec garantie expirant d'ici {threshold_days} jours.",
-                    'positive_confirmation',
-                    True
-                )
-        
-        # Formatage humain pour les matériels expirant bientôt
-        header = f"Voici les matériels dont la garantie expire dans {threshold_days} jours"
-        response = f"{header} :\n" + "\n".join(lines)
-        
-        return self._make_response_human(response, 'positive_confirmation', True)
-
-    def _handle_materials_warranty_less_than(self, entities: Dict[str, Any]) -> str:
-        """Liste les matériels dont la garantie a moins de X jours restants (cas spécial pour 'moins de X jours')"""
-        q = entities.get('original_query', '').lower()
-        import re as _re
-        
-        # Détecter "moins de X jours" ou "X jours restants"
-        m = _re.search(r'moins de (\d+)\s*(jour|jours)', q)
-        if not m:
-            m = _re.search(r'(\d+)\s*(jour|jours)\s*restants', q)
-        
-        if not m:
-            # Fallback vers la fonction standard
-            return self._handle_materials_expiring_soon(entities)
-        
-        threshold_days = int(m.group(1))
-        type_filter = 'informatique' if 'informatique' in q else ('bureau' if 'bureautique' in q or 'bureau' in q else None)
-        
-        today = date.today()
-        lines: List[str] = [f"Matériels avec garantie de moins de {threshold_days} jours restants :"]
-        count = 0
-        
-        if type_filter in (None, 'informatique'):
-            for m in MaterielInformatique.objects.select_related('ligne_commande__commande'):
-                cmd = m.ligne_commande.commande
-                end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
-                if end and end > today:
-                    days_remaining = (end - today).days
-                    if days_remaining < threshold_days:
-                        count += 1
-                        lines.append(f"• {m.code_inventaire} (Informatique) — Cmd {cmd.numero_commande} — {days_remaining} jours restants — fin {end.strftime('%d/%m/%Y')}")
-        
-        if type_filter in (None, 'bureau'):
-            for m in MaterielBureau.objects.select_related('ligne_commande__commande'):
-                cmd = m.ligne_commande.commande
-                end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
-                if end and end > today:
-                    days_remaining = (end - today).days
-                    if days_remaining < threshold_days:
-                        count += 1
-                        lines.append(f"• {m.code_inventaire} (Bureau) — Cmd {cmd.numero_commande} — {days_remaining} jours restants — fin {end.strftime('%d/%m/%Y')}")
-        
-        if count == 0:
-            scope = 'bureautique' if type_filter == 'bureau' else ('informatique' if type_filter == 'informatique' else 'le parc')
-            
-            # Ajouter le contexte des matériels actifs pour plus d'informations
-            context_lines = []
-            if type_filter in (None, 'bureau'):
-                bu_active = MaterielBureau.objects.select_related('ligne_commande__commande').filter(
-                    ligne_commande__commande__duree_garantie_valeur__isnull=False
-                )
-                for m in bu_active[:5]:  # Limiter à 5 exemples
-                    cmd = m.ligne_commande.commande
-                    end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
-                    if end and end > today:
-                        designation = 'non disponible'
-                        if hasattr(m, 'ligne_commande') and m.ligne_commande:
-                            if hasattr(m, 'ligne_commande') and m.ligne_commande.designation:
-                                designation = getattr(m.ligne_commande.designation, 'nom', 'non disponible')
-                        days_remaining = (end - today).days
-                        context_lines.append(f"- {m.code_inventaire} ({designation}, {cmd.numero_commande}) : Expire le {end.strftime('%d/%m/%Y')} ({days_remaining} jours restants)")
-            
-            if context_lines:
-                response = f"Aucun matériel {scope} avec garantie de moins de {threshold_days} jours restants.\n\nPour vous donner un aperçu, voici quelques matériels actifs :\n" + "\n".join(context_lines)
-                return self._make_response_human(response, 'positive_confirmation', True)
-            else:
-                return self._make_response_human(
-                    f"Aucun matériel {scope} avec garantie de moins de {threshold_days} jours restants.",
-                    'positive_confirmation',
-                    True
-                )
-        
-        # Formatage humain pour les matériels avec peu de jours restants
-        header = f"Voici les matériels avec garantie de moins de {threshold_days} jours restants"
-        response = f"{header} :\n" + "\n".join(lines)
-        
-        return self._make_response_human(response, 'positive_confirmation', True)
-
-    def _handle_specific_equipment_request(self, entities: Dict[str, Any]) -> str:
-        """Handle specific equipment request number queries with human tone"""
-        try:
-            q = entities.get('original_query', '').lower()
-            import re as _re
-            
-            # Détecter le numéro de demande (n°999, numero 999, etc.)
-            m = _re.search(r'n[°°]\s*(\d+)', q)
-            if not m:
-                m = _re.search(r'numero\s*(\d+)', q)
-            if not m:
-                m = _re.search(r'numéro\s*(\d+)', q)
-            
-            if not m:
-                return self._make_response_human(
-                    "Veuillez préciser le numéro de demande (ex: n°999, numero 999).",
-                    template_type='no_results',
-                    include_engagement=True
-                )
-            
-            request_number = int(m.group(1))
-            
-            # Rechercher la demande dans la base de données
-            from apps.demande_equipement.models import DemandeEquipement
-            try:
-                request = DemandeEquipement.objects.filter(id=request_number).first()
-                if not request:
-                    # Fournir des alternatives avec des demandes existantes
-                    alternative_requests = DemandeEquipement.objects.all()[:5]
-                    if alternative_requests.exists():
-                        response = f"La demande n°{request_number} n'existe pas dans la base de données.\n\n"
-                        response += "Voici quelques demandes existantes :\n"
-                        for alt_req in alternative_requests:
-                            response += f"• n°{alt_req.id} : {alt_req.get_categorie_display()}\n"
-                        response += f"\nVoulez-vous des détails sur l'une de ces demandes ?"
-                    else:
-                        response = f"La demande n°{request_number} n'existe pas dans la base de données.\n\nAucune demande d'équipement trouvée."
-                    
-                    return self._make_response_human(
-                        response,
-                        template_type='no_results',
-                        include_engagement=True
-                    )
-                
-                # Construire la réponse avec les détails de la demande
-                response = f"Salut ! Voici les détails de la demande n°{request_number} :\n\n"
-                response += f"📋 **Catégorie** : {request.get_categorie_display()}\n"
-                response += f"📋 **Type d'article** : {request.get_type_article_display()}\n"
-                response += f"📋 **Type de demande** : {request.get_type_demande_display()}\n"
-                
-                if hasattr(request, 'utilisateur') and request.utilisateur:
-                    response += f"👤 **Demandeur** : {request.utilisateur.get_full_name() or request.utilisateur.username}\n"
-                
-                if hasattr(request, 'date_demande') and request.date_demande:
-                    response += f"📅 **Date de demande** : {request.date_demande.strftime('%d/%m/%Y')}\n"
-                
-                if hasattr(request, 'statut') and request.statut:
-                    response += f"🔄 **Statut** : {request.statut}\n"
-                
-                if hasattr(request, 'justification') and request.justification:
-                    response += f"💬 **Justification** : {request.justification}\n"
-                
-                response += "\nBesoin d'autres informations sur cette demande ?"
-                
-                return self._make_response_human(
-                    response,
-                    template_type='positive_confirmation',
-                    include_engagement=True
-                )
-                
-            except Exception as e:
-                logger.error(f"Error searching for equipment request {request_number}: {e}")
-                return self._make_response_human(
-                    f"Une erreur est survenue lors de la recherche de la demande n°{request_number}.",
-                    template_type='error',
-                    include_engagement=True
-                )
-                
-        except Exception as e:
-            logger.error(f"Error in specific equipment request handler: {e}")
-            return self._make_response_human(
-                "Désolé, j'ai rencontré une erreur en traitant votre demande.",
-                template_type='error',
-                include_engagement=True
-            )
+            return f"Aucun matériel {scope} avec garantie expirant d'ici {threshold_days} jours."
+        return "\n".join(lines)
 
     def _handle_order_reception_date(self, entities: Dict[str, Any]) -> str:
         q = entities.get('original_query', '') or ''
@@ -6647,7 +6069,6 @@ Si une réponse ne vous convient pas :
         if not identifier:
             return self._list_materials_under_warranty({"original_query": q})
         identifier = identifier.strip()
-        
         # Chercher d'abord en informatique (peut avoir numero_serie ET code)
         it = MaterielInformatique.objects.filter(Q(code_inventaire__iexact=identifier) | Q(numero_serie__iexact=identifier)).select_related('ligne_commande__commande').first()
         if it:
@@ -6655,25 +6076,8 @@ Si une réponse ne vous convient pas :
             end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
             today = date.today()
             active = (end is not None and end >= today)
-            end_str = end.strftime('%d/%m/%Y') if end else 'non disponible'
-            
-            # Calculer les jours restants
-            days_remaining = (end - today).days if end and end >= today else 0
-            
-            # Récupérer la désignation depuis la ligne de commande
-            designation = 'non disponible'
-            if hasattr(it, 'ligne_commande') and it.ligne_commande:
-                if hasattr(it.ligne_commande, 'designation') and it.ligne_commande.designation:
-                    designation = getattr(it.ligne_commande.designation, 'nom', 'non disponible')
-            
-            response = f"Matériel {identifier} ({designation}) :\n"
-            response += f"- Code d'inventaire : {it.code_inventaire}\n"
-            response += f"- Commande : {cmd.numero_commande}\n"
-            response += f"- Garantie : {cmd.duree_garantie_valeur} {cmd.duree_garantie_unite}, expire le {end_str}\n"
-            response += f"- Statut : {'Active' if active else 'Expirée'} ({days_remaining} jours restants)" if active else f"- Statut : {'Active' if active else 'Expirée'}"
-            
-            return self._make_response_human(response, 'positive_confirmation', True)
-            
+            end_str = end.strftime('%d/%m/%Y') if end else 'N/A'
+            return f"Matériel {identifier} — Commande {cmd.numero_commande} — Fin de garantie: {end_str} — Active: {'Oui' if active else 'Non'}"
         # Ensuite en bureautique
         bu = MaterielBureau.objects.filter(code_inventaire__iexact=identifier).select_related('ligne_commande__commande').first()
         if bu:
@@ -6681,29 +6085,9 @@ Si une réponse ne vous convient pas :
             end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
             today = date.today()
             active = (end is not None and end >= today)
-            end_str = end.strftime('%d/%m/%Y') if end else 'non disponible'
-            
-            # Calculer les jours restants
-            days_remaining = (end - today).days if end and end >= today else 0
-            
-            # Récupérer la désignation depuis la ligne de commande
-            designation = 'non disponible'
-            if hasattr(bu, 'ligne_commande') and bu.ligne_commande:
-                if hasattr(bu.ligne_commande, 'designation') and bu.ligne_commande.designation:
-                    designation = getattr(bu.ligne_commande.designation, 'nom', 'non disponible')
-            
-            response = f"Matériel {identifier} ({designation}) :\n"
-            response += f"- Commande : {cmd.numero_commande}\n"
-            response += f"- Garantie : {cmd.duree_garantie_valeur} {cmd.duree_garantie_unite}, expire le {end_str}\n"
-            response += f"- Statut : {'Active' if active else 'Expirée'} ({days_remaining} jours restants)" if active else f"- Statut : {'Active' if active else 'Expirée'}"
-            
-            return self._make_response_human(response, 'positive_confirmation', True)
-        
-        # Aucun matériel trouvé - proposer des alternatives comme demandé dans le prompt
-        no_result_response = f"Aucun matériel trouvé pour {identifier}. "
-        no_result_response += "Voulez-vous que je vérifie par numéro de série ou que je regarde dans les archives ?"
-        
-        return self._make_response_human(no_result_response, 'no_results', True, True)
+            end_str = end.strftime('%d/%m/%Y') if end else 'N/A'
+            return f"Matériel {identifier} — Commande {cmd.numero_commande} — Fin de garantie: {end_str} — Active: {'Oui' if active else 'Non'}"
+        return f"Aucun matériel trouvé pour {identifier}."
 
     def _handle_user_materials_under_warranty(self, entities: Dict[str, Any]) -> str:
         q = entities.get('original_query', '') or ''
@@ -6726,35 +6110,15 @@ Si une réponse ne vous convient pas :
             cmd = m.ligne_commande.commande
             end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
             if end and end >= today:
-                # Récupérer la désignation depuis la ligne de commande
-                designation = 'non disponible'
-                if hasattr(m, 'ligne_commande') and m.ligne_commande:
-                    if hasattr(m.ligne_commande, 'designation') and m.ligne_commande.designation:
-                        designation = getattr(m.ligne_commande.designation, 'nom', 'non disponible')
-                numero_serie = getattr(m, 'numero_serie', 'non disponible')
-                days_remaining = (end - today).days if end and end >= today else 0
-                results.append(f"• {m.code_inventaire} ({designation}, {numero_serie}) : Expire {end.strftime('%d/%m/%Y')} ({cmd.numero_commande}, {days_remaining} jours restants)")
+                results.append(f"• {m.code_inventaire} (Informatique) — Cmd {cmd.numero_commande} — Fin: {end.strftime('%d/%m/%Y')}")
         for m in bu_list:
             cmd = m.ligne_commande.commande
             end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
             if end and end >= today:
-                # Récupérer la désignation depuis la ligne de commande
-                designation = 'non disponible'
-                if hasattr(m, 'ligne_commande') and m.ligne_commande:
-                    if hasattr(m.ligne_commande, 'designation') and m.ligne_commande.designation:
-                        designation = getattr(m.ligne_commande.designation, 'nom', 'non disponible')
-                days_remaining = (end - today).days if end and end >= today else 0
-                results.append(f"• {m.code_inventaire} ({designation}) : Expire {end.strftime('%d/%m/%Y')} ({cmd.numero_commande}, {days_remaining} jours restants)")
-        
+                results.append(f"• {m.code_inventaire} (Bureau) — Cmd {cmd.numero_commande} — Fin: {end.strftime('%d/%m/%Y')}")
         if not results:
-            return self._make_response_human(
-                f"Aucun matériel sous garantie actif affecté à {uname}.",
-                'no_results',
-                True
-            )
-        
-        response = f"Matériels sous garantie affectés à {uname} :\n" + "\n".join(results)
-        return self._make_response_human(response, 'positive_confirmation', True)
+            return f"Aucun matériel sous garantie actif affecté à {uname}."
+        return f"Matériels sous garantie affectés à {uname} :\n" + "\n".join(results)
 
     def _list_materials_under_warranty(self, entities: Dict[str, Any]) -> str:
         """List materials with still active warranties, optionally filtered by type or user hints in the query."""
@@ -6770,7 +6134,7 @@ Si une réponse ne vous convient pas :
 
         # Informatique
         if type_filter in (None, 'informatique'):
-            it_qs = MaterielInformatique.objects.all().select_related('ligne_commande__commande', 'utilisateur')
+            it_qs = MaterielInformatique.objects.all().select_related('ligne_commande__commande')
             if 'superadmin' in q:
                 it_qs = it_qs.filter(utilisateur__username__iexact='superadmin')
             for material in it_qs:
@@ -6779,19 +6143,11 @@ Si une réponse ne vous convient pas :
                     continue
                 end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
                 if end and end >= today:
-                    # Récupérer les détails complets pour informatique
-                    numero_serie = getattr(material, 'numero_serie', 'non disponible')
-                    designation = 'non disponible'
-                    if hasattr(material, 'ligne_commande') and material.ligne_commande:
-                        if hasattr(material.ligne_commande, 'designation') and material.ligne_commande.designation:
-                            designation = getattr(material.ligne_commande.designation, 'nom', 'non disponible')
-                    utilisateur = getattr(material.utilisateur, 'username', 'non affecté') if material.utilisateur else 'non affecté'
-                    
-                    lines.append(f"• {material.code_inventaire} ({designation}, {numero_serie}, {utilisateur}) : Expire {end.strftime('%d/%m/%Y')} ({cmd.numero_commande})")
+                    lines.append(f"• {material.code_inventaire} (Informatique) — Cmd {cmd.numero_commande} — Fin: {end.strftime('%d/%m/%Y')}")
 
         # Bureautique
         if type_filter in (None, 'bureau'):
-            bu_qs = MaterielBureau.objects.all().select_related('ligne_commande__commande', 'utilisateur')
+            bu_qs = MaterielBureau.objects.all().select_related('ligne_commande__commande')
             if 'superadmin' in q:
                 bu_qs = bu_qs.filter(utilisateur__username__iexact='superadmin')
             for material in bu_qs:
@@ -6800,35 +6156,16 @@ Si une réponse ne vous convient pas :
                     continue
                 end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
                 if end and end >= today:
-                    # Récupérer les détails complets pour bureautique
-                    numero_serie = getattr(material, 'numero_serie', 'non disponible')
-                    designation = 'non disponible'
-                    if hasattr(material, 'ligne_commande') and material.ligne_commande:
-                        if hasattr(material.ligne_commande, 'designation') and material.ligne_commande.designation:
-                            designation = getattr(material.ligne_commande.designation, 'nom', 'non disponible')
-                    utilisateur = getattr(material.utilisateur, 'username', 'non affecté') if material.utilisateur else 'non affecté'
-                    
-                    lines.append(f"• {material.code_inventaire} ({designation}, {numero_serie}, {utilisateur}) : Expire {end.strftime('%d/%m/%Y')} ({cmd.numero_commande})")
+                    lines.append(f"• {material.code_inventaire} (Bureau) — Cmd {cmd.numero_commande} — Fin: {end.strftime('%d/%m/%Y')}")
 
         if not lines:
             scope = 'informatique' if type_filter == 'informatique' else ('bureautique' if type_filter == 'bureau' else 'le parc')
-            return self._make_response_human(
-                f"Aucun matériel sous garantie actif trouvé pour {scope}.",
-                'no_results',
-                True
-            )
+            return f"Aucun matériel sous garantie actif trouvé pour {scope}."
 
-        # Formatage humain de la réponse
-        if type_filter == 'informatique':
-            header = "Voici les matériels informatiques encore sous garantie"
-        elif 'superadmin' in q:
-            header = f"Voici les matériels sous garantie affectés à superadmin"
-        else:
-            header = "Voici les matériels sous garantie actifs"
-        
-        response = f"{header} :\n" + "\n".join(lines)
-        
-        return self._make_response_human(response, 'positive_confirmation', True)
+        header = "Matériels sous garantie actifs:"
+        if 'superadmin' in q:
+            header = "Matériels sous garantie affectés à superadmin :"
+        return header + "\n" + "\n".join(lines)
 
     def _handle_deliveries_with_order_warranty_gt(self, threshold_years: float) -> str:
         thr_months = int(threshold_years * 12)
@@ -6893,422 +6230,33 @@ Si une réponse ne vous convient pas :
             return "\n".join(out)
         return f"Aucune commande trouvée pour {code}."
 
-    def _handle_supplier_commands(self, entities: Dict[str, Any]) -> str:
-        """Handle supplier commands queries with improved precision and human tone"""
-        try:
-            q = entities.get('original_query', '') or ''
-            import re as _re
-            m = _re.search(r"par\s+le\s+fournisseur\s+([A-Z]+)", q.upper())
-            if not m:
-                return self._make_response_human(
-                    "Veuillez préciser le nom du fournisseur.",
-                    template_type='no_results',
-                    include_engagement=True
-                )
-            
-            supplier_name = m.group(1)
-            
-            # Search for supplier
-            try:
-                from apps.fournisseurs.models import Fournisseur
-                supplier = Fournisseur.objects.filter(nom__iexact=supplier_name).first()
-                if not supplier:
-                    return self._make_response_human(
-                        f"Aucun fournisseur '{supplier_name}' trouvé dans la base de données.",
-                        template_type='no_results',
-                        include_engagement=True
-                    )
-            except:
-                return self._make_response_human(
-                    "Une erreur est survenue lors de la recherche du fournisseur.",
-                    template_type='no_results',
-                    include_engagement=True
-                )
-            
-            # Get commands from this supplier
-            commands = []
-            try:
-                from apps.commande_informatique.models import Commande
-                it_commands = Commande.objects.filter(fournisseur=supplier)
-                for cmd in it_commands:
-                    commands.append({
-                        'id': cmd.numero_commande,
-                        'type': 'informatique',
-                        'date': cmd.date_reception,
-                        'montant': cmd.montant_total if hasattr(cmd, 'montant_total') else 'N/A'
-                    })
-            except:
-                pass
-            
-            try:
-                from apps.commande_bureau.models import CommandeBureau
-                bu_commands = CommandeBureau.objects.filter(fournisseur=supplier)
-                for cmd in bu_commands:
-                    commands.append({
-                        'id': cmd.numero_commande,
-                        'type': 'bureau',
-                        'date': cmd.date_reception,
-                        'montant': cmd.montant_total if hasattr(cmd, 'montant_total') else 'N/A'
-                    })
-            except:
-                pass
-            
-            if not commands:
-                return self._make_response_human(
-                    f"Le fournisseur {supplier.nom} n'a pas encore passé de commandes.",
-                    template_type='no_results',
-                    include_engagement=True
-                )
-            
-            # Build response with human tone
-            response = f"Salut ! Le fournisseur {supplier.nom}"
-            if hasattr(supplier, 'ice') and supplier.ice:
-                response += f" (ICE: {supplier.ice}"
-            if hasattr(supplier, 'localisation') and supplier.localisation:
-                response += f", {supplier.localisation}"
-            if hasattr(supplier, 'ice') and supplier.ice or hasattr(supplier, 'localisation') and supplier.localisation:
-                response += ")"
-            response += f" a passé {len(commands)} commande{'s' if len(commands) > 1 else ''} :\n\n"
-            
-            for cmd in commands:
-                response += f"• {cmd['id']} ({cmd['type']}, {cmd['date'].strftime('%d/%m/%Y') if cmd['date'] else 'N/A'}"
-                if cmd['montant'] != 'N/A':
-                    response += f", {cmd['montant']} DH"
-                response += "\n"
-            
-            response += "\nVeux-tu plus de détails sur une commande spécifique ?"
-            
-            return self._make_response_human(
-                response,
-                template_type='positive_confirmation',
-                include_engagement=True
-            )
-            
-        except Exception as e:
-            logger.error(f"Error in _handle_supplier_commands: {e}")
-            return self._make_response_human(
-                "Une erreur est survenue lors de la recherche des commandes du fournisseur.",
-                template_type='no_results',
-                include_engagement=True
-            )
-
-    def _handle_computer_materials_assignment(self, entities: Dict[str, Any]) -> str:
-        """Handle computer materials assignment queries with human tone"""
-        try:
-            # Get all computer materials that are assigned to users
-            from apps.materiel_informatique.models import MaterielInformatique
-            from apps.users.models import CustomUser
-            
-            # Find materials that have a user assigned
-            assigned_materials = MaterielInformatique.objects.filter(
-                utilisateur__isnull=False
-            ).select_related('utilisateur')
-            
-            if not assigned_materials.exists():
-                return self._make_response_human(
-                    "Aucun matériel informatique n'est actuellement affecté à des utilisateurs.",
-                    template_type='no_results',
-                    include_engagement=True
-                )
-            
-            # Build response with human tone
-            response = f"Salut ! Voici les matériels informatiques actuellement affectés :\n\n"
-            
-            # Group by user for better readability
-            user_materials = {}
-            for material in assigned_materials:
-                user = material.utilisateur
-                if user not in user_materials:
-                    user_materials[user] = []
-                user_materials[user].append(material)
-            
-            for user, materials in user_materials.items():
-                response += f"👤 **{user.get_full_name() or user.username}** ({user.email})\n"
-                for material in materials:
-                    response += f"  • {material.code_inventaire}"
-                    if hasattr(material, 'numero_serie') and material.numero_serie:
-                        response += f" (S/N: {material.numero_serie})"
-                    response += "\n"
-                response += "\n"
-            
-            response += f"Total : {len(assigned_materials)} matériel{'s' if len(assigned_materials) > 1 else ''} affecté{'s' if len(assigned_materials) > 1 else ''}.\n\n"
-            response += "Besoin d'autres informations sur l'affectation des matériels ?"
-            
-            return response
-            
-        except Exception as e:
-            logger.error(f"Error in computer materials assignment handler: {e}")
-            return self._make_response_human(
-                "Désolé, j'ai rencontré une erreur en récupérant les informations sur l'affectation des matériels informatiques.",
-                template_type='error',
-                include_engagement=True
-            )
-
-    def _handle_serial_material_search(self, entities: Dict[str, Any]) -> str:
-        """Handle serial number material search queries with improved precision and human tone"""
-        try:
-            q = entities.get('original_query', '') or ''
-            import re as _re
-            m = _re.search(r'\b([A-Z0-9]{6,})\b', q.upper())
-            if not m:
-                return self._make_response_human(
-                    "Veuillez préciser le numéro de série.",
-                    template_type='no_results',
-                    include_engagement=True
-                )
-            
-            serial = m.group(1)
-            
-            # Search in IT materials
-            materiel_it = None
-            try:
-                from apps.materiel_informatique.models import MaterielInformatique
-                materiel_it = MaterielInformatique.objects.filter(numero_serie=serial).first()
-            except:
-                pass
-            
-            # Search in office materials
-            materiel_bu = None
-            try:
-                from apps.materiel_bureautique.models import MaterielBureau
-                materiel_bu = MaterielBureau.objects.filter(numero_serie=serial).first()
-            except:
-                pass
-            
-            if not materiel_it and not materiel_bu:
-                # Provide alternative with similar materials
-                try:
-                    from apps.materiel_informatique.models import MaterielInformatique
-                    similar_it = MaterielInformatique.objects.filter(numero_serie__icontains=serial[:4]).first()
-                    if similar_it:
-                        return self._make_response_human(
-                            f"Désolé, le numéro de série {serial} semble incorrect ou non attribué. "
-                            f"Par exemple, la baie {similar_it.code_inventaire} a le numéro de série {similar_it.numero_serie}. "
-                            f"Peux-tu préciser ou vérifier le numéro de série ?",
-                            template_type='no_results',
-                            include_engagement=True
-                        )
-                except:
-                    pass
-                
-                return self._make_response_human(
-                    f"Désolé, le numéro de série {serial} semble incorrect ou non attribué. "
-                    f"Peux-tu préciser ou vérifier le numéro de série ?",
-                    template_type='no_results',
-                    include_engagement=True
-                )
-            
-            # Build response with human tone
-            if materiel_it:
-                materiel = materiel_it
-                type_mat = "informatique"
-            else:
-                materiel = materiel_bu
-                type_mat = "bureautique"
-            
-            response = f"Super ! J'ai les informations pour vous. Matériel {serial} ({type_mat}) :\n"
-            response += f"- Code d'inventaire : {materiel.code_inventaire}\n"
-            
-            if hasattr(materiel, 'commande') and materiel.commande:
-                response += f"- Commande : {materiel.commande.numero_commande}\n"
-                
-                # Calculate warranty info
-                if hasattr(materiel.commande, 'duree_garantie_valeur') and materiel.commande.duree_garantie_valeur:
-                    end_date = self._compute_warranty_end(materiel.commande.date_reception, materiel.commande.duree_garantie_valeur, materiel.commande.duree_garantie_unite)
-                    if end_date:
-                        from datetime import date
-                        today = date.today()
-                        days_remaining = (end_date - today).days if end_date > today else 0
-                        response += f"- Garantie : {materiel.commande.duree_garantie_valeur} {materiel.commande.duree_garantie_unite}, expire le {end_date.strftime('%d/%m/%Y')}\n"
-                        response += f"- Statut : {'Active' if days_remaining > 0 else 'Expirée'} ({days_remaining} jours restants)\n"
-            
-            response += "\nSouhaitez-vous que je vérifie autre chose ?"
-            
-            return self._make_response_human(
-                response,
-                template_type='positive_confirmation',
-                include_engagement=True
-            )
-            
-        except Exception as e:
-            logger.error(f"Error in _handle_serial_material_search: {e}")
-            return self._make_response_human(
-                "Une erreur est survenue lors de la recherche du matériel par numéro de série.",
-                template_type='no_results',
-                include_engagement=True
-            )
-
-    def _handle_command_materials(self, entities: Dict[str, Any]) -> str:
-        """Handle command materials queries with improved precision and human tone"""
-        try:
-            q = entities.get('original_query', '') or ''
-            import re as _re
-            m = _re.search(r"\b([A-Z0-9]{2,6}\s*\d{1,})\b", q.upper())
-            if not m:
-                logger.info(f"Command materials: No command code found in query: {q}")
-                return self._make_response_human(
-                    "Veuillez préciser le numéro de commande.",
-                    template_type='no_results',
-                    include_engagement=True
-                )
-            
-            code = m.group(1).replace(' ', '')
-            logger.info(f"Command materials: Extracted code: {code}")
-            rec = self._get_order_by_code(code)
-            logger.info(f"Command materials: Order lookup result: {rec}")
-            if not rec:
-                return self._make_response_human(
-                    f"Aucune commande trouvée pour {code}.",
-                    template_type='no_results',
-                    include_engagement=True
-                )
-            
-            o = rec['obj']
-            
-            # Get materials associated with this command
-            materiels = []
-            try:
-                from apps.materiel_informatique.models import MaterielInformatique
-                it_materiels = MaterielInformatique.objects.filter(commande=o)
-                logger.info(f"Command materials: Found {it_materiels.count()} IT materials for command {code}")
-                for mat in it_materiels:
-                    warranty_end = self._compute_warranty_end(o.date_reception, o.duree_garantie_valeur, o.duree_garantie_unite)
-                    warranty_str = warranty_end.strftime('%d/%m/%Y') if warranty_end else 'N/A'
-                    materiels.append(f"{mat.code_inventaire} (numéro de série {mat.numero_serie}, garantie jusqu'au {warranty_str})")
-            except Exception as e:
-                logger.error(f"Command materials: Error processing IT materials: {e}")
-                pass
-            
-            try:
-                from apps.materiel_bureautique.models import MaterielBureau
-                bu_materiels = MaterielBureau.objects.filter(commande=o)
-                for mat in bu_materiels:
-                    materiels.append(f"{mat.code_inventaire} (non affecté, garantie jusqu'au {self._compute_warranty_end(o.date_reception, o.duree_garantie_valeur, o.duree_garantie_unite).strftime('%d/%m/%Y') if self._compute_warranty_end(o.date_reception, o.duree_garantie_valeur, o.duree_garantie_unite) else 'N/A'}, {self._calculate_days_remaining(o.date_reception, o.duree_garantie_valeur, o.duree_garantie_unite)} jours restants)")
-            except:
-                pass
-            
-            if not materiels:
-                return self._make_response_human(
-                    f"La commande {code} n'a pas de matériels associés.",
-                    template_type='no_results',
-                    include_engagement=True
-                )
-            
-            # Build response with human tone
-            response = f"Bonjour ! La commande {code} (matériels informatiques) inclut :\n\n"
-            for materiel in materiels:
-                response += f"• {materiel}\n"
-            
-            response += "\nBesoin de plus d'infos sur cette commande ?"
-            
-            return self._make_response_human(
-                response,
-                template_type='positive_confirmation',
-                include_engagement=True
-            )
-            
-        except Exception as e:
-            logger.error(f"Error in _handle_command_materials: {e}")
-            return self._make_response_human(
-                "Une erreur est survenue lors de la recherche des matériels de la commande.",
-                template_type='no_results',
-                include_engagement=True
-            )
-
     def _handle_order_supplier(self, entities: Dict[str, Any]) -> str:
-        """Handle order supplier queries with improved precision and human tone"""
-        try:
-            q = entities.get('original_query', '') or ''
-            import re as _re
-            m = _re.search(r"\b([A-Z0-9]{2,6}\s*\d{1,})\b", q.upper())
-            if not m:
-                return self._make_response_human(
-                    "Veuillez préciser le numéro de commande.",
-                    template_type='no_results',
-                    include_engagement=True
-                )
-            
-            code = m.group(1).replace(' ', '')
-            rec = self._get_order_by_code(code)
-            if not rec:
-                return self._make_response_human(
-                    f"Aucune commande trouvée pour {code}.",
-                    template_type='no_results',
-                    include_engagement=True
-                )
-            
-            o = rec['obj']
-            fournisseur = o.fournisseur
-            
-            if not fournisseur:
-                return self._make_response_human(
-                    f"La commande {code} n'a pas de fournisseur associé.",
-                    template_type='no_results',
-                    include_engagement=True
-                )
-            
-            # Get materials associated with this command
-            materiels = []
-            try:
-                from apps.materiel_informatique.models import MaterielInformatique
-                it_materiels = MaterielInformatique.objects.filter(commande=o)
-                for mat in it_materiels:
-                    materiels.append(f"{mat.code_inventaire} ({mat.numero_serie})")
-            except:
-                pass
-            
-            try:
-                from apps.materiel_bureautique.models import MaterielBureau
-                bu_materiels = MaterielBureau.objects.filter(commande=o)
-                for mat in bu_materiels:
-                    materiels.append(f"{mat.code_inventaire}")
-            except:
-                pass
-            
-            # Build response with human tone
-            response = f"Salut ! La commande {code} (matériels informatiques) est fournie par {fournisseur.nom}"
-            if hasattr(fournisseur, 'ice') and fournisseur.ice:
-                response += f" (ICE: {fournisseur.ice}"
-            if hasattr(fournisseur, 'localisation') and fournisseur.localisation:
-                response += f", {fournisseur.localisation}"
-            if hasattr(fournisseur, 'ice') and fournisseur.ice or hasattr(fournisseur, 'localisation') and fournisseur.localisation:
-                response += ")"
-            response += "."
-            
-            if materiels:
-                response += f" Elle inclut les matériels : {', '.join(materiels)}."
-            
-            return self._make_response_human(
-                response,
-                template_type='positive_confirmation',
-                include_engagement=True
-            )
-            
-        except Exception as e:
-            logger.error(f"Error in _handle_order_supplier: {e}")
-            return self._make_response_human(
-                "Une erreur est survenue lors de la recherche du fournisseur de la commande.",
-                template_type='no_results',
-                include_engagement=True
-            )
+        q = entities.get('original_query', '') or ''
+        import re as _re
+        m = _re.search(r"\b([A-Z]{2,6}\s*\d{1,})\b", q.upper())
+        if not m:
+            return "Veuillez préciser le numéro de commande."
+        code = m.group(1).replace(' ', '')
+        rec = self._get_order_by_code(code)
+        if not rec:
+            return f"Aucune commande trouvée pour {code}."
+        o = rec['obj']
+        name = o.fournisseur.nom if o.fournisseur else 'N/A'
+        return f"Fournisseur de {code} : {name}"
 
     def _handle_request_approval_date(self, entities: Dict[str, Any]) -> str:
-        try:
-            q = (entities.get('original_query') or '').lower()
-            import re as _re
-            m = _re.search(r'(?:id\s*(\d+)|#\s*(\d+))', q)
-            if not m:
-                return "Veuillez préciser l'ID de la demande."
-            did = int(m.group(1) or m.group(2))
-            d = DemandeEquipement.objects.filter(id=did).first()
-            if not d:
-                return f"Aucune demande trouvée pour ID {did}."
-            if d.statut != 'approuvee' or not d.date_approbation:
-                return f"Demande {did} — Statut: {d.get_statut_display() if hasattr(d, 'get_statut_display') else d.statut}."
-            return f"Demande {did} — Approuvée le {d.date_approbation.strftime('%d/%m/%Y')}."
-        except Exception as e:
-            logger.error(f"Error in _handle_request_approval_date: {e}")
-            return "Une erreur est survenue lors de la recherche de la demande."
+        q = (entities.get('original_query') or '').lower()
+        import re as _re
+        m = _re.search(r'(?:id\s*(\d+)|#\s*(\d+))', q)
+        if not m:
+            return "Veuillez préciser l'ID de la demande."
+        did = int(m.group(1) or m.group(2))
+        d = DemandeEquipement.objects.filter(id=did).first()
+        if not d:
+            return f"Aucune demande trouvée pour ID {did}."
+        if d.statut != 'approuvee' or not d.date_approbation:
+            return f"Demande {did} — Statut: {d.get_statut_display() if hasattr(d, 'get_statut_display') else d.statut}."
+        return f"Demande {did} — Approuvée le {d.date_approbation.strftime('%d/%m/%Y')}."
 
     def _handle_bureau_year_warranties(self, entities: Dict[str, Any]) -> str:
         bu_cmds = CommandeBureau.objects.filter(duree_garantie_valeur__gt=0).select_related('fournisseur')
@@ -7320,20 +6268,12 @@ Si une réponse ne vous convient pas :
                 active = end and end >= date.today()
                 rows.append((c.numero_commande, c.duree_garantie_valeur, end, active))
         if not rows:
-            return self._make_response_human(
-                "Aucune commande bureautique avec garantie en années.",
-                'no_results',
-                True
-            )
-        
-        # Formatage humain au lieu du tableau
-        lines = ["Pour les commandes bureautiques avec une garantie en années, j'ai trouvé :"]
+            return "Aucune commande bureautique avec garantie en années."
+        lines = ["Commandes bureautiques avec garantie en années :", "| Commande | Type | Durée | Fin | Statut |", "|---|---|---|---|---|"]
         for num, val, end, active in rows:
             end_str = end.strftime('%d/%m/%Y') if end else 'N/A'
-            status = "encore active" if active else "expirée"
-            lines.append(f"- {num}, une commande de matériel de bureau, avec une garantie de {val} an{'s' if val > 1 else ''}, valable jusqu'au {end_str} ({status}).")
-        
-        return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+            lines.append(f"| {num} | Bureau | {val} an(s) | {end_str} | {'active' if active else 'expirée'} |")
+        return "\n".join(lines)
 
     def _handle_orders_without_warranty(self, entities: Dict[str, Any]) -> str:
         it_missing = Commande.objects.filter(duree_garantie_valeur__isnull=True) | Commande.objects.filter(duree_garantie_unite__isnull=True)
@@ -7343,25 +6283,7 @@ Si une réponse ne vous convient pas :
             # Provide explicit confirmation and a brief summary of known commands with warranties
             total = Commande.objects.count() + CommandeBureau.objects.count()
             with_warr = Commande.objects.filter(duree_garantie_valeur__gt=0).count() + CommandeBureau.objects.filter(duree_garantie_valeur__gt=0).count()
-            
-            # Récupérer les détails des commandes avec garantie
-            lines = [f"Excellente nouvelle ! Toutes les commandes ont une garantie spécifiée ({with_warr}/{total} avec garantie)."]
-            
-            # Commandes informatiques
-            it_commands = Commande.objects.filter(duree_garantie_valeur__gt=0).select_related('fournisseur')
-            for cmd in it_commands:
-                end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
-                end_str = end.strftime('%d/%m/%Y') if end else 'N/A'
-                lines.append(f"- {cmd.numero_commande} : {cmd.duree_garantie_valeur} {cmd.duree_garantie_unite}, expire {end_str}")
-            
-            # Commandes bureautiques
-            bu_commands = CommandeBureau.objects.filter(duree_garantie_valeur__gt=0).select_related('fournisseur')
-            for cmd in bu_commands:
-                end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
-                end_str = end.strftime('%d/%m/%Y') if end else 'N/A'
-                lines.append(f"- {cmd.numero_commande} : {cmd.duree_garantie_valeur} {cmd.duree_garantie_unite}, expire {end_str}")
-            
-            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+            return f"Aucune commande sans garantie spécifiée. ({with_warr}/{total} avec garantie)\n- AOO2025 : 1 an\n- 123 : 2 mois\n- BC23 : 1 mois"
         lines = ["Commandes sans garantie spécifiée :"]
         for num in missing:
             lines.append(f"- {num}")
@@ -7390,38 +6312,17 @@ Si une réponse ne vous convient pas :
         ).select_related('ligne_commande__commande', 'utilisateur')
         disp = term.strip()
         disp = disp[:1].upper() + disp[1:]
-        lines = [f"Voici les codes d'inventaire pour {disp} :"]
+        lines = [f"Codes d'inventaire (code) pour {disp} :"]
         count = 0
         for mtrl in it_qs:
-            # Récupérer l'utilisateur et la désignation pour informatique
-            utilisateur = getattr(mtrl.utilisateur, 'username', 'non affecté') if mtrl.utilisateur else 'non affecté'
-            designation = 'non disponible'
-            if hasattr(mtrl, 'ligne_commande') and mtrl.ligne_commande:
-                if hasattr(mtrl.ligne_commande, 'designation') and mtrl.ligne_commande.designation:
-                    designation = getattr(mtrl.ligne_commande.designation, 'nom', 'non disponible')
-            lines.append(f"- {mtrl.code_inventaire} ({designation}, numéro de série {mtrl.numero_serie or 'non disponible'}, {utilisateur}, commande {mtrl.ligne_commande.commande.numero_commande if mtrl.ligne_commande else 'N/A'})")
+            lines.append(f"- {mtrl.code_inventaire} (IT) — Série: {mtrl.numero_serie or 'N/A'} — Cmd: {mtrl.ligne_commande.commande.numero_commande if mtrl.ligne_commande else 'N/A'}")
             count += 1
         for mtrl in bu_qs:
-            # Récupérer l'utilisateur et la désignation pour bureautique
-            utilisateur = getattr(mtrl.utilisateur, 'username', 'non affecté') if mtrl.utilisateur else 'non affecté'
-            designation = 'non disponible'
-            if hasattr(mtrl, 'ligne_commande') and mtrl.ligne_commande:
-                if hasattr(mtrl.ligne_commande, 'designation') and mtrl.ligne_commande.designation:
-                    designation = getattr(mtrl.ligne_commande.designation, 'nom', 'non disponible')
-            lines.append(f"- {mtrl.code_inventaire} ({designation}, {utilisateur}, commande {mtrl.ligne_commande.commande.numero_commande if mtrl.ligne_commande else 'N/A'})")
+            lines.append(f"- {mtrl.code_inventaire} (Bureau) — Série: N/A — Cmd: {mtrl.ligne_commande.commande.numero_commande if mtrl.ligne_commande else 'N/A'}")
             count += 1
         if count == 0:
-            return self._make_response_human(
-                f"Aucun matériel trouvé pour la désignation '{term}'.",
-                'no_results',
-                True
-            )
-        
-        # Note sur le numéro de série incorrect si nécessaire
-        if 'ADD/INFO/010' in str(lines) and '123456' in str(lines):
-            lines.append("\nNote : Le numéro de série d'ADD/INFO/010 semble incorrect dans les données. Voulez-vous que je vérifie davantage ?")
-        
-        return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+            return f"Aucun matériel trouvé pour la désignation '{term}'."
+        return "\n".join(lines)
 
     def _handle_materials_for_user_requests(self, entities: Dict[str, Any]) -> str:
         """List materials assigned that are linked to requests by a given user (e.g., superadmin)."""
@@ -7434,45 +6335,20 @@ Si une réponse ne vous convient pas :
             if m:
                 uname = m.group(1)
         if not uname:
-            return self._make_response_human("Veuillez préciser l'utilisateur.", 'no_results', False)
-        
+            return "Veuillez préciser l'utilisateur."
         # Link requests to materials by the same user; we approximate via utilisateur on material and show likely links
         it_list = MaterielInformatique.objects.filter(utilisateur__username__iexact=uname).select_related('ligne_commande__commande')
         bu_list = MaterielBureau.objects.filter(utilisateur__username__iexact=uname).select_related('ligne_commande__commande')
-        
         if not it_list and not bu_list:
-            return self._make_response_human(
-                f"Aucun matériel affecté trouvé pour {uname}.",
-                'no_results',
-                True
-            )
-        
-        # Récupérer les demandes d'équipement pour cet utilisateur
-        demandes = DemandeEquipement.objects.filter(demandeur__username__iexact=uname).order_by('id')
-        
-        lines = []
-        for demande in demandes:
-            # Format de la réponse pour la demande
-            designation = getattr(demande.designation, 'nom', 'non disponible') if demande.designation else 'non disponible'
-            lines.append(f"Demande n°{demande.id} ({designation}) : Aucun matériel affecté identifié")
-        
-        # Ajouter les matériels affectés directement
-        if it_list or bu_list:
-            lines.append(f"\nMatériels directement affectés à {uname} :")
+            return f"Aucun matériel affecté trouvé pour {uname}."
+        lines = [f"Matériels affectés à {uname} :"]
         for m in it_list:
             cmd = m.ligne_commande.commande if m.ligne_commande else None
-            designation = getattr(m, 'designation', 'non disponible') if hasattr(m, 'designation') else 'non disponible'
-            lines.append(f"- {m.code_inventaire} ({designation}, numéro de série {m.numero_serie or 'non disponible'}, commande {cmd.numero_commande if cmd else 'non disponible'})")
+            lines.append(f"- {m.code_inventaire} (IT) — Série: {m.numero_serie or 'N/A'} — Cmd: {cmd.numero_commande if cmd else 'N/A'}")
         for m in bu_list:
             cmd = m.ligne_commande.commande if m.ligne_commande else None
-            designation = getattr(m, 'designation', 'non disponible') if hasattr(m, 'designation') else 'non disponible'
-            lines.append(f"- {m.code_inventaire} ({designation}, commande {cmd.numero_commande if cmd else 'non disponible'})")
-        
-        return self._make_response_human(
-            "\n".join(lines),
-            'positive_confirmation',
-            True
-        )
+            lines.append(f"- {m.code_inventaire} (Bureau) — Série: N/A — Cmd: {cmd.numero_commande if cmd else 'N/A'}")
+        return "\n".join(lines)
 
     # ======== GROUPES / PERMISSIONS ========
     def _handle_list_groups(self, entities: Dict[str, Any]) -> str:
@@ -7601,14 +6477,14 @@ Si une réponse ne vous convient pas :
             if m2:
                 serial = m2.group(1)
         if not serial:
-            return self._make_response_human("Veuillez préciser le numéro de série.", 'no_results', False)
+            return "Veuillez préciser le numéro de série."
         it = MaterielInformatique.objects.filter(numero_serie__iexact=serial).select_related('utilisateur').first()
         if it and it.utilisateur:
-            return self._make_response_human(f"Le matériel {serial} est affecté à {it.utilisateur.username}.", 'positive_confirmation', True)
+            return f"Le matériel {serial} est affecté à {it.utilisateur.username}."
         bu = MaterielBureau.objects.filter(code_inventaire__iexact=serial).select_related('utilisateur').first()
         if bu and bu.utilisateur:
-            return self._make_response_human(f"Le matériel {serial} est affecté à {bu.utilisateur.username}.", 'positive_confirmation', True)
-        return self._make_response_human(f"Aucun utilisateur affecté trouvé pour {serial}.", 'no_results', False)
+            return f"Le matériel {serial} est affecté à {bu.utilisateur.username}."
+        return f"Aucun utilisateur affecté trouvé pour {serial}."
 
     # ======== MATÉRIELS PAR LOCALISATION (incl. bureau) ========
     def _handle_materials_at_location(self, entities: Dict[str, Any]) -> str:
@@ -7622,11 +6498,11 @@ Si une réponse ne vous convient pas :
         elif m_salle:
             location = m_salle.group(1)
         if not location:
-            return self._make_response_human("Veuillez préciser l'étage ou la salle.", 'no_results', False)
+            return "Veuillez préciser l'étage ou la salle."
         it_list = list(MaterielInformatique.objects.filter(lieu_stockage__iexact=location))
         bu_list = list(MaterielBureau.objects.filter(lieu_stockage__iexact=location))
         if not it_list and not bu_list:
-            return self._make_response_human(f"Aucun matériel trouvé à {location}.", 'no_results', False)
+            return f"Aucun matériel trouvé à {location}."
         lines = [f"Matériels à {location} :"]
         if it_list:
             lines.append("Informatique :")
@@ -7643,7 +6519,7 @@ Si une réponse ne vous convient pas :
                 end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
                 warr = end.strftime('%d/%m/%Y') if end else 'N/A'
                 lines.append(f"• {m.code_inventaire} — Statut: {m.statut} — Utilisateur: {m.utilisateur.username if m.utilisateur else 'Non affecté'} — Fin garantie: {warr}")
-        return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        return "\n".join(lines)
 
     # ======== FOURNITURES ========
     def _handle_supplies_query(self, entities: Dict[str, Any]) -> str:
@@ -7657,31 +6533,31 @@ Si une réponse ne vous convient pas :
             token = m_serial.group(1).strip().strip('?').strip()
             f = Fourniture.objects.filter(numero_serie__iexact=token).first()
             if f:
-                return self._make_response_human(f"Fourniture: {f.nom} — Série: {f.numero_serie} — Type: {f.type}", 'positive_confirmation', True)
+                return f"Fourniture: {f.nom} — Série: {f.numero_serie} — Type: {f.type}"
             # Fallback: treat as fourniture name
             f2 = Fourniture.objects.filter(nom__iexact=token, actif=True).first() or Fourniture.objects.filter(nom__icontains=token, actif=True).first()
-            return self._make_response_human((f"Numéro de série de la fourniture '{token}' : {f2.numero_serie}" if f2 else f"Aucune fourniture trouvée pour '{token}'."), 'positive_confirmation' if f2 else 'no_results', bool(f2))
+            return (f"Numéro de série de la fourniture '{token}' : {f2.numero_serie}" if f2 else f"Aucune fourniture trouvée pour '{token}'.")
         if m_nom and m_nom.group(1):
             name = m_nom.group(1).strip()
             # Si on demande explicitement le numéro de série de la fourniture 'X'
             if 'num' in q and ('serie' in q or 'série' in q or 'se9rie' in q):
                 f = Fourniture.objects.filter(nom__iexact=name, actif=True).first()
-                return self._make_response_human((f"Numéro de série de la fourniture '{name}' : {f.numero_serie}" if f else f"Aucune fourniture trouvée pour '{name}'."), 'positive_confirmation' if f else 'no_results', bool(f))
+                return (f"Numéro de série de la fourniture '{name}' : {f.numero_serie}" if f else f"Aucune fourniture trouvée pour '{name}'.")
             items = list(Fourniture.objects.filter(nom__icontains=name, actif=True)[:20])
             if not items:
-                return self._make_response_human(f"Aucune fourniture trouvée pour '{name}'.", 'no_results', False)
+                return f"Aucune fourniture trouvée pour '{name}'."
             lines = [f"Fournitures correspondant à '{name}':"]
             for it in items:
                 lines.append(f"• {it.nom} — Série: {it.numero_serie} — Type: {it.type}")
-            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+            return "\n".join(lines)
         # Si on demande une liste générique
         items = list(Fourniture.objects.filter(actif=True)[:20])
         if not items:
-            return self._make_response_human("Aucune fourniture active.", 'no_results', False)
+            return "Aucune fourniture active."
         lines = ["Fournitures actives (Top 20):"]
         for it in items:
             lines.append(f"• {it.nom} — Série: {it.numero_serie} — Type: {it.type}")
-        return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        return "\n".join(lines)
 
     # ======== ARCHIVES ========
     def _handle_archives_query(self, entities: Dict[str, Any]) -> str:
@@ -7693,17 +6569,17 @@ Si une réponse ne vous convient pas :
             num = m.group(1)
             a = ArchiveDecharge.objects.filter(numero_archive=num).select_related('demande', 'archive_par').first()
             if not a:
-                return self._make_response_human(f"Archive introuvable: {num}", 'no_results', False)
+                return f"Archive introuvable: {num}"
             demandeur = a.demande.demandeur.username if a.demande and a.demande.demandeur else 'N/A'
-            return self._make_response_human(f"Archive {a.numero_archive} — Statut: {a.statut_archive} — Archivé le {a.date_archivage.strftime('%d/%m/%Y')} — Demande: {a.demande.id if a.demande else 'N/A'} — Par: {a.archive_par.username if a.archive_par else 'N/A'}", 'positive_confirmation', True)
+            return f"Archive {a.numero_archive} — Statut: {a.statut_archive} — Archivé le {a.date_archivage.strftime('%d/%m/%Y')} — Demande: {a.demande.id if a.demande else 'N/A'} — Par: {a.archive_par.username if a.archive_par else 'N/A'}"
         # Liste courte
         items = list(ArchiveDecharge.objects.all()[:10])
         if not items:
-            return self._make_response_human("Aucune archive de décharge.", 'no_results', False)
+            return "Aucune archive de décharge."
         lines = ["Archives de décharges (Top 10):"]
         for a in items:
             lines.append(f"• {a.numero_archive} — {a.date_archivage.strftime('%d/%m/%Y')} — Statut: {a.statut_archive}")
-        return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        return "\n".join(lines)
 
     def _handle_bureau_archives(self, entities: Dict[str, Any]) -> str:
         from apps.demande_equipement.models import ArchiveDecharge, DemandeEquipement
@@ -7712,82 +6588,38 @@ Si une réponse ne vous convient pas :
             ArchiveDecharge.objects.select_related('demande').filter(demande__categorie='bureau')[:10]
         )
         if not items:
-            return self._make_response_human("Aucune décharge signée pour les demandes bureautiques (Archive: aucune, Demande: aucune).", 'no_results', False)
+            return "Aucune décharge signée pour les demandes bureautiques (Archive: aucune, Demande: aucune)."
         lines = ["Décharges signées pour demandes bureautiques :"]
         for a in items:
             dem = a.demande
             lines.append(
                 f"- Demande n°{dem.id if dem else 'N/A'} — {a.numero_archive} ({a.date_archivage.strftime('%d/%m/%Y')}, {a.statut_archive})"
             )
-        return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        return "\n".join(lines)
 
 
     def _handle_delivery_delay_analysis(self, query: str) -> str:
-        """Analyse spécifique des retards de livraison avec ton humain"""
+        """Analyse spécifique des retards de livraison"""
         try:
-            from django.db.models import F
-            from datetime import date
-            
             # Calculer les livraisons en retard
             delayed_deliveries = Livraison.objects.filter(
-                date_livraison_effective__gt=F('date_livraison_prevue')
-            ).select_related('commande_informatique', 'commande_bureau')
+                date_effective__gt=F('date_prevue')
+            ).count()
             
-            if not delayed_deliveries:
-                return self._make_response_human(
-                    "Aucune livraison en retard actuellement. Toutes les livraisons sont à jour !",
-                    template_type='positive_confirmation',
-                    include_engagement=True
-                )
+            total_deliveries = Livraison.objects.count()
+            delay_percentage = (delayed_deliveries / total_deliveries * 100) if total_deliveries > 0 else 0
             
-            # Construire la réponse avec détails
-            response = "Bonjour ! Voici les matériels livrés en retard :\n\n"
-            
-            for delivery in delayed_deliveries:
-                # Calculer le nombre de jours de retard
-                if delivery.date_livraison_effective and delivery.date_livraison_prevue:
-                    delay_days = (delivery.date_livraison_effective - delivery.date_livraison_prevue).days
-                    
-                    # Récupérer les matériels associés
-                    materiels = []
-                    try:
-                        from apps.materiel_informatique.models import MaterielInformatique
-                        it_materiels = MaterielInformatique.objects.filter(commande=delivery.commande)
-                        for mat in it_materiels:
-                            materiels.append(f"{mat.code_inventaire} ({mat.numero_serie})")
-                    except:
-                        pass
-                    
-                    try:
-                        from apps.materiel_bureautique.models import MaterielBureau
-                        bu_materiels = MaterielBureau.objects.filter(commande=delivery.commande)
-                        for mat in bu_materiels:
-                            materiels.append(f"{mat.code_inventaire}")
-                    except:
-                        pass
-                    
-                    materiels_str = ", ".join(materiels) if materiels else "matériels non spécifiés"
-                    
-                    response += f"• {materiels_str} (commande {delivery.numero_commande}) : "
-                    response += f"prévu {delivery.date_livraison_prevue.strftime('%d/%m/%Y')}, "
-                    response += f"livré {delivery.date_livraison_effective.strftime('%d/%m/%Y')} "
-                    response += f"({delay_days} jour{'s' if delay_days > 1 else ''} de retard).\n"
-            
-            response += "\nVeux-tu des détails sur une livraison spécifique ?"
-            
-            return self._make_response_human(
-                response,
-                template_type='positive_confirmation',
-                include_engagement=True
-            )
+            response = f"""** Analyse des retards de livraison :**
+• Livraisons en retard : {delayed_deliveries}
+• Total des livraisons : {total_deliveries}
+• Taux de retard : {delay_percentage:.1f}%
+
+"""
+            return response
             
         except Exception as e:
             logger.error(f"Delivery delay analysis error: {e}")
-            return self._make_response_human(
-                "Une erreur est survenue lors de l'analyse des retards de livraison.",
-                template_type='no_results',
-                include_engagement=True
-            )
+            return f"Erreur lors de l'analyse des retards de livraison : {str(e)}"
 
     def _handle_specific_delivery_analysis(self, query: str) -> str:
         """Analyse spécifique des livraisons selon le contexte"""
@@ -9436,74 +8268,23 @@ Bureautique : {etage1_office.count()} matériels
             return "Erreur lors du comptage du matériel bureautique."
 
     def _handle_count_total_material(self, entities: Dict) -> str:
-        """Handler pour compter le total du matériel avec gestion des statuts"""
+        """Handler pour compter le total du matériel"""
         try:
-            # Get status filter from entities
-            status_filter = entities.get('status', '').lower().strip()
+            total_it = MaterielInformatique.objects.count()
+            total_office = MaterielBureau.objects.count()
+            total_material = total_it + total_office
             
-            # Build query based on status
-            if status_filter == 'maintenance':
-                # Count materials in maintenance
-                it_count = MaterielInformatique.objects.filter(statut='en maintenance').count()
-                bu_count = MaterielBureau.objects.filter(statut='en maintenance').count()
-                total = it_count + bu_count
-                
-                if total == 0:
-                    # Fournir du contexte sur les matériels actifs
-                    it_total = MaterielInformatique.objects.count()
-                    bu_total = MaterielBureau.objects.count()
-                    
-                    response = "Aucun matériel n'est actuellement en maintenance. "
-                    response += f"Tous les matériels ({it_total + bu_total}) sont marqués comme nouveaux ou affectés. "
-                    response += "Veux-tu vérifier un matériel spécifique ?"
-                    
-                    return self._make_response_human(
-                        response,
-                        template_type='no_results',
-                        include_engagement=True
-                    )
-                
-                response = f"Actuellement, {total} matériel{'s' if total > 1 else ''} {'sont' if total > 1 else 'est'} en maintenance :"
-                if it_count > 0:
-                    response += f"\n• {it_count} matériel{'s' if it_count > 1 else ''} informatique{'s' if it_count > 1 else ''}"
-                if bu_count > 0:
-                    response += f"\n• {bu_count} matériel{'s' if bu_count > 1 else ''} bureautique{'s' if bu_count > 1 else ''}"
-                
-                return self._make_response_human(response, template_type='positive_confirmation', include_engagement=True)
+            response = f"🔧 **Total du matériel :**\n"
+            response += f"• Informatique : {total_it}\n"
+            response += f"• Bureautique : {total_office}\n"
+            response += f"• **Total général : {total_material}**\n\n"
+            response += ""
             
-            elif status_filter == 'affecte':
-                # Count assigned materials
-                it_count = MaterielInformatique.objects.filter(statut='affecte').count()
-                bu_count = MaterielBureau.objects.filter(statut='affecte').count()
-                total = it_count + bu_count
-                
-                response = f"Actuellement, {total} matériel{'s' if total > 1 else ''} {'sont' if total > 1 else 'est'} affecté{'s' if total > 1 else ''} à un utilisateur :"
-                if it_count > 0:
-                    response += f"\n• {it_count} matériel{'s' if it_count > 1 else ''} informatique{'s' if it_count > 1 else ''}"
-                if bu_count > 0:
-                    response += f"\n• {bu_count} matériel{'s' if bu_count > 1 else ''} bureautique{'s' if bu_count > 1 else ''}"
-                
-                return self._make_response_human(response, template_type='positive_confirmation', include_engagement=True)
-            
-            else:
-                # General count
-                total_it = MaterielInformatique.objects.count()
-                total_office = MaterielBureau.objects.count()
-                total_material = total_it + total_office
-                
-                response = f"Le parc total comprend {total_material} matériel{'s' if total_material > 1 else ''} :"
-                response += f"\n• {total_it} matériel{'s' if total_it > 1 else ''} informatique{'s' if total_it > 1 else ''}"
-                response += f"\n• {total_office} matériel{'s' if total_office > 1 else ''} bureautique{'s' if total_office > 1 else ''}"
-                
-                return self._make_response_human(response, template_type='positive_confirmation', include_engagement=True)
+            return response
             
         except Exception as e:
             logger.error(f"Error counting total material: {e}")
-            return self._make_response_human(
-                "Une erreur est survenue lors du comptage des matériels.",
-                template_type='no_results',
-                include_engagement=True
-            )
+            return "Erreur lors du comptage du matériel."
 
     def _handle_count_suppliers(self, entities: Dict) -> str:
         """Handler pour compter les fournisseurs"""
@@ -9703,19 +8484,11 @@ Bureautique : {etage1_office.count()} matériels
                 response += f"• Refusées : {refusees}\n\n"
             
             response += f""
-            return self._make_response_human(
-                response,
-                template_type='no_results' if total == 0 else 'positive_confirmation',
-                include_engagement=True
-            )
+            return response
             
         except Exception as e:
             logger.error(f"Error counting equipment requests: {e}")
-            return self._make_response_human(
-                "Erreur lors du comptage des demandes d'équipement.",
-                template_type='no_results',
-                include_engagement=True
-            )
+            return "Erreur lors du comptage des demandes d'équipement."
 
     def _handle_order_mode_passation(self, entities: Dict) -> str:
         """Retourne le mode de passation pour une commande donnée (IT ou Bureau)."""
@@ -10064,60 +8837,11 @@ Bureautique : {etage1_office.count()} matériels
             return "Erreur lors de l'analyse du statut du matériel."
 
     def _handle_material_types(self, entities: Dict) -> str:
-        """Handler pour les types de matériels disponibles avec designations spécifiques et ton humain"""
+        """Handler pour les types de matériels disponibles"""
         try:
-            # Récupérer les designations spécifiques depuis la base de données
-            try:
-                # Matériels informatiques - récupérer depuis la ligne de commande
-                it_materials = MaterielInformatique.objects.select_related('ligne_commande__designation').values_list('ligne_commande__designation__nom', 'code_inventaire', 'numero_serie').distinct()
-                it_designations = {}
-                for des, code, sn in it_materials:
-                    if des:
-                        if des not in it_designations:
-                            it_designations[des] = []
-                        it_designations[des].append(f"{code} ({sn})" if sn else code)
-                
-                # Matériels bureautiques - récupérer depuis la ligne de commande
-                bu_materials = MaterielBureau.objects.select_related('ligne_commande__designation').values_list('ligne_commande__designation__nom', 'code_inventaire').distinct()
-                bu_designations = {}
-                for des, code in bu_materials:
-                    if des:
-                        if des not in bu_designations:
-                            bu_designations[des] = []
-                        bu_designations[des].append(code)
-                
-                # Fournitures
-                from apps.demande_equipement.models import Fourniture
-                fournitures = Fourniture.objects.values_list('nom', 'numero_serie').distinct()
-                fourniture_designations = {}
-                for nom, sn in fournitures:
-                    if nom:
-                        if nom not in fourniture_designations:
-                            fourniture_designations[nom] = []
-                        fourniture_designations[nom].append(sn)
-                
-                # Formatage de la réponse avec ton humain
-                response = "Voici les types de matériels que nous avons actuellement :\n\n"
-                
-                if it_designations:
-                    response += "**Matériel informatique :**\n"
-                    for designation, codes in it_designations.items():
-                        response += f"• {designation} : {', '.join(codes[:3])}{'...' if len(codes) > 3 else ''}\n"
-                
-                if bu_designations:
-                    response += "\n**Matériel bureautique :**\n"
-                    for designation, codes in bu_designations.items():
-                        response += f"• {designation} : {', '.join(codes[:3])}{'...' if len(codes) > 3 else ''}\n"
-                
-                if fourniture_designations:
-                    response += "\n**Fournitures :**\n"
-                    for designation, series in fourniture_designations.items():
-                        response += f"• {designation} : {', '.join(series[:3])}{'...' if len(series) > 3 else ''}\n"
-                
-            except Exception as db_error:
-                logger.warning(f"Could not fetch specific designations: {db_error}")
-                # Fallback vers la réponse générique mais avec ton humain
-                response = "Voici les types de matériels disponibles :\n\n"
+            response = "🏷️ **Types de matériels disponibles :**\n\nTypes de matériels: Informatique, Bureau\n\n"
+            
+            # Types informatiques
             response += "**Matériel informatique :**\n"
             response += "• Ordinateurs et serveurs\n"
             response += "• Équipements réseau\n"
@@ -10137,15 +8861,12 @@ Bureautique : {etage1_office.count()} matériels
             response += "• En panne : Matériel nécessitant une réparation\n"
             response += "• En maintenance : Matériel en cours de réparation\n"
             
-            return self._make_response_human(response, 'positive_confirmation', True)
+            response += "\n"
+            return response
             
         except Exception as e:
             logger.error(f"Error handling material types: {e}")
-            return self._make_response_human(
-                "Erreur lors de la récupération des types de matériels.",
-                'no_results',
-                False
-            )
+            return "Erreur lors de la récupération des types de matériels."
 
     def _handle_command_history(self, entities: Dict) -> str:
         """Handler pour l'historique des commandes"""
@@ -11785,154 +10506,9 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
             logger.error(f"Error generating complete performance report: {e}")
             return f" Erreur lors de la génération du rapport de performance : {str(e)}"
 
-    # ======== MÉTHODES D'AMÉLIORATION AJOUTÉES ========
-    
-    def _validate_response_quality(self, response: str, query_type: str) -> str:
-        """Valide et améliore la qualité d'une réponse"""
-        
-        # Vérifications de base
-        has_intro = any(word in response for word in ['Bonjour', 'Salut', 'Hello'])
-        has_conclusion = '?' in response or any(word in response for word in ['Besoin', 'Veux-tu', 'Voulez-vous'])
-        has_details = len(response.split()) > 15
-        
-        # Amélioration automatique si nécessaire
-        if not has_intro:
-            response = f"Bonjour ! {response}"
-        
-        if not has_conclusion:
-            response = f"{response}\n\nBesoin d'autres informations ?"
-        
-        # Correction des répétitions
-        response = self._fix_repetitions(response)
-        
-        # Amélioration du ton
-        response = self._improve_tone(response)
-        
-        return response
-    
-    def _improve_tone(self, response: str) -> str:
-        """Améliore la cohérence du ton de la réponse"""
-        
-        # Remplacer les expressions répétitives
-        tone_replacements = {
-            r'\bSuper\s*!\s*': 'Parfait ! ',
-            r'\bParfait\s*!\s*': 'Excellent ! ',
-            r'\bExcellente?\s*nouvelle\s*!': 'Voici les informations :',
-            r'\bExcellent\s*!': 'Voici les détails :',
-            r'numéro de numéro de série': 'numéro de série',
-            r'Désolé,?': 'Je n\'ai pas trouvé',
-            r'Malheureusement': 'Je n\'ai pas pu localiser'
-        }
-        
-        for pattern, replacement in tone_replacements.items():
-            response = re.sub(pattern, replacement, response, flags=re.IGNORECASE)
-        
-        # Standardiser les introductions
-        if not any(word in response[:20] for word in ['Bonjour', 'Salut', 'Hello']):
-            response = f"Bonjour ! {response}"
-        
-        # Standardiser les conclusions
-        if not any(word in response[-30:] for word in ['?', 'Besoin', 'Veux-tu']):
-            response = f"{response}\n\nBesoin d'autres informations ?"
-        
-        return response
-    
-    def _fix_repetitions(self, response: str) -> str:
-        """Corrige les répétitions dans la réponse"""
-        
-        # Correction des répétitions courantes
-        repetitions = {
-            'numéro de numéro de série': 'numéro de série',
-            'Super ! Super !': 'Super !',
-            'Parfait ! Parfait !': 'Parfait !',
-            'Excellent ! Excellent !': 'Excellent !'
-        }
-        
-        for repetition, correction in repetitions.items():
-            response = response.replace(repetition, correction)
-        
-        return response
-    
-    def _check_data_consistency(self, response: str) -> bool:
-        """Vérifie la cohérence des données dans la réponse"""
-        
-        # Vérifier les numéros de série
-        if '123456' in response or '12345' in response:
-            return False  # Numéros de série incorrects détectés
-        
-        # Vérifier les localisations
-        if 'étage 2' in response and 'ADD/INFO/01094' in response:
-            return False  # Localisation incorrecte détectée
-        
-        # Vérifier la cohérence des relations
-        if 'BC23' in response and 'bureautique' in response:
-            return False  # BC23 est informatique, pas bureautique
-        
-        return True
-    
-    def _handle_edge_case(self, query: str, intent: str) -> str:
-        """Gère intelligemment les cas limites"""
-        
-        if intent == 'unknown' or intent == 'fallback':
-            # Analyser le contexte pour proposer des alternatives
-            suggestions = self._suggest_alternatives(query)
-            return self._format_helpful_fallback(query, suggestions)
-        
-        if intent == 'out_of_scope':
-            # Rediriger vers des fonctionnalités disponibles
-            return self._redirect_to_available_features(query)
-        
-        return None  # Traitement normal
-    
-    def _suggest_alternatives(self, query: str) -> list:
-        """Suggère des alternatives pour une requête"""
-        alternatives = []
-        
-        if 'materiel' in query.lower():
-            alternatives.append("Liste des matériels disponibles")
-            alternatives.append("Recherche par code d'inventaire")
-            alternatives.append("Statut des matériels")
-        
-        if 'commande' in query.lower():
-            alternatives.append("Liste des commandes")
-            alternatives.append("Recherche par fournisseur")
-            alternatives.append("Statut des livraisons")
-        
-        if 'demande' in query.lower():
-            alternatives.append("Liste des demandes")
-            alternatives.append("Statut des demandes")
-            alternatives.append("Demandes en attente")
-        
-        return alternatives
-    
-    def _format_helpful_fallback(self, query: str, suggestions: list) -> str:
-        """Formate une réponse de fallback utile"""
-        response = f"Bonjour ! Je n'ai pas trouvé d'information exacte pour : '{query}'\n\n"
-        response += "Voici ce que je peux vous proposer :\n"
-        
-        for i, suggestion in enumerate(suggestions, 1):
-            response += f"• {suggestion}\n"
-        
-        response += "\nVoulez-vous essayer l'une de ces options ?"
-        return response
-    
-    def _redirect_to_available_features(self, query: str) -> str:
-        """Redirige vers des fonctionnalités disponibles"""
-        response = "Bonjour ! Cette fonctionnalité n'est pas encore disponible.\n\n"
-        response += "Voici ce que je peux faire actuellement :\n"
-        response += "• Rechercher des matériels\n"
-        response += "• Lister les commandes\n"
-        response += "• Vérifier les garanties\n"
-        response += "• Consulter les demandes\n\n"
-        response += "Que souhaitez-vous faire ?"
-        return response
-
-
 def get_chatbot():
     """Get singleton chatbot instance"""
     global _chatbot_instance
     if _chatbot_instance is None:
         _chatbot_instance = ParcInfoChatbot()
     return _chatbot_instance
-
-

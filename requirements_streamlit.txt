@@ -1,0 +1,32 @@
+# Requirements pour les dashboards Streamlit de ParcInfo
+# Installé avec: pip install -r requirements_streamlit.txt
+
+# Core Streamlit
+streamlit>=1.48.0
+
+# Data manipulation
+pandas>=2.3.0
+numpy>=2.3.0
+
+# Visualization
+plotly>=5.17.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+altair>=5.5.0
+
+# Database
+psycopg2-binary>=2.9.0
+sqlalchemy>=2.0.0
+
+# Utilities
+python-dateutil>=2.9.0
+pytz>=2025.0
+requests>=2.32.0
+
+# Charts and graphs
+pydeck>=0.9.0
+bokeh>=3.0.0
+
+# Interactive components
+streamlit-aggrid>=0.3.0
+streamlit-option-menu>=0.3.0

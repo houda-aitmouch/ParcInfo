@@ -1,56 +1,49 @@
-# ===== DJANGO ET DÉPENDANCES PRINCIPALES =====
-Django==5.2.4
-psycopg2-binary==2.9.9
+# Requirements unifiés pour ParcInfo (UN SEUL FICHIER)
+# Utilisation: pip install -r requirements.txt
 
-# ===== EXTENSIONS DJANGO =====
+# Django et extensions
+Django==5.2.4
 django-widget-tweaks==1.5.0
 django-humanize==0.1.2
-
-# ===== CONFIGURATION ET ENVIRONNEMENT =====
 python-dotenv==1.0.0
 
-# ===== TRAITEMENT DE DONNÉES ET DATES =====
-python-dateutil==2.8.2
-numpy>=1.26.0
+# Base de données
+psycopg2-binary>=2.9.10
+pgvector>=0.4.0
 
-# ===== GÉNÉRATION DE DOCUMENTS =====
-# PDF (utilisé dans demande_equipement/pdf_generator.py)
-reportlab==4.0.7
-# Excel (utilisé dans toutes les vues d'export)
-openpyxl==3.1.2
-# Excel avancé avec formatage (utilisé dans demande_equipement/views.py)
-XlsxWriter==3.1.9
-# Images (utilisé pour traitement d'images)
-Pillow==10.1.0
+# IA / RAG
+sentence-transformers==2.2.2
+transformers==4.40.2
+huggingface-hub==0.19.4
+tokenizers==0.19.1
+safetensors>=0.5.0
+torch>=2.3.0
+torchvision>=0.18.0
+torchaudio>=2.3.0
+scikit-learn>=1.6.0
+scipy>=1.15.0
+numpy>=2.0.0
+nltk==3.9.1
+sentencepiece==0.2.1
+rapidfuzz>=3.13.0
 
-# ===== CHATBOT ET IA =====
-# Embeddings et similarité (core_chatbot.py) - Version compatible
-sentence-transformers>=2.7.0,<3.0.0
-rapidfuzz>=3.0.0,<4.0.0
+# Données / Fichiers
+pandas>=2.2.0
+openpyxl>=3.1.0
+reportlab>=4.4.0
+python-dateutil>=2.9.0
+requests>=2.32.0
+Pillow>=11.3.0
 
-# ===== BASE DE DONNÉES VECTORIELLE =====
-# pgvector pour PostgreSQL (utilisé dans chatbot/models.py)
-pgvector==0.2.4
+# Dashboards (Streamlit)
+streamlit>=1.48.0
+plotly>=6.3.0
+matplotlib>=3.9.0
+seaborn>=0.13.0
+altair>=5.5.0
+bokeh>=3.7.0
+pydeck>=0.9.0
+sqlalchemy>=2.0.0
 
-# ===== REQUÊTES HTTP =====
-# Utilisé dans chatbot/core_chatbot.py pour Ollama
-requests>=2.31.0
-
-# ===== SERVEUR WEB PRODUCTION =====
-gunicorn==21.2.0
-
-# ===== DASHBOARD STREAMLIT =====
-# Dashboard de garantie (dashboard_garantie/dashboard_garantie.py)
-streamlit>=1.28.0
-pandas>=2.0.0
-plotly>=5.15.0
-
-# ===== FRONTEND (CDN - pas d'installation Python requise) =====
-# TailwindCSS: https://cdn.tailwindcss.com
-# AlpineJS: https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js
-# Google Fonts: https://fonts.googleapis.com/css2?family=Inter
-
-# ===== MODULES PYTHON STANDARD (inclus avec Python) =====
-# json, logging, os, sys, re, time, datetime, uuid, hashlib
-# base64, io, csv, threading, concurrent.futures, subprocess
-# timedelta, pathlib, secrets
+# Utilitaires
+tqdm>=4.67.0

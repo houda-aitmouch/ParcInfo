@@ -1,0 +1,361 @@
+{
+  "timestamp": "2025-08-18T21:08:10.431727",
+  "test_results": [
+    {
+      "test_name": "Matériels pour superadmin avec demandes",
+      "query": "Quel matériel a été affecté à la demande de 'superadmin' ?",
+      "response": "Excellent ! J'ai trouvé les informations. Demande n°11 (Baie) : Aucun matériel affecté identifié\nDemande n°21 (Casque sans fil) : Aucun matériel affecté identifié\nDemande n°23 (Caméra) : Aucun matériel affecté identifié\n\nMatériels directement affectés à superadmin :\n- cd14 (non disponible, numéro de numéro de série sn14, commande BC23) Puis-je vous aider avec autre chose ?",
+      "intent": "materials_for_user_requests",
+      "confidence": 85,
+      "response_time": 0.009862184524536133,
+      "timeout_ok": true,
+      "precision": {
+        "score": 1.0,
+        "found": [
+          "Demande n°",
+          "cd14",
+          "sn14",
+          "BC23",
+          "Caméra",
+          "Casque",
+          "Baie"
+        ],
+        "missing": [],
+        "is_accurate": true
+      },
+      "tone": {
+        "score": 1,
+        "issues": [
+          "Terme technique 'série' présent",
+          "Manque d'invitation à poursuivre",
+          "Structure de réponse trop simple"
+        ],
+        "improvements": [
+          "Remplacer 'série' par un terme clair",
+          "Ajouter une question d'engagement",
+          "Structurer avec introduction, détails, conclusion"
+        ],
+        "is_human": false
+      },
+      "overall_score": 0.6
+    },
+    {
+      "test_name": "Matériels informatiques sous garantie (détails)",
+      "query": "Quels matériels informatiques sont encore sous garantie ?",
+      "response": "Parfainformatique ! Voici ce que j'ai pu récupérer. Voici les matériels informatiques encore sous garantie :\n• ADD/INFO/010 (Baie, 123456, non affecté) : Expire 15/09/2025 (123)\n• ADD/INFO/01000 (Call Server, 12345, non affecté) : Expire 15/09/2025 (123)\n• cd13 (Baie, sn13, gestionnaire bureau) : Expire 23/08/2025 (BC23)\n• cd12 (Baie, sn12, employe anonyme) : Expire 23/08/2025 (BC23)\n• cd14 (Baie, sn14, superadmin) : Expire 23/08/2025 (BC23) Besoin d'informations supplémentaires ?",
+      "intent": "material_warranty_status",
+      "confidence": 90,
+      "response_time": 0.004970073699951172,
+      "timeout_ok": true,
+      "precision": {
+        "score": 0.5714285714285714,
+        "found": [
+          "cd12",
+          "cd13",
+          "cd14",
+          "ADD/INFO/010"
+        ],
+        "missing": [
+          "designation",
+          "utilisateur",
+          "numéro de série"
+        ],
+        "is_accurate": false
+      },
+      "tone": {
+        "score": 2,
+        "issues": [
+          "Manque d'introduction engageante",
+          "Structure de réponse trop simple"
+        ],
+        "improvements": [
+          "Ajouter 'Bonjour ! J'ai vérifié pour vous'",
+          "Structurer avec introduction, détails, conclusion"
+        ],
+        "is_human": false
+      },
+      "overall_score": 0.4857142857142857
+    },
+    {
+      "test_name": "Garantie ADD/INFO/01094 (détails)",
+      "query": "La garantie du matériel avec le code d'inventaire ADD/INFO/01094 est-elle toujours active ?",
+      "response": "Je n'ai pas pu trouver d'informations correspondantes. Aucun matériel trouvé pour code d'inventaire. Voulez-vous que je vérifie par numéro de numéro de série ou que je regarde dans les archives ? Avez-vous d'autres questions ? Souhaitez-vous que je regarde dans les archives ?",
+      "intent": "material_warranty_status",
+      "confidence": 92,
+      "response_time": 0.0033311843872070312,
+      "timeout_ok": true,
+      "precision": {
+        "score": 0.0,
+        "found": [],
+        "missing": [
+          "ADD/INFO/01094",
+          "AOO2025",
+          "Armoire",
+          "jours restants",
+          "28/07/2026"
+        ],
+        "is_accurate": false
+      },
+      "tone": {
+        "score": 1,
+        "issues": [
+          "Manque d'introduction engageante",
+          "Terme technique 'it' présent",
+          "Terme technique 'série' présent"
+        ],
+        "improvements": [
+          "Ajouter 'Bonjour ! J'ai vérifié pour vous'",
+          "Remplacer 'it' par un terme clair",
+          "Remplacer 'série' par un terme clair"
+        ],
+        "is_human": false
+      },
+      "overall_score": 0.1
+    },
+    {
+      "test_name": "Matériels bureautiques expirant bientôt (contexte)",
+      "query": "Liste les matériels bureautiques dont la garantie expire bientôt.",
+      "response": "Excellente nouvelle ! Voici les détails. Aucun matériel bureautique avec garantie expirant d'ici 30 jours.\n\nPour vous donner un aperçu, voici quelques matériels actifs :\n- ADD/INFO/01094 (Armoire, AOO2025) : Expire le 28/07/2026 (344 jours restants) Avez-vous d'autres questions ?",
+      "intent": "materials_expiring_soon",
+      "confidence": 90,
+      "response_time": 0.005154848098754883,
+      "timeout_ok": true,
+      "precision": {
+        "score": 0.75,
+        "found": [
+          "30 jours",
+          "matériels actifs",
+          "ADD/INFO/01094"
+        ],
+        "missing": [
+          "contexte"
+        ],
+        "is_accurate": false
+      },
+      "tone": {
+        "score": 3,
+        "issues": [
+          "Manque d'introduction engageante"
+        ],
+        "improvements": [
+          "Ajouter 'Bonjour ! J'ai vérifié pour vous'"
+        ],
+        "is_human": true
+      },
+      "overall_score": 0.675
+    },
+    {
+      "test_name": "Codes d'inventaire Baie (utilisateurs)",
+      "query": "Quel est le code d'inventaire de la Baie ?",
+      "response": "Je n'ai pas pu trouver d'informations correspondantes. Aucun matériel trouvé pour la désignation 'la baie'. Puis-je vous aider avec autre chose ?",
+      "intent": "codes_by_designation",
+      "confidence": 85,
+      "response_time": 0.006928920745849609,
+      "timeout_ok": true,
+      "precision": {
+        "score": 0.0,
+        "found": [],
+        "missing": [
+          "cd12",
+          "cd13",
+          "cd14",
+          "utilisateur",
+          "employe anonyme",
+          "gestionnaire bureau",
+          "superadmin"
+        ],
+        "is_accurate": false
+      },
+      "tone": {
+        "score": 1,
+        "issues": [
+          "Manque d'introduction engageante",
+          "Manque d'invitation à poursuivre"
+        ],
+        "improvements": [
+          "Ajouter 'Bonjour ! J'ai vérifié pour vous'",
+          "Ajouter une question d'engagement"
+        ],
+        "is_human": false
+      },
+      "overall_score": 0.1
+    },
+    {
+      "test_name": "Commandes sans garantie (dates)",
+      "query": "Y a-t-il des commandes sans garantie spécifiée ?",
+      "response": "Parfainformatique ! Voici ce que j'ai trouvé. Excellente nouvelle ! Toutes les commandes ont une garantie spécifiée (3/3 avec garantie).\n- 123 : 2 mois, expire 15/09/2025\n- BC23 : 1 mois, expire 23/08/2025\n- AOO2025 : 1 annee, expire 28/07/2026 Souhaitez-vous que je vérifie autre chose ?",
+      "intent": "orders_without_warranty",
+      "confidence": 88,
+      "response_time": 0.005688905715942383,
+      "timeout_ok": true,
+      "precision": {
+        "score": 1.0,
+        "found": [
+          "AOO2025",
+          "123",
+          "BC23",
+          "expire",
+          "28/07/2026",
+          "15/09/2025",
+          "23/08/2025"
+        ],
+        "missing": [],
+        "is_accurate": true
+      },
+      "tone": {
+        "score": 4,
+        "issues": [
+          "Terme technique 'it' présent"
+        ],
+        "improvements": [
+          "Remplacer 'it' par un terme clair"
+        ],
+        "is_human": true
+      },
+      "overall_score": 0.9
+    },
+    {
+      "test_name": "Commandes bureautiques garantie années (conversationnel)",
+      "query": "Liste des commandes bureautiques avec garantie en années.",
+      "response": "Excellent ! J'ai trouvé les informations. Pour les commandes bureautiques avec une garantie en années, j'ai trouvé :\n- AOO2025, une commande de matériel de bureau, avec une garantie de 1 an, valable jusqu'au 28/07/2026 (encore active). Souhaitez-vous explorer d'autres aspects ?",
+      "intent": "bureau_year_warranties",
+      "confidence": 90,
+      "response_time": 0.0008571147918701172,
+      "timeout_ok": true,
+      "precision": {
+        "score": 0.8,
+        "found": [
+          "AOO2025",
+          "1 an",
+          "28/07/2026",
+          "active"
+        ],
+        "missing": [
+          "conversationnel"
+        ],
+        "is_accurate": true
+      },
+      "tone": {
+        "score": 4,
+        "issues": [
+          "Terme technique 'it' présent"
+        ],
+        "improvements": [
+          "Remplacer 'it' par un terme clair"
+        ],
+        "is_human": true
+      },
+      "overall_score": 0.8
+    },
+    {
+      "test_name": "Types de matériels (designations spécifiques)",
+      "query": "Quels types de matériels sont disponibles ?",
+      "response": "Excellent ! J'ai trouvé les informations. Voici les types de matériels disponibles :\n\n**Matériel informatique :**\n• Ordinateurs et serveurs\n• Équipements réseau\n• Périphériques (écrans, claviers, souris)\n• Équipements de stockage\n\n**Matériel bureautique :**\n• Mobilier de bureau (bureaux, chaises, armoires)\n• Fourninformatiqueures de bureau\n• Équipements de conférence\n• Matériel de rangement\n\n**Catégories par statut :**\n• Nouveau : Matériel récemment acquis\n• Opérationnel : Matériel en bon état de fonctionnement\n• Affecté : Matériel assigné à un utilisateur\n• En panne : Matériel nécessinformatiqueant une réparation\n• En maintenance : Matériel en cours de réparation\n Avez-vous d'autres questions ?",
+      "intent": "material_types",
+      "confidence": 92,
+      "response_time": 0.0025560855865478516,
+      "timeout_ok": true,
+      "precision": {
+        "score": 0.125,
+        "found": [
+          "Armoire"
+        ],
+        "missing": [
+          "Baie",
+          "Call Server",
+          "Câble",
+          "cd12",
+          "cd13",
+          "cd14",
+          "ADD/INFO/010"
+        ],
+        "is_accurate": false
+      },
+      "tone": {
+        "score": 4,
+        "issues": [
+          "Structure de réponse trop simple"
+        ],
+        "improvements": [
+          "Structurer avec introduction, détails, conclusion"
+        ],
+        "is_human": true
+      },
+      "overall_score": 0.4625
+    },
+    {
+      "test_name": "Matériel sn12 avec garantie (détails)",
+      "query": "Quel matériel informatique avec le numéro de série sn12 a une garantie associée ?",
+      "response": "Super ! J'ai les informations pour vous. Matériel sn12 (Baie) :\n- Code d'inventaire : cd12\n- Commande : BC23\n- Garantie : 1 mois, expire le 23/08/2025\n- Statut : Active (5 jours restants) Besoin d'informations supplémentaires ?",
+      "intent": "material_warranty_status",
+      "confidence": 93,
+      "response_time": 0.003031015396118164,
+      "timeout_ok": true,
+      "precision": {
+        "score": 1.0,
+        "found": [
+          "cd12",
+          "BC23",
+          "23/08/2025",
+          "jours restants",
+          "5 jours"
+        ],
+        "missing": [],
+        "is_accurate": true
+      },
+      "tone": {
+        "score": 2,
+        "issues": [
+          "Manque d'introduction engageante",
+          "Structure de réponse trop simple"
+        ],
+        "improvements": [
+          "Ajouter 'Bonjour ! J'ai vérifié pour vous'",
+          "Structurer avec introduction, détails, conclusion"
+        ],
+        "is_human": false
+      },
+      "overall_score": 0.7
+    },
+    {
+      "test_name": "Matériels superadmin sous garantie (détails)",
+      "query": "Y a-t-il des matériels affectés à 'superadmin' encore sous garantie ?",
+      "response": "Parfainformatique ! Voici ce que j'ai trouvé. Matériels sous garantie affectés à superadmin :\n• cd14 (Baie, sn14) : Expire 23/08/2025 (BC23, 5 jours restants) Puis-je vous aider avec autre chose ?",
+      "intent": "user_materials_under_warranty",
+      "confidence": 88,
+      "response_time": 0.003803253173828125,
+      "timeout_ok": true,
+      "precision": {
+        "score": 1.0,
+        "found": [
+          "cd14",
+          "sn14",
+          "Baie",
+          "23/08/2025",
+          "5 jours restants",
+          "BC23"
+        ],
+        "missing": [],
+        "is_accurate": true
+      },
+      "tone": {
+        "score": 2,
+        "issues": [
+          "Manque d'invitation à poursuivre",
+          "Structure de réponse trop simple"
+        ],
+        "improvements": [
+          "Ajouter une question d'engagement",
+          "Structurer avec introduction, détails, conclusion"
+        ],
+        "is_human": false
+      },
+      "overall_score": 0.7
+    }
+  ],
+  "summary": {
+    "total_tests": 10,
+    "successful_tests": 10,
+    "failed_tests": 0
+  }
+}

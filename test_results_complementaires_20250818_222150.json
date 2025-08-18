@@ -1,0 +1,256 @@
+[
+  {
+    "question": "Quels matériels sont stockés à l'étage 1 ?",
+    "response": "Matériels à etage1 :\nInformatique :\n• cd14 — Statut: affecte — Utilisateur: superadmin — Fin garantie: 23/08/2025\n• cd12 — Statut: affecte — Utilisateur: employe anonyme — Fin garantie: 23/08/2025\n• cd13 — Statut: affecte — Utilisateur: gestionnaire bureau — Fin garantie: 23/08/2025\n• ADD/INFO/010 — Statut: nouveau — Utilisateur: Non affecté — Fin garantie: 15/09/2025\n• ADD/INFO/01000 — Statut: nouveau — Utilisateur: Non affecté — Fin garantie: 15/09/2025",
+    "intent": "materials_by_location",
+    "confidence": 85,
+    "source": "early_override",
+    "response_time": 0.014423847198486328,
+    "validation": {
+      "precision": 1.0,
+      "completeness": 0.4,
+      "performance": 1.0,
+      "overall_score": 0.8200000000000001,
+      "details": [
+        "✅ Performance: <2s"
+      ]
+    },
+    "tone_analysis": {
+      "human_like": 0.0,
+      "professional": 0.0,
+      "friendly": 0.0,
+      "technical": 0.0,
+      "issues": []
+    },
+    "timestamp": "2025-08-18T22:21:39.909035"
+  },
+  {
+    "question": "Quelles demandes sont associées à la comande BC23 ?",
+    "response": "**🤖 Assistant ParcInfo - Réponse Intelligente**\n\nJe n'ai pas trouvé d'information exacte pour votre requête, mais je peux vous aider avec des alternatives pertinentes.\n\n##  **État Actuel du Système**\n• ** Matériels** : 6 équipements enregistrés\n• **🏢 Fournisseurs** : 42 partenaires référencés\n• ** Commandes** : 3 transactions dans le système\n• **🚚 Livraisons** : 3 expéditions suivies\n\n##  **Informations Disponibles**\n\nVoici ce que je peux vous proposer :\n\n## 🏢 **Exemples de Fournisseurs Disponibles**\nWANA CORPORATE SA, RKFE, ONBOARDTECH\n\n##  **Exemples de Codes Matériel**\ncd14, cd12, cd13\n\n##  **Exemples de Commandes**\n123, BC23\n\n##  **Comment Obtenir une Réponse Précise**\n\n###  **Conseils pour des Questions Efficaces**\n• **Soyez spécifique** : \"Matériel informatique\" plutôt que \"matériel\"\n• **Ajoutez des critères** : \"affecté\", \"opérationnel\", \"en attente\"\n• **Spécifiez la période** : \"juillet 2025\", \"ce mois\"\n• **Utilisez les codes** : \"PC-123\", \"BC-2023-456\"\n\n### 🔄 **Reformulation Recommandée**\nSi votre question ne fonctionne pas :\n1. **Précisez le type** : \"matériel informatique\" ou \"matériel de bureau\"\n2. **Ajoutez un statut** : \"affecté\", \"opérationnel\", \"en attente\"\n3. **Posez une question ciblée** : \"Quel est le mode de passation de BC23 ?\"\n4. **Utilisez des synonymes** : \"équipement\" au lieu de \"matériel\"\n\n##  **Fonctionnalités Avancées Disponibles**\n\n### 📦 **Gestion du Matériel**\n• Liste complète et recherche avancée\n• Localisation et statut en temps réel\n• Analyse de performance et maintenance\n\n###  **Gestion des Commandes**\n• Suivi complet des achats\n• Analyse des fournisseurs\n• Optimisation des coûts\n\n### 🚚 **Suivi des Livraisons**\n• Statut en temps réel\n• Gestion des retards\n• PV de réception\n\n###  **Analyses et Rapports**\n• Statistiques détaillées\n• Tendances et prédictions\n• Optimisation continue\n\n** Le système est prêt à répondre à vos questions sur le parc informatique.**\n",
+    "intent": "fallback",
+    "confidence": 0,
+    "source": "enhanced_fallback",
+    "response_time": 0.032212018966674805,
+    "validation": {
+      "precision": 0.30000000000000004,
+      "completeness": 0.6000000000000001,
+      "performance": 1.0,
+      "overall_score": 0.53,
+      "details": [
+        "✅ Performance: <2s"
+      ]
+    },
+    "tone_analysis": {
+      "human_like": 0.2,
+      "professional": 0.0,
+      "friendly": 0.0,
+      "technical": 0.3333333333333333,
+      "issues": [
+        "Réponse trop verbeuse"
+      ]
+    },
+    "timestamp": "2025-08-18T22:21:40.946588"
+  },
+  {
+    "question": "Quel est le statut des livraisons pour le fourniseur 3STD ?",
+    "response": "Excellente nouvelle ! Voici les détails. Bonjour ! Voici les matériels livrés en retard :\n\n• ADD/INFO/01094 (commande AOO2025) : prévu 14/08/2025, livré 28/08/2025 (14 jours de retard).\n• cd14 (sn14), cd12 (sn12), cd13 (sn13) (commande BC23) : prévu 31/07/2025, livré 14/08/2025 (14 jours de retard).\n• ADD/INFO/010 (sn_correct), ADD/INFO/01000 (sn_01000) (commande 123) : prévu 27/07/2025, livré 08/08/2025 (12 jours de retard).\n\nVeux-tu des détails sur une livraison spécifique ? Besoin d'informations supplémentaires ?",
+    "intent": "delivery_delay",
+    "confidence": 95,
+    "source": "early_delivery_detection",
+    "response_time": 0.018643856048583984,
+    "validation": {
+      "precision": 0.2,
+      "completeness": 0.8,
+      "performance": 1.0,
+      "overall_score": 0.54,
+      "details": [
+        "✅ Performance: <2s"
+      ]
+    },
+    "tone_analysis": {
+      "human_like": 0.4,
+      "professional": 0.0,
+      "friendly": 1.0,
+      "technical": 0.0,
+      "issues": []
+    },
+    "timestamp": "2025-08-18T22:21:41.972685"
+  },
+  {
+    "question": "Quels matériels informatiques sont marqués comme nouveaux ?",
+    "response": "**Matériel informatique :**\n• ADD/INFO/010 - Statut: nouveau (Série: sn_correct, Lieu: etage1, Désignation: Baie, Description: bqie test)\n• ADD/INFO/01000 - Statut: nouveau (Série: sn_01000, Lieu: etage1, Désignation: Call Server, Description: OmniPCX Entreprise Large)",
+    "intent": "liste_materiel",
+    "confidence": 90,
+    "source": "heuristic_complex",
+    "response_time": 0.021946191787719727,
+    "validation": {
+      "precision": 0.4,
+      "completeness": 0.4,
+      "performance": 1.0,
+      "overall_score": 0.52,
+      "details": [
+        "✅ Performance: <2s"
+      ]
+    },
+    "tone_analysis": {
+      "human_like": 0.0,
+      "professional": 0.0,
+      "friendly": 0.0,
+      "technical": 0.0,
+      "issues": []
+    },
+    "timestamp": "2025-08-18T22:21:43.000952"
+  },
+  {
+    "question": "Quel est le total des comandes passées en juillet 2025 ?",
+    "response": "** RAPPORT COMPLET - PERFORMANCES DU SYSTÈME**\n\n##  **Indicateurs de Performance Globaux**\n\n### 📦 **Gestion du Matériel**\n• **Taux de disponibilité** : 93.5%\n• **Temps de réponse** : < 2 secondes\n• **Précision des recherches** : 98.2%\n• **Couverture géographique** : 100%\n\n### 🏢 **Gestion des Fournisseurs**\n• **Nombre de partenaires** : 15 fournisseurs actifs\n• **Taux de satisfaction** : 94.8%\n• **Délai moyen de livraison** : 12 jours\n• **Qualité des services** : Excellente\n\n###  **Gestion des Commandes**\n• **Temps de traitement** : < 24 heures\n• **Taux d'approbation** : 96.3%\n• **Précision des estimations** : 97.1%\n• **Suivi en temps réel** : 100%\n\n##  **Performance Technique**\n\n### ⚡ **Vitesse et Réactivité**\n• **Temps de réponse moyen** : 0.03 secondes\n• **Capacité de traitement** : 1000+ requêtes simultanées\n• **Disponibilité système** : 99.9%\n• **Temps de maintenance** : < 2 heures/mois\n\n###  **Recherche et Analyse**\n• **Recherche sémantique** : Opérationnelle\n• **Recherche floue** : 95% de précision\n• **Analyse prédictive** : Intégrée\n• **Rapports automatisés** : Disponibles\n\n## 📈 **Métriques d'Utilisation**\n\n###  **Utilisateurs**\n• **Utilisateurs actifs** : 50+ utilisateurs\n• **Sessions quotidiennes** : 200+ sessions\n• **Taux d'adoption** : 98.5%\n• **Satisfaction utilisateur** : 4.8/5\n\n###  **Données**\n• **Matériels gérés** : 150+ équipements\n• **Commandes traitées** : 500+ transactions\n• **Fournisseurs** : 15 partenaires\n• **Historique complet** : 2+ années\n\n##  **Recommandations d'Amélioration**\n\n###  **Points Forts**\n• Performance exceptionnelle\n• Fiabilité élevée\n• Interface intuitive\n• Fonctionnalités complètes\n\n### 🔧 **Optimisations Futures**\n• Intégration IA avancée\n• Automatisation renforcée\n• Analytics prédictifs\n• Mobile app\n\n## 🏆 **Classement Performance**\n\n### 🥇 **Excellence Technique**\n• Architecture robuste\n• Scalabilité prouvée\n• Sécurité renforcée\n• Maintenance proactive\n\n### 🥈 **Qualité de Service**\n• Réponses précises\n• Temps de traitement optimaux\n• Interface utilisateur intuitive\n• Support technique réactif\n\n### 🥉 **Innovation Continue**\n• Mises à jour régulières\n• Nouvelles fonctionnalités\n• Amélioration continue\n• Adaptation aux besoins\n\n** Rapport généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')}**\n** Source : Métriques système complètes**",
+    "intent": "completeness_question",
+    "confidence": 90,
+    "source": "completeness_handler",
+    "response_time": 0.0022051334381103516,
+    "validation": {
+      "precision": 0.2,
+      "completeness": 0.4,
+      "performance": 1.0,
+      "overall_score": 0.42000000000000004,
+      "details": [
+        "✅ Performance: <2s"
+      ]
+    },
+    "tone_analysis": {
+      "human_like": 0.2,
+      "professional": 0.0,
+      "friendly": 0.0,
+      "technical": 0.3333333333333333,
+      "issues": [
+        "Réponse trop verbeuse"
+      ]
+    },
+    "timestamp": "2025-08-18T22:21:44.008742"
+  },
+  {
+    "question": "Quels matériels sont liés à des demandes non approuvées ?",
+    "response": " **Demandes d'équipement approuvées (6):**\n\n• **Demande n°23** du 02/08/2025\n  - **Demandeur :** superadmin\n  - **Catégorie :** Informatique | **Type :** Nouveau | **Article :** Materiel\n  - **Statut :** Approuvee\n  - **Désignation :** Caméra\n  - **Description :** Caméra dôme intérieure\n\n• **Demande n°21** du 01/08/2025\n  - **Demandeur :** superadmin\n  - **Catégorie :** Informatique | **Type :** Nouveau | **Article :** Materiel\n  - **Statut :** Approuvee\n  - **Désignation :** Casque sans fil\n  - **Description :** Casque Bluetooth marque JABRA Evolve2 65\n\n• **Demande n°14** du 30/07/2025\n  - **Demandeur :** gestionnaire bureau\n  - **Catégorie :** Bureau | **Type :** Nouveau | **Article :** Materiel\n  - **Statut :** Approuvee\n  - **Désignation :** Armoire\n  - **Description :** Armoire archive de 228 cm de hauteur (228 * 80 * 44cm)\n\n• **Demande n°13** du 30/07/2025\n  - **Demandeur :** gestionnaire bureau\n  - **Catégorie :** Informatique | **Type :** Nouveau | **Article :** Materiel\n  - **Statut :** Approuvee\n  - **Désignation :** Baie\n  - **Description :** Lenovo ThinkSystem DE2000H\n\n• **Demande n°12** du 30/07/2025\n  - **Demandeur :** employe anonyme\n  - **Catégorie :** Informatique | **Type :** Nouveau | **Article :** Materiel\n  - **Statut :** Approuvee\n  - **Désignation :** Baie\n  - **Description :** Lenovo ThinkSystem DE2000H\n\n• **Demande n°11** du 30/07/2025\n  - **Demandeur :** superadmin\n  - **Catégorie :** Informatique | **Type :** Nouveau | **Article :** Materiel\n  - **Statut :** Approuvee\n  - **Désignation :** Baie\n  - **Description :** Lenovo ThinkSystem DE2000H\n\n",
+    "intent": "count_equipment_requests",
+    "confidence": 95,
+    "source": "count_detection",
+    "response_time": 0.027904033660888672,
+    "validation": {
+      "precision": 0.0,
+      "completeness": 0.4,
+      "performance": 1.0,
+      "overall_score": 0.32,
+      "details": [
+        "✅ Performance: <2s"
+      ]
+    },
+    "tone_analysis": {
+      "human_like": 0.0,
+      "professional": 0.0,
+      "friendly": 0.0,
+      "technical": 0.0,
+      "issues": []
+    },
+    "timestamp": "2025-08-18T22:21:45.040074"
+  },
+  {
+    "question": "Quel fourniseur a livré le matériel ADD/INFO/01094 ?",
+    "response": "**Matériel trouvé :**\n• **Code :** ADD/INFO/01094\n• **Série :** None\n• **Observation :** \n• **Statut :** affecte\n• **Lieu :** etage2\n• **Catégorie :** bureau\n\n",
+    "intent": "structured_search",
+    "confidence": 100,
+    "source": "database_exact",
+    "response_time": 0.0021219253540039062,
+    "validation": {
+      "precision": 0.2,
+      "completeness": 0.4,
+      "performance": 1.0,
+      "overall_score": 0.42000000000000004,
+      "details": [
+        "✅ Performance: <2s"
+      ]
+    },
+    "tone_analysis": {
+      "human_like": 0.0,
+      "professional": 0.0,
+      "friendly": 0.0,
+      "technical": 0.0,
+      "issues": []
+    },
+    "timestamp": "2025-08-18T22:21:46.047872"
+  },
+  {
+    "question": "Quels matériels sont publics à l'étage 1 ?",
+    "response": "Matériels à etage1 :\nInformatique :\n• cd14 — Statut: affecte — Utilisateur: superadmin — Fin garantie: 23/08/2025\n• cd12 — Statut: affecte — Utilisateur: employe anonyme — Fin garantie: 23/08/2025\n• cd13 — Statut: affecte — Utilisateur: gestionnaire bureau — Fin garantie: 23/08/2025\n• ADD/INFO/010 — Statut: nouveau — Utilisateur: Non affecté — Fin garantie: 15/09/2025\n• ADD/INFO/01000 — Statut: nouveau — Utilisateur: Non affecté — Fin garantie: 15/09/2025",
+    "intent": "materials_by_location",
+    "confidence": 85,
+    "source": "early_override",
+    "response_time": 0.017621278762817383,
+    "validation": {
+      "precision": 1.0,
+      "completeness": 0.4,
+      "performance": 1.0,
+      "overall_score": 0.8200000000000001,
+      "details": [
+        "✅ Performance: <2s"
+      ]
+    },
+    "tone_analysis": {
+      "human_like": 0.0,
+      "professional": 0.0,
+      "friendly": 0.0,
+      "technical": 0.0,
+      "issues": []
+    },
+    "timestamp": "2025-08-18T22:21:47.070740"
+  },
+  {
+    "question": "Combien de matériels sont en stock actuellement ?",
+    "response": "Excellent ! J'ai trouvé les informations. Le parc total comprend 6 matériels :\n• 5 matériels informatiques\n• 1 matériel bureautique Avez-vous besoin de plus de précisions ?",
+    "intent": "count_total_material",
+    "confidence": 95,
+    "source": "count_detection",
+    "response_time": 0.005131721496582031,
+    "validation": {
+      "precision": 0.0,
+      "completeness": 0.6000000000000001,
+      "performance": 1.0,
+      "overall_score": 0.38,
+      "details": [
+        "✅ Performance: <2s"
+      ]
+    },
+    "tone_analysis": {
+      "human_like": 0.0,
+      "professional": 0.0,
+      "friendly": 0.0,
+      "technical": 0.0,
+      "issues": []
+    },
+    "timestamp": "2025-08-18T22:21:48.078909"
+  },
+  {
+    "question": "Quel matériel est associé au fourniseur INCONNU ?",
+    "response": "**Aucun matériel trouvé pour les critères spécifiés.**",
+    "intent": "liste_materiel",
+    "confidence": 90,
+    "source": "heuristic_complex",
+    "response_time": 0.07874464988708496,
+    "validation": {
+      "precision": 0.0,
+      "completeness": 0.0,
+      "performance": 1.0,
+      "overall_score": 0.2,
+      "details": [
+        "✅ Performance: <2s"
+      ]
+    },
+    "tone_analysis": {
+      "human_like": 0.0,
+      "professional": 0.0,
+      "friendly": 0.0,
+      "technical": 0.0,
+      "issues": []
+    },
+    "timestamp": "2025-08-18T22:21:49.162717"
+  }
+]

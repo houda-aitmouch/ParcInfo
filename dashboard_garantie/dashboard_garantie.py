@@ -374,14 +374,14 @@ def create_garantie_timeline_dashboard(df, title, dashboard_type=None):
         
         # Statistiques par fournisseur
         if not df_valid.empty and 'Fournisseur' in df_valid.columns:
-        fournisseur_stats = df_valid.groupby('Fournisseur').agg({
-            'Jours Restants': ['count', 'mean', 'min']
-        }).round(1)
-        
-        # Aplatir les colonnes multi-niveaux
-        fournisseur_stats.columns = ['Nombre_Commandes', 'Moyenne_Jours', 'Min_Jours']
-        fournisseur_stats = fournisseur_stats.reset_index()
-            
+            fournisseur_stats = df_valid.groupby('Fournisseur').agg({
+                'Jours Restants': ['count', 'mean', 'min']
+            }).round(1)
+
+            # Aplatir les colonnes multi-niveaux
+            fournisseur_stats.columns = ['Nombre_Commandes', 'Moyenne_Jours', 'Min_Jours']
+            fournisseur_stats = fournisseur_stats.reset_index()
+
             # Vérifier qu'il y a des données à afficher
             if fournisseur_stats.empty:
                 st.info("Aucune donnée de fournisseur disponible pour l'analyse.")
