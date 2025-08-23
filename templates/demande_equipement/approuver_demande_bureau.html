@@ -1,0 +1,149 @@
+{% extends 'dashboards/base_gestionnaire_bureau.html' %}
+{% load static %}
+
+{% block title %}Approuver la demande - ADD{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/parcinfo-ui.css' %}">
+<link rel="stylesheet" href="{% static 'react/assets/index.css' %}">
+{% endblock %}
+{% block content %}
+    <div class="max-w-4xl mx-auto py-6 px-2">
+        <!-- En-tête -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent mb-2">
+                {% if demande.statut == 'en_attente' %}
+                    Traiter la demande d'équipement
+                {% elif demande.statut == 'approuvee' %}
+                    Demande approuvée
+                {% elif demande.statut == 'en_cours' %}
+                    Demande en cours de traitement
+                {% elif demande.statut == 'terminee' %}
+                    Demande terminée
+                {% elif demande.statut == 'refusee' %}
+                    Demande refusée
+                {% else %}
+                    Détails de la demande
+                {% endif %}
+            </h1>
+            <p class="text-gray-600">
+                {% if demande.statut == 'en_attente' %}
+                    Approuver ou refuser la demande d'équipement
+                {% elif demande.statut == 'approuvee' %}
+                    La demande a été approuvée. Vous pouvez la marquer comme "En cours" de traitement.
+                {% elif demande.statut == 'en_cours' %}
+                    La demande est en cours de traitement. Vous pouvez la marquer comme "Terminée".
+                {% elif demande.statut == 'terminee' %}
+                    La demande a été traitée avec succès.
+                {% elif demande.statut == 'refusee' %}
+                    La demande a été refusée.
+                {% else %}
+                    Consulter les détails de la demande d'équipement
+                {% endif %}
+            </p>
+        </div>
+        <!-- Détails de la demande -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Détails de la demande</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">Demandeur</h3>
+                    <p class="text-gray-900">{{ demande.demandeur.get_full_name }}</p>
+                    <p class="text-sm text-gray-500">{{ demande.demandeur.email }}</p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">Date de demande</h3>
+                    <p class="text-gray-900">{{ demande.date_demande|date:"d/m/Y à H:i" }}</p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">Catégorie</h3>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if demande.categorie == 'bureau' %}
+                            bg-blue-100 text-blue-800
+                        {% else %}
+                            bg-green-100 text-green-800
+                        {% endif %}">
+                        {{ demande.get_categorie_display }}
+                    </span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">Type d'article</h3>
+                    <p class="text-gray-900">{{ demande.get_type_article_display }}</p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">Type de demande</h3>
+                    <p class="text-gray-900">{{ demande.get_type_demande_display }}</p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">Statut actuel</h3>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if demande.statut == 'en_attente' %}
+                            bg-yellow-100 text-yellow-800
+                        {% elif demande.statut == 'approuvee' %}
+                            bg-green-100 text-green-800
+                        {% elif demande.statut == 'refusee' %}
+                            bg-red-100 text-red-800
+                        {% elif demande.statut == 'en_cours' %}
+                            bg-blue-100 text-blue-800
+                        {% elif demande.statut == 'terminee' %}
+                            bg-gray-100 text-gray-800
+                        {% endif %}">
+                        {{ demande.get_statut_display }}
+                    </span>
+                </div>
+            </div>
+            {% if demande.type_article == 'materiel' and demande.designation %}
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">Désignation</h3>
+                    <p class="text-gray-900">{{ demande.designation.nom }}</p>
+                    {% if demande.description %}
+                        <h3 class="text-sm font-medium text-gray-500 mb-2 mt-4">Description</h3>
+                        <p class="text-gray-900">{{ demande.description.nom }}</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        <!-- Actions -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Actions</h2>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                {% if demande.statut == 'en_attente' %}
+                    <div class="flex space-x-4">
+                        <button type="submit" name="action" value="approuver" 
+                                class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            Approuver la demande
+                        </button>
+                        <button type="submit" name="action" value="refuser" 
+                                class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                            Refuser la demande
+                        </button>
+                    </div>
+                {% elif demande.statut == 'approuvee' %}
+                    <div class="flex space-x-4">
+                        <button type="submit" name="action" value="en_cours" 
+                                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Marquer comme "En cours"
+                        </button>
+                    </div>
+                {% elif demande.statut == 'en_cours' %}
+                    <div class="flex space-x-4">
+                        <button type="submit" name="action" value="terminer" 
+                                class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                            Marquer comme "Terminée"
+                        </button>
+                    </div>
+                {% else %}
+                    <p class="text-gray-500">Aucune action disponible pour ce statut.</p>
+                {% endif %}
+            </form>
+        </div>
+        <!-- Bouton retour -->
+        <div class="mt-8">
+            <a href="{% url 'demande_equipement:liste_toutes_demandes' %}" 
+               class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                Retour à la liste des demandes
+            </a>
+        </div>
+    </div>
+{% endblock %}
+{% endblock %}

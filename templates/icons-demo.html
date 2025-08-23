@@ -1,0 +1,328 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démonstration du Système d'Icônes - ParcInfo</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Système d'icônes moderne ParcInfo -->
+    <link rel="stylesheet" href="{% static 'css/icons-system.css' %}">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Chargeur d'icônes ParcInfo -->
+    <script src="{% static 'js/icons-loader.js' %}"></script>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <header class="mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                <span data-icon="palette" data-icon-size="xl" class="mr-4 text-blue-600"></span>
+                Système d'Icônes ParcInfo
+            </h1>
+            <p class="text-lg text-gray-600">Démonstration des icônes modernes et cohérentes du projet</p>
+        </header>
+
+        <!-- Navigation Icons -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">
+                <span data-icon="navigation" data-icon-size="lg" class="mr-3 text-blue-600"></span>
+                Icônes de Navigation
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="layout-dashboard" data-icon-size="xl" class="text-blue-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Dashboard</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="user-circle" data-icon-size="xl" class="text-blue-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Profil</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="users" data-icon-size="xl" class="text-blue-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Utilisateurs</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="building-2" data-icon-size="xl" class="text-blue-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Fournisseurs</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="monitor" data-icon-size="xl" class="text-blue-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Matériel IT</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="printer" data-icon-size="xl" class="text-blue-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Bureau</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Icons -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">
+                <span data-icon="zap" data-icon-size="lg" class="mr-3 text-green-600"></span>
+                Icônes d'Actions
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                <div class="bg-white p-4 rounded-lg shadow-sm border text-center">
+                    <span data-icon="plus-circle" data-icon-size="lg" class="text-green-600 mb-2 block"></span>
+                    <p class="text-xs">Ajouter</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border text-center">
+                    <span data-icon="edit" data-icon-size="lg" class="text-blue-600 mb-2 block"></span>
+                    <p class="text-xs">Modifier</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border text-center">
+                    <span data-icon="trash-2" data-icon-size="lg" class="text-red-600 mb-2 block"></span>
+                    <p class="text-xs">Supprimer</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border text-center">
+                    <span data-icon="eye" data-icon-size="lg" class="text-gray-600 mb-2 block"></span>
+                    <p class="text-xs">Voir</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border text-center">
+                    <span data-icon="download" data-icon-size="lg" class="text-purple-600 mb-2 block"></span>
+                    <p class="text-xs">Télécharger</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border text-center">
+                    <span data-icon="save" data-icon-size="lg" class="text-green-600 mb-2 block"></span>
+                    <p class="text-xs">Sauvegarder</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border text-center">
+                    <span data-icon="search" data-icon-size="lg" class="text-blue-600 mb-2 block"></span>
+                    <p class="text-xs">Rechercher</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border text-center">
+                    <span data-icon="filter" data-icon-size="lg" class="text-orange-600 mb-2 block"></span>
+                    <p class="text-xs">Filtrer</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Status Icons -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">
+                <span data-icon="activity" data-icon-size="lg" class="mr-3 text-orange-600"></span>
+                Icônes de Statut
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="check-circle" data-icon-size="xl" class="text-green-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Validé</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="x-circle" data-icon-size="xl" class="text-red-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Rejeté</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="clock" data-icon-size="xl" class="text-orange-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">En attente</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="alert-triangle" data-icon-size="xl" class="text-yellow-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Alerte</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="info" data-icon-size="xl" class="text-blue-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Information</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="help-circle" data-icon-size="xl" class="text-purple-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Aide</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Equipment Icons -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">
+                <span data-icon="server" data-icon-size="lg" class="mr-3 text-indigo-600"></span>
+                Icônes d'Équipements
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="laptop" data-icon-size="xl" class="text-indigo-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Ordinateur</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="server" data-icon-size="xl" class="text-indigo-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Serveur</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="smartphone" data-icon-size="xl" class="text-indigo-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Mobile</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="tablet" data-icon-size="xl" class="text-indigo-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Tablette</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="printer" data-icon-size="xl" class="text-indigo-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Imprimante</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border text-center">
+                    <span data-icon="wifi" data-icon-size="xl" class="text-indigo-600 mb-3 block"></span>
+                    <p class="text-sm font-medium">Réseau</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Size Variations -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">
+                <span data-icon="maximize" data-icon-size="lg" class="mr-3 text-purple-600"></span>
+                Variations de Tailles
+            </h2>
+            <div class="bg-white p-8 rounded-lg shadow-sm border">
+                <div class="flex items-center justify-center space-x-8">
+                    <div class="text-center">
+                        <span data-icon="star" data-icon-size="xs" class="text-yellow-600 block mb-2"></span>
+                        <p class="text-xs">XS (12px)</p>
+                    </div>
+                    <div class="text-center">
+                        <span data-icon="star" data-icon-size="sm" class="text-yellow-600 block mb-2"></span>
+                        <p class="text-xs">SM (16px)</p>
+                    </div>
+                    <div class="text-center">
+                        <span data-icon="star" data-icon-size="md" class="text-yellow-600 block mb-2"></span>
+                        <p class="text-xs">MD (20px)</p>
+                    </div>
+                    <div class="text-center">
+                        <span data-icon="star" data-icon-size="lg" class="text-yellow-600 block mb-2"></span>
+                        <p class="text-xs">LG (24px)</p>
+                    </div>
+                    <div class="text-center">
+                        <span data-icon="star" data-icon-size="xl" class="text-yellow-600 block mb-2"></span>
+                        <p class="text-xs">XL (32px)</p>
+                    </div>
+                    <div class="text-center">
+                        <span data-icon="star" data-icon-size="2xl" class="text-yellow-600 block mb-2"></span>
+                        <p class="text-xs">2XL (48px)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Color Variations -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">
+                <span data-icon="palette" data-icon-size="lg" class="mr-3 text-pink-600"></span>
+                Variations de Couleurs
+            </h2>
+            <div class="bg-white p-8 rounded-lg shadow-sm border">
+                <div class="grid grid-cols-4 md:grid-cols-8 gap-4">
+                    <div class="text-center">
+                        <span data-icon="heart" data-icon-size="lg" data-icon-color="primary" class="block mb-2"></span>
+                        <p class="text-xs">Primary</p>
+                    </div>
+                    <div class="text-center">
+                        <span data-icon="heart" data-icon-size="lg" data-icon-color="success" class="block mb-2"></span>
+                        <p class="text-xs">Success</p>
+                    </div>
+                    <div class="text-center">
+                        <span data-icon="heart" data-icon-size="lg" data-icon-color="warning" class="block mb-2"></span>
+                        <p class="text-xs">Warning</p>
+                    </div>
+                    <div class="text-center">
+                        <span data-icon="heart" data-icon-size="lg" data-icon-color="danger" class="block mb-2"></span>
+                        <p class="text-xs">Danger</p>
+                    </div>
+                    <div class="text-center">
+                        <span data-icon="heart" data-icon-size="lg" data-icon-color="info" class="block mb-2"></span>
+                        <p class="text-xs">Info</p>
+                    </div>
+                    <div class="text-center">
+                        <span data-icon="heart" data-icon-size="lg" data-icon-color="secondary" class="block mb-2"></span>
+                        <p class="text-xs">Secondary</p>
+                    </div>
+                    <div class="text-center">
+                        <span data-icon="heart" data-icon-size="lg" data-icon-color="light" class="block mb-2 bg-gray-800 p-2 rounded"></span>
+                        <p class="text-xs">Light</p>
+                    </div>
+                    <div class="text-center">
+                        <span data-icon="heart" data-icon-size="lg" data-icon-color="dark" class="block mb-2"></span>
+                        <p class="text-xs">Dark</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Examples -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">
+                <span data-icon="mouse-pointer" data-icon-size="lg" class="mr-3 text-green-600"></span>
+                Exemples Interactifs
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Bouton avec icône -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <h3 class="font-semibold mb-4">Boutons avec Icônes</h3>
+                    <div class="space-y-3">
+                        <button class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            <span data-icon="plus" data-icon-size="sm" class="mr-2"></span>
+                            Ajouter
+                        </button>
+                        <button class="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <span data-icon="save" data-icon-size="sm" class="mr-2"></span>
+                            Sauvegarder
+                        </button>
+                        <button class="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                            <span data-icon="trash-2" data-icon-size="sm" class="mr-2"></span>
+                            Supprimer
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <h3 class="font-semibold mb-4">Notifications</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <span data-icon="check-circle" data-icon-size="sm" class="text-green-600 mr-3"></span>
+                            <span class="text-sm text-green-800">Opération réussie</span>
+                        </div>
+                        <div class="flex items-center p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <span data-icon="alert-triangle" data-icon-size="sm" class="text-yellow-600 mr-3"></span>
+                            <span class="text-sm text-yellow-800">Attention requise</span>
+                        </div>
+                        <div class="flex items-center p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <span data-icon="x-circle" data-icon-size="sm" class="text-red-600 mr-3"></span>
+                            <span class="text-sm text-red-800">Erreur détectée</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <h3 class="font-semibold mb-4">Navigation</h3>
+                    <nav class="space-y-2">
+                        <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                            <span data-icon="home" data-icon-size="sm" class="mr-3"></span>
+                            Accueil
+                        </a>
+                        <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                            <span data-icon="settings" data-icon-size="sm" class="mr-3"></span>
+                            Paramètres
+                        </a>
+                        <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                            <span data-icon="help-circle" data-icon-size="sm" class="mr-3"></span>
+                            Aide
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center py-8 border-t">
+            <p class="text-gray-600">
+                <span data-icon="sparkles" data-icon-size="sm" class="mr-2 text-yellow-500"></span>
+                Système d'icônes ParcInfo - Design moderne et cohérent
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

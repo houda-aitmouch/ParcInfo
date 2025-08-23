@@ -1,0 +1,215 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ajouter un matériel informatique</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>  <link rel="stylesheet" href="{% static 'css/parcinfo-ui.css' %}">
+  <link rel="stylesheet" href="{% static 'react/assets/index.css' %}">
+</head>
+<body class="bg-gray-100 p-8 min-h-screen">
+  <div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">Ajouter un matériel informatique</h1>
+    {% if form.errors %}
+      <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+        <strong>Erreur :</strong>
+        <ul>
+          {% for field in form %}
+            {% for error in field.errors %}
+              <li>{{ field.label }} : {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    <form method="post" x-data="materielForm()" x-init="init()">
+      {% csrf_token %}
+      <div class="mb-4">
+        <label for="id_commande" class="block text-gray-700 font-medium mb-1">Commande</label>
+        {{ form.commande }}
+      </div>
+      <!-- Désignation -->
+      <div class="mb-4">
+        <label for="id_designation" class="block text-gray-700 font-medium mb-1">Désignation</label>
+        <select id="id_designation" class="w-full border rounded px-3 py-2"
+                x-model="designationId" @change="updateDescriptions()">
+          <option value="">---------</option>
+          <template x-for="d in designationsUnique" :key="d.designation_id">
+            <option :value="d.designation_id" x-text="d.designation"></option>
+          </template>
+        </select>
+      </div>
+      <!-- Description -->
+      <div class="mb-4">
+        <label for="id_description" class="block text-gray-700 font-medium mb-1">Description</label>
+        <select id="id_description" class="w-full border rounded px-3 py-2"
+                x-model="descriptionId" @change="updateLigneFields()">
+          <option value="">---------</option>
+          <template x-for="desc in descriptionsPourDesignation" :key="desc.description_id">
+            <option :value="desc.description_id" x-text="desc.description"></option>
+          </template>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Prix unitaire</label>
+        <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100" :value="ligneChoisie.prix_unitaire || ''" readonly>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Fournisseur</label>
+        <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100" :value="ligneChoisie.fournisseur || ''" readonly>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">N° Facture</label>
+        <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100" :value="ligneChoisie.numero_facture || ''" readonly>
+      </div>
+      <!-- Champs cachés pour soumettre les valeurs dans le POST -->
+      <input type="hidden" name="designation" :value="designationId">
+      <input type="hidden" name="description" :value="descriptionId">
+      <input type="hidden" name="prix_unitaire" :value="ligneChoisie.prix_unitaire">
+      <input type="hidden" name="fournisseur" :value="ligneChoisie.fournisseur">
+      <input type="hidden" name="numero_facture" :value="ligneChoisie.numero_facture">
+      <input type="hidden" name="ligne_commande" :value="ligneChoisie.id">
+      <!-- Autres champs du modèle -->
+      <div class="mb-4">{{ form.numero_serie.label_tag }}{{ form.numero_serie }}</div>
+      <div class="mb-4">{{ form.code_inventaire.label_tag }}{{ form.code_inventaire }}</div>
+      <div class="mb-4">{{ form.utilisateur.label_tag }}{{ form.utilisateur }}</div>
+      <div class="mb-4">{{ form.statut.label_tag }}{{ form.statut }}</div>
+      <div class="mb-4">{{ form.public.label_tag }}{{ form.public }}</div>
+      <div class="mb-4">{{ form.lieu_stockage.label_tag }}{{ form.lieu_stockage }}</div>
+      <div class="mb-4">{{ form.observation.label_tag }}{{ form.observation }}</div>
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Date mise en service</label>
+        <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100" :value="dateServiceFr" readonly>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Date fin de garantie</label>
+        <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100" :value="dateFinGarantieFr" readonly>
+      </div>
+      <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition duration-200">
+        Ajouter
+      </button>
+    </form>
+    <script>
+      function materielForm() {
+        return {
+          commandeId: '',
+          lignesCommande: [],
+          designationId: '',
+          descriptionId: '',
+          ligneChoisie: {},
+          designationsUnique: [],
+          descriptionsPourDesignation: [],
+          dateServiceAuto: '',
+          dateServiceFr: '',
+          dateFinGarantieAuto: '',
+          dateFinGarantieFr: '',
+          updateLignes() {
+            const commandeSelect = document.getElementById('id_commande');
+            this.commandeId = commandeSelect.value;
+            this.designationId = '';
+            this.descriptionId = '';
+            this.ligneChoisie = {};
+            this.dateServiceAuto = '';
+            this.dateServiceFr = '';
+            this.dateFinGarantieAuto = '';
+            this.dateFinGarantieFr = '';
+            if (!this.commandeId) {
+              this.lignesCommande = [];
+              this.designationsUnique = [];
+              this.descriptionsPourDesignation = [];
+              return;
+            }
+            fetch(`/materiels/api/lignes_commande_par_commande/${this.commandeId}/`)
+              .then(r => r.json())
+              .then(data => {
+                this.lignesCommande = data;
+                // Désignations uniques
+                const seen = new Set();
+                this.designationsUnique = data.filter(ligne => {
+                  if (seen.has(ligne.designation_id)) return false;
+                  seen.add(ligne.designation_id);
+                  return true;
+                }).map(ligne => ({
+                  designation_id: ligne.designation_id,
+                  designation: ligne.designation
+                }));
+                this.descriptionsPourDesignation = [];
+              });
+          },
+          updateDescriptions() {
+            this.descriptionId = '';
+            this.ligneChoisie = {};
+            this.dateServiceAuto = '';
+            this.dateServiceFr = '';
+            this.dateFinGarantieAuto = '';
+            this.dateFinGarantieFr = '';
+            this.descriptionsPourDesignation = this.lignesCommande
+              .filter(ligne => ligne.designation_id == this.designationId)
+              .map(ligne => ({
+                id: ligne.id,
+                description: ligne.description,
+                description_id: ligne.description_id
+              }));
+          },
+          updateLigneFields() {
+            // Trouver la ligne correspondant à la désignation ET la description sélectionnées
+            const ligne = this.lignesCommande.find(
+              l => l.designation_id == this.designationId && l.description_id == this.descriptionId
+            );
+            this.ligneChoisie = ligne || {};
+            // Calcul automatique de la date de service : date_reception + 1 jour
+            if (ligne && ligne.date_reception) {
+              const d = new Date(ligne.date_reception);
+              d.setDate(d.getDate() + 1);
+              this.dateServiceAuto = d.toISOString().slice(0, 10);
+              // Format français jj/mm/aaaa
+              const day = ('0' + d.getDate()).slice(-2);
+              const month = ('0' + (d.getMonth() + 1)).slice(-2);
+              const year = d.getFullYear();
+              this.dateServiceFr = `${day}/${month}/${year}`;
+              // Calcul automatique de la date de fin de garantie
+              if (ligne.duree_garantie_valeur && ligne.duree_garantie_unite) {
+                const dFin = new Date(d);
+                const val = parseInt(ligne.duree_garantie_valeur, 10);
+                if (ligne.duree_garantie_unite === 'jour') {
+                  dFin.setDate(dFin.getDate() + val);
+                } else if (ligne.duree_garantie_unite === 'mois') {
+                  dFin.setMonth(dFin.getMonth() + val);
+                } else if (ligne.duree_garantie_unite === 'annee') {
+                  dFin.setFullYear(dFin.getFullYear() + val);
+                }
+                this.dateFinGarantieAuto = dFin.toISOString().slice(0, 10);
+                const dayF = ('0' + dFin.getDate()).slice(-2);
+                const monthF = ('0' + (dFin.getMonth() + 1)).slice(-2);
+                const yearF = dFin.getFullYear();
+                this.dateFinGarantieFr = `${dayF}/${monthF}/${yearF}`;
+              } else {
+                this.dateFinGarantieAuto = '';
+                this.dateFinGarantieFr = '';
+              }
+            } else {
+              this.dateServiceAuto = '';
+              this.dateServiceFr = '';
+              this.dateFinGarantieAuto = '';
+              this.dateFinGarantieFr = '';
+            }
+          },
+          init() {
+            if (document.getElementById('id_commande').value) {
+              this.updateLignes();
+            }
+            document.getElementById('id_commande').addEventListener('change', () => {
+              this.updateLignes();
+            });
+          }
+        }
+      }
+      document.addEventListener('alpine:init', () => {
+        Alpine.data('materielForm', materielForm);
+      });
+    </script>
+  </div></body>
+</html>

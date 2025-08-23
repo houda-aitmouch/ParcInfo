@@ -28,13 +28,37 @@ def liste_demandes(request):
     
     # Séparer les demandes approuvées avec décharge à signer
     demandes_a_signer = demandes.filter(statut='approuvee', decharge_signee=False)
+    
+    # Autres demandes (toutes sauf celles à signer)
     autres_demandes = demandes.exclude(statut='approuvee', decharge_signee=False)
     
+    # Statistiques pour le dashboard
+    demandes_en_attente_count = demandes.filter(statut='en_attente').count()
+    demandes_approuvees_count = demandes.filter(statut='approuvee').count()
+    
+    # Utiliser le même template pour tous les utilisateurs (même code backend)
+    template_name = 'demande_equipement/liste_demandes.html'
+    
+    # Déterminer le template de base selon le type d'utilisateur
+    if request.user.is_superuser:
+        base_template = 'dashboards/base_superadmin.html'
+    elif request.user.groups.filter(name='Gestionnaire Informatique').exists():
+        base_template = 'dashboards/base_gestionnaire_info.html'
+    elif request.user.groups.filter(name='Gestionnaire Bureau').exists():
+        base_template = 'dashboards/base_gestionnaire_bureau.html'
+    else:
+        # Fallback pour les autres utilisateurs (employés, etc.)
+        base_template = 'dashboards/base_superadmin.html'
+    
     dashboard_url = get_user_dashboard_url(request.user)
-    return render(request, 'demande_equipement/liste_demandes.html', {
+    return render(request, template_name, {
+        'demandes': demandes,
         'demandes_a_signer': demandes_a_signer,
         'autres_demandes': autres_demandes,
-        'dashboard_url': dashboard_url
+        'demandes_en_attente_count': demandes_en_attente_count,
+        'demandes_approuvees_count': demandes_approuvees_count,
+        'dashboard_url': dashboard_url,
+        'base_template': base_template
     })
 
 @login_required
@@ -47,33 +71,92 @@ def nouvelle_demande(request):
                 demande = form.save(commit=False)
                 demande.demandeur = request.user
                 demande.statut = 'en_attente'
+                
                 demande.save()
+                
+                # Rediriger vers la liste des demandes
                 return redirect('demande_equipement:liste_demandes')
             except Exception as e:
-                # Log l'erreur silencieusement
-                pass
+                # Ajouter l'erreur au formulaire
+                form.add_error(None, f"Erreur lors de la sauvegarde: {e}")
     else:
         form = DemandeEquipementForm(initial={'type_demande': 'nouveau'})
     
-    return render(request, 'demande_equipement/nouvelle_demande.html', {'form': form})
+    # Utiliser le même template pour tous les utilisateurs (même code backend)
+    template_name = 'demande_equipement/nouvelle_demande.html'
+    
+    # Déterminer le template de base selon le type d'utilisateur
+    if request.user.is_superuser:
+        base_template = 'dashboards/base_superadmin.html'
+    elif request.user.groups.filter(name='Gestionnaire Informatique').exists():
+        base_template = 'dashboards/base_gestionnaire_info.html'
+    elif request.user.groups.filter(name='Gestionnaire Bureau').exists():
+        base_template = 'dashboards/base_gestionnaire_bureau.html'
+    else:
+        # Fallback pour les autres utilisateurs (employés, etc.)
+        base_template = 'dashboards/base_superadmin.html'
+    
+    dashboard_url = get_user_dashboard_url(request.user)
+    return render(request, template_name, {
+        'form': form,
+        'dashboard_url': dashboard_url,
+        'base_template': base_template
+    })
 
 @login_required
 def modifier_demande(request, pk):
     """Modifier une demande existante"""
-    demande = get_object_or_404(DemandeEquipement, pk=pk, demandeur=request.user)
-    
-    if request.method == 'POST':
-        form = DemandeEquipementForm(request.POST, instance=demande)
-        if form.is_valid():
-            form.save()
-            return redirect('demande_equipement:liste_demandes')
-    else:
-        form = DemandeEquipementForm(instance=demande)
-    
-    return render(request, 'demande_equipement/modifier_demande.html', {
-        'form': form,
-        'demande': demande
-    })
+    try:
+        demande = get_object_or_404(DemandeEquipement, pk=pk, demandeur=request.user)
+        
+        if request.method == 'POST':
+            form = DemandeEquipementForm(request.POST, instance=demande)
+            if form.is_valid():
+                # Sauvegarder les modifications
+                demande_modifiee = form.save()
+                
+                # Rediriger vers la liste des demandes avec cache-busting plus robuste
+                from django.utils import timezone
+                from django.urls import reverse
+                import random
+                timestamp = int(timezone.now().timestamp())
+                random_id = random.randint(1000, 9999)
+                return redirect(f'{reverse("demande_equipement:liste_demandes")}?t={timestamp}&r={random_id}')
+            else:
+                # Les erreurs de validation seront affichées dans le template
+                pass
+        else:
+            form = DemandeEquipementForm(instance=demande)
+        
+        # Gérer le dashboard_url de manière sécurisée
+        try:
+            dashboard_url = get_user_dashboard_url(request.user)
+        except Exception as e:
+            dashboard_url = 'users:profil'  # Fallback
+        
+        # Déterminer le template de base selon le type d'utilisateur
+        if request.user.is_superuser:
+            base_template = 'dashboards/base_superadmin.html'
+        elif request.user.groups.filter(name='Gestionnaire Informatique').exists():
+            base_template = 'dashboards/base_gestionnaire_info.html'
+        elif request.user.groups.filter(name='Gestionnaire Bureau').exists():
+            base_template = 'dashboards/base_gestionnaire_bureau.html'
+        else:
+            # Fallback pour les autres utilisateurs (employés, etc.)
+            base_template = 'dashboards/base_superadmin.html'
+        
+        context = {
+            'form': form,
+            'demande': demande,
+            'dashboard_url': dashboard_url,
+            'base_template': base_template
+        }
+        
+        return render(request, 'demande_equipement/modifier_demande.html', context)
+        
+    except Exception as e:
+        # En cas d'erreur, rediriger vers la liste des demandes
+        return redirect('demande_equipement:liste_demandes')
 
 @login_required
 def supprimer_demande(request, pk):
@@ -84,7 +167,11 @@ def supprimer_demande(request, pk):
         demande.delete()
         return redirect('demande_equipement:liste_demandes')
     
-    return render(request, 'demande_equipement/confirmer_suppression.html', {'demande': demande})
+    dashboard_url = get_user_dashboard_url(request.user)
+    return render(request, 'demande_equipement/confirmer_suppression.html', {
+        'demande': demande,
+        'dashboard_url': dashboard_url
+    })
 
 @login_required
 @require_http_methods(["GET"])
@@ -279,7 +366,16 @@ def liste_toutes_demandes(request):
             demande.code_inventaire_exemple = "N/A"
     
     dashboard_url = get_user_dashboard_url(request.user)
-    return render(request, 'demande_equipement/liste_toutes_demandes.html', {
+    
+    # Choisir le template selon le rôle
+    if request.user.groups.filter(name='Gestionnaire Informatique').exists():
+        template_name = 'demande_equipement/liste_toutes_demandes_gestionnaire_info.html'
+    elif request.user.groups.filter(name='Gestionnaire Bureau').exists():
+        template_name = 'demande_equipement/liste_toutes_demandes_bureau.html'
+    else:
+        template_name = 'demande_equipement/liste_toutes_demandes.html'
+    
+    return render(request, template_name, {
         'demandes': demandes,
         'dashboard_url': dashboard_url,
         'categorie_gestionnaire': categorie_gestionnaire
@@ -388,7 +484,11 @@ def approuver_demande(request, pk):
         demande.save()
         return redirect('demande_equipement:liste_toutes_demandes')
     
-    return render(request, 'demande_equipement/approuver_demande.html', {'demande': demande})
+    dashboard_url = get_user_dashboard_url(request.user)
+    return render(request, 'demande_equipement/approuver_demande.html', {
+        'demande': demande,
+        'dashboard_url': dashboard_url
+    })
 
 @login_required
 def signer_decharge(request, pk):
@@ -418,7 +518,11 @@ def signer_decharge(request, pk):
         if not signature_data:
             from django.contrib import messages
             messages.error(request, "Signature électronique requise.")
-            return render(request, 'demande_equipement/signer_decharge.html', {'demande': demande})
+            dashboard_url = get_user_dashboard_url(request.user)
+            return render(request, 'demande_equipement/signer_decharge.html', {
+                'demande': demande,
+                'dashboard_url': dashboard_url
+            })
         
         # Marquer la décharge comme signée
         demande.decharge_signee = True
@@ -454,7 +558,11 @@ def signer_decharge(request, pk):
         except Exception as e:
             from django.contrib import messages
             messages.error(request, f"Erreur lors de la sauvegarde de la signature : {str(e)}")
-            return render(request, 'demande_equipement/signer_decharge.html', {'demande': demande})
+            dashboard_url = get_user_dashboard_url(request.user)
+            return render(request, 'demande_equipement/signer_decharge.html', {
+                'demande': demande,
+                'dashboard_url': dashboard_url
+            })
         
         demande.save()
         
@@ -465,7 +573,11 @@ def signer_decharge(request, pk):
         messages.success(request, "Décharge signée électroniquement avec succès et archivée !")
         return redirect('demande_equipement:liste_demandes')
     
-    return render(request, 'demande_equipement/signer_decharge.html', {'demande': demande})
+    dashboard_url = get_user_dashboard_url(request.user)
+    return render(request, 'demande_equipement/signer_decharge.html', {
+        'demande': demande,
+        'dashboard_url': dashboard_url
+    })
 
 @login_required
 def telecharger_decharge(request, pk):
@@ -541,7 +653,11 @@ def viewer_pdf(request, pk):
     if not (request.user == demande.demandeur or is_gestionnaire_ou_superadmin(request.user)):
         raise PermissionDenied("Vous n'êtes pas autorisé à accéder à cette décharge.")
     
-    return render(request, 'demande_equipement/pdf_viewer.html', {'demande': demande})
+    dashboard_url = get_user_dashboard_url(request.user)
+    return render(request, 'demande_equipement/pdf_viewer.html', {
+        'demande': demande,
+        'dashboard_url': dashboard_url
+    })
 
 def archiver_decharge_automatique(demande, request_user=None):
     """
@@ -692,7 +808,18 @@ def consulter_archives(request):
         context['stats_categories'] = stats_categories
         context['stats_types'] = stats_types
     
-    return render(request, 'demande_equipement/archives_unifiees.html', context)
+    dashboard_url = get_user_dashboard_url(request.user)
+    context['dashboard_url'] = dashboard_url
+    
+    # Choisir le template selon le rôle
+    if request.user.groups.filter(name='Gestionnaire Informatique').exists():
+        template_name = 'demande_equipement/archives_unifiees_gestionnaire_info.html'
+    elif request.user.groups.filter(name='Gestionnaire Bureau').exists():
+        template_name = 'demande_equipement/archives_unifiees_bureau.html'
+    else:
+        template_name = 'demande_equipement/archives_unifiees.html'
+    
+    return render(request, template_name, context)
 
 def exporter_archives_data(archives, categorie_gestionnaire):
     """Exporter les données d'archives en Excel"""

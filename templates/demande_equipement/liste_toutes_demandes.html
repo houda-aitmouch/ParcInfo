@@ -1,15 +1,10 @@
+{% extends 'dashboards/base_superadmin.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Toutes les demandes d'équipement - ADD</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-</head>
-<body class="bg-gradient-to-br from-indigo-50 to-white min-h-screen font-sans">
-    <div class="max-w-7xl mx-auto py-10 px-4">
+
+{% block title %}Toutes les demandes d'équipement - ADD{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-10 px-4">
         <!-- En-tête -->
         <div class="flex justify-between items-center mb-8">
             <div>
@@ -317,5 +312,4 @@
             </div>
         {% endif %}
     </div>
-</body>
-</html> 
+{% endblock %} 

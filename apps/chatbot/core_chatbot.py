@@ -55,7 +55,8 @@ PREDEFINED_INTENTS = [
     "get_date_reception", "get_commande_details", "get_general_stats",
     "compare_garanties", "check_warranty_status", "list_materials",
     "get_delivery_info", "get_user_permissions", "search_supplies",
-    "get_location_materials", "check_expiring_soon", "get_order_lines"
+    "get_location_materials", "check_expiring_soon", "get_order_lines",
+    "list_users", "count_users"
 ]
 
 # Prompt principal du chatbot avec exigence de ton humain
@@ -1941,6 +1942,26 @@ class ParcInfoChatbot:
                     'source': 'early_route',
                     'confidence': 90,
                     'method': 'pre_rag_warranty'
+                }
+
+            # Early: requêtes sur les utilisateurs
+            if ('utilisateur' in qlow or 'user' in qlow) and ('liste' in qlow or 'list' in qlow):
+                return {
+                    'response': self._handle_list_users({'original_query': query}),
+                    'intent': 'list_users',
+                    'source': 'early_route',
+                    'confidence': 95,
+                    'method': 'early_override'
+                }
+            
+            # Early: comptage d'utilisateurs
+            if ('utilisateur' in qlow or 'user' in qlow) and ('compte' in qlow or 'nombre' in qlow or 'total' in qlow or 'count' in qlow):
+                return {
+                    'response': self._handle_count_users({'original_query': query}),
+                    'intent': 'count_users',
+                    'source': 'early_route',
+                    'confidence': 95,
+                    'method': 'early_override'
                 }
 
             # Early overrides BEFORE structured search
@@ -6282,7 +6303,9 @@ Si une réponse ne vous convient pas :
             "check_warranty_status": ["garantie", "active", "expire", "valide"],
             "get_delivery_info": ["livraison", "livré", "conforme", "retard"],
             "list_materials": ["matériel", "materiel", "liste", "affecté"],
-            "get_user_permissions": ["permission", "groupe", "utilisateur", "droits"]
+            "get_user_permissions": ["permission", "groupe", "utilisateur", "droits"],
+            "list_users": ["utilisateur", "utilisateurs", "liste", "user", "users"],
+            "count_users": ["utilisateur", "utilisateurs", "compte", "nombre", "total", "user", "users"]
         }
         
         if intent not in validation_rules:
@@ -6314,7 +6337,9 @@ Si une réponse ne vous convient pas :
                 "search_supplies": lambda: self._handle_supplies_query({'original_query': query}),
                 "get_location_materials": lambda: self._handle_materials_at_location({'original_query': query}),
                 "check_expiring_soon": lambda: self._handle_commands_expiring_soon({'original_query': query}),
-                "get_order_lines": lambda: self._handle_lines_for_order({'original_query': query})
+                "get_order_lines": lambda: self._handle_lines_for_order({'original_query': query}),
+                "list_users": lambda: self._handle_list_users({'original_query': query}),
+                "count_users": lambda: self._handle_count_users({'original_query': query})
             }
             
             if intent in intent_handlers:
@@ -9574,6 +9599,52 @@ Bureautique : {etage1_office.count()} matériels
         except Exception as e:
             logger.error(f"Error listing user roles: {e}")
             return "Erreur lors de la récupération des rôles des utilisateurs."
+
+    def _handle_list_users(self, entities: Dict) -> str:
+        """Liste tous les utilisateurs avec leurs informations de base."""
+        try:
+            from apps.users.models import CustomUser
+            from django.contrib.auth.models import Group
+            
+            users = CustomUser.objects.all().prefetch_related('groups').order_by('username')
+            
+            if not users.exists():
+                return "Aucun utilisateur trouvé dans le système."
+            
+            response = "**Liste des utilisateurs :**\n\n"
+            
+            for user in users:
+                # Statut de l'utilisateur
+                status = "✅ Actif" if user.is_active else "❌ Inactif"
+                
+                # Groupes de l'utilisateur
+                groups = user.groups.all()
+                group_names = [g.name for g in groups]
+                role_display = ", ".join(group_names) if group_names else "(aucun groupe)"
+                
+                # Date de création
+                created_date = user.date_joined.strftime('%d/%m/%Y') if user.date_joined else "N/A"
+                
+                response += f"• **{user.username}** — {status}\n"
+                response += f"  📧 Email: {user.email}\n"
+                response += f"  👥 Rôles: {role_display}\n"
+                response += f"  📅 Créé le: {created_date}\n\n"
+            
+            # Statistiques
+            total_users = users.count()
+            active_users = users.filter(is_active=True).count()
+            inactive_users = total_users - active_users
+            
+            response += f"**Statistiques :**\n"
+            response += f"• Total: {total_users} utilisateurs\n"
+            response += f"• Actifs: {active_users}\n"
+            response += f"• Inactifs: {inactive_users}\n\n"
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error listing users: {e}")
+            return "Erreur lors de la récupération de la liste des utilisateurs."
 
     def _handle_count_completed_deliveries(self, entities: Dict) -> str:
         """Handler pour compter les livraisons terminées"""

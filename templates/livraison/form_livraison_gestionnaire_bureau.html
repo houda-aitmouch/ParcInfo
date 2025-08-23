@@ -1,0 +1,648 @@
+{% extends 'dashboards/base_gestionnaire_bureau.html' %}
+{% load static %}
+
+{% block title %}Nouvelle/Modifier Livraison - Gestionnaire Bureau{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+      <h1 class="text-3xl font-bold text-gray-900">
+        {% if is_edit %}
+          Modifier la livraison {{ livraison.numero_commande }}
+        {% else %}
+          Nouvelle livraison
+        {% endif %}
+      </h1>
+      <a href="{% url 'livraison:liste_livraisons_gestionnaire_bureau' %}"
+         class="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-200">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Retour à la liste
+      </a>
+    </div>
+</div>
+
+  <div class="chart-card" x-data="livraisonForm()" x-init="init()">
+    {% if messages %}
+      <div class="mb-6">
+        {% for message in messages %}
+          <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 border border-red-400 text-red-700{% else %}bg-green-100 border border-green-400 text-green-700{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="space-y-8" onsubmit="return validateForm()">
+        {% csrf_token %}
+        
+      <!-- Section 1: Sélection de la commande / Infos commande -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          {% if is_edit %}Informations de la commande{% else %}Sélection de la commande{% endif %}
+        </h3>
+
+        {% if is_edit %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Type de commande</label>
+            <input type="text" value="{{ livraison.get_type_commande_display }}" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">
+            </div>
+            <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Commande</label>
+            <input type="text" value="{{ livraison.numero_commande }}" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">
+            </div>
+        </div>
+        <div class="mt-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Fournisseur</label>
+          <input type="text" value="{{ livraison.fournisseur.nom }}" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">
+                </div>
+        {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+            <label for="type-commande" class="block text-sm font-medium text-gray-700 mb-2">Type de commande *</label>
+            {{ form.type_commande }}
+            {% if form.type_commande.errors %}<p class="text-red-600 text-sm mt-1">{{ form.type_commande.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+            <label for="commande-select-display" class="block text-sm font-medium text-gray-700 mb-2">Commande *</label>
+            <select id="commande-select-display" class="w-full px-4 py-3 border border-gray-300 rounded-lg" required>
+              <option value="">Sélectionner une commande</option>
+            </select>
+            {{ form.commande_id }}
+            {% if form.commande_id.errors %}<p class="text-red-600 text-sm mt-1">{{ form.commande_id.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+            <div class="mt-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Fournisseur</label>
+          <input type="text" id="fournisseur-display" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700" placeholder="Sélectionnez une commande pour voir le fournisseur">
+                </div>
+        {% endif %}
+            </div>
+
+      <!-- Matériels de la commande (chargés dynamiquement) -->
+      <div id="materiels-section" class="hidden">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          Matériels de la commande
+        </h3>
+        <div id="materiels-list" class="space-y-3"></div>
+        </div>
+        
+        <!-- Informations de livraison -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+          Informations de livraison
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+            <label for="{{ form.date_livraison_prevue.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Date de livraison prévue *</label>
+            {{ form.date_livraison_prevue }}
+            {% if form.date_livraison_prevue.errors %}<p class="text-red-600 text-sm mt-1">{{ form.date_livraison_prevue.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label for="{{ form.date_livraison_effective.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Date de livraison effective</label>
+            {{ form.date_livraison_effective }}
+            {% if form.date_livraison_effective.errors %}<p class="text-red-600 text-sm mt-1">{{ form.date_livraison_effective.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+            <label for="{{ form.statut_livraison.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Statut de livraison</label>
+            {{ form.statut_livraison }}
+            {% if form.statut_livraison.errors %}<p class="text-red-600 text-sm mt-1">{{ form.statut_livraison.errors.0 }}</p>{% endif %}
+            </div>
+        </div>
+            </div>
+            
+      <!-- Conformité et réception -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          Conformité et réception
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="flex items-center p-4 bg-white rounded-lg border border-gray-200">
+            {{ form.conforme }}
+            <label for="{{ form.conforme.id_for_label }}" class="ml-3 text-sm font-medium text-gray-700">Conforme</label>
+            </div>
+          <div class="flex items-center p-4 bg-white rounded-lg border border-gray-200">
+            {{ form.pv_reception_recu }}
+            <label for="{{ form.pv_reception_recu.id_for_label }}" class="ml-3 text-sm font-medium text-gray-700">PV réception validé</label>
+          </div>
+            </div>
+        </div>
+        
+      <!-- Notes -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+          Notes et commentaires
+        </h3>
+        <div>
+          {{ form.notes }}
+          {% if form.notes.errors %}<p class="text-red-600 text-sm mt-1">{{ form.notes.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+
+        
+      <!-- Actions -->
+        <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+        <button type="button" onclick="window.history.back()" class="px-4 py-2 text-sm rounded bg-gray-600 text-white">Annuler</button>
+        <button type="submit" class="px-4 py-2 text-sm rounded bg-blue-600 text-white flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          {% if is_edit %}Mettre à jour la livraison{% else %}Enregistrer la livraison{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+  {% if is_edit and materiels %}
+  <div class="chart-card mt-4">
+    <h2 class="text-lg font-semibold mb-4">Matériels</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full table-auto text-sm">
+        <thead><tr><th class="px-2 py-2 text-left">Désignation</th><th class="px-2 py-2 text-left">Description</th><th class="px-2 py-2 text-left">Quantité</th><th class="px-2 py-2 text-left">Prix unitaire</th><th class="px-2 py-2 text-left">Total</th></tr></thead>
+        <tbody>
+          {% for materiel in materiels %}
+          <tr class="hover:bg-gray-50"><td class="px-2 py-2">{{ materiel.designation.nom }}</td><td class="px-2 py-2">{{ materiel.description.nom }}</td><td class="px-2 py-2">{{ materiel.quantite }}</td><td class="px-2 py-2">{{ materiel.prix_unitaire }} MAD</td><td class="px-2 py-2">{{ materiel.total }} MAD</td></tr>
+                            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+                        {% endif %}
+                    </div>
+
+<script>
+  // Fonction de validation du formulaire
+  function validateForm() {
+    console.log('🔍 Validating form...');
+    
+    // Vérifier le type de commande
+    const typeCommande = document.getElementById('type-commande');
+    if (typeCommande && !typeCommande.value) {
+      alert('Veuillez sélectionner un type de commande');
+      typeCommande.focus();
+      return false;
+    }
+    
+    // Vérifier la commande sélectionnée
+    const commandeSelect = document.getElementById('commande-select');
+    if (commandeSelect && !commandeSelect.value) {
+      alert('Veuillez sélectionner une commande');
+      document.getElementById('commande-select-display').focus();
+      return false;
+    }
+    
+    // Vérifier la date de livraison prévue
+    const datePrevue = document.getElementById('{{ form.date_livraison_prevue.id_for_label }}');
+    if (datePrevue && !datePrevue.value) {
+      alert('Veuillez saisir une date de livraison prévue');
+      datePrevue.focus();
+      return false;
+    }
+    
+    console.log('✅ Form validation passed');
+    console.log('📝 Form data:', {
+      type_commande: typeCommande ? typeCommande.value : 'N/A',
+      commande_id: commandeSelect ? commandeSelect.value : 'N/A',
+      date_livraison_prevue: datePrevue ? datePrevue.value : 'N/A'
+    });
+    
+    // Log tous les champs du formulaire
+    const form = document.querySelector('form');
+    const formData = new FormData(form);
+    console.log('📋 All form data:');
+    for (let [key, value] of formData.entries()) {
+      console.log(`  ${key}: ${value}`);
+    }
+    
+    // Vérifier que les champs cachés sont bien remplis
+    console.log('🔍 Checking hidden fields:');
+    const hiddenFields = form.querySelectorAll('input[type="hidden"]');
+    hiddenFields.forEach(field => {
+      console.log(`  ${field.name}: ${field.value}`);
+    });
+    
+    // Vérifier que les champs visibles sont bien remplis
+    console.log('🔍 Checking visible fields:');
+    const visibleFields = form.querySelectorAll('input:not([type="hidden"]), select, textarea');
+    visibleFields.forEach(field => {
+      if (field.name) {
+        console.log(`  ${field.name}: ${field.value || field.checked || 'Non défini'}`);
+      }
+    });
+    
+    return true;
+  }
+
+  // Debug: Log quand le DOM est chargé
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 DOM loaded, checking form elements...');
+    
+    // Vérifier tous les éléments du formulaire
+    const form = document.querySelector('form');
+    const typeCommande = document.getElementById('type-commande');
+    const commandeSelect = document.getElementById('commande-select');
+    const commandeSelectDisplay = document.getElementById('commande-select-display');
+    const datePrevue = document.getElementById('{{ form.date_livraison_prevue.id_for_label }}');
+    
+    console.log('📋 Form elements found:', {
+      form: !!form,
+      typeCommande: !!typeCommande,
+      commandeSelect: !!commandeSelect,
+      commandeSelectDisplay: !!commandeSelectDisplay,
+      datePrevue: !!datePrevue
+    });
+    
+    if (form) {
+      console.log('📝 Form action:', form.action);
+      console.log('📝 Form method:', form.method);
+    }
+    
+    // Mettre à jour les informations de debug en temps réel
+    if (typeCommande) {
+      typeCommande.addEventListener('change', updateDebugInfo);
+    }
+    if (commandeSelectDisplay) {
+      commandeSelectDisplay.addEventListener('change', updateDebugInfo);
+    }
+    if (datePrevue) {
+      datePrevue.addEventListener('change', updateDebugInfo);
+    }
+    
+    // Ajouter des listeners pour les autres champs
+    const statutSelect = document.getElementById('{{ form.statut_livraison.id_for_label }}');
+    const conformeCheckbox = document.getElementById('{{ form.conforme.id_for_label }}');
+    const pvCheckbox = document.getElementById('{{ form.pv_reception_recu.id_for_label }}');
+    
+    if (statutSelect) {
+      statutSelect.addEventListener('change', updateDebugInfo);
+    }
+    if (conformeCheckbox) {
+      conformeCheckbox.addEventListener('change', updateDebugInfo);
+    }
+    if (pvCheckbox) {
+      pvCheckbox.addEventListener('change', updateDebugInfo);
+    }
+    
+    // Fonction pour mettre à jour les informations de debug
+    function updateDebugInfo() {
+      const debugTypeCommande = document.getElementById('debug-type-commande');
+      const debugCommandeId = document.getElementById('debug-commande-id');
+      const debugDatePrevue = document.getElementById('debug-date-prevue');
+      const debugStatut = document.getElementById('debug-statut');
+      const debugConforme = document.getElementById('debug-conforme');
+      const debugPv = document.getElementById('debug-pv');
+      
+      if (debugTypeCommande) {
+        debugTypeCommande.textContent = typeCommande ? typeCommande.value || 'Non sélectionné' : 'Non trouvé';
+      }
+      if (debugCommandeId) {
+        debugCommandeId.textContent = commandeSelect ? commandeSelect.value || 'Non sélectionné' : 'Non trouvé';
+      }
+      if (debugDatePrevue) {
+        debugDatePrevue.textContent = datePrevue ? datePrevue.value || 'Non saisie' : 'Non trouvé';
+      }
+      if (debugStatut) {
+        debugStatut.textContent = statutSelect ? statutSelect.value || 'En attente' : 'Non trouvé';
+      }
+      if (debugConforme) {
+        debugConforme.textContent = conformeCheckbox ? (conformeCheckbox.checked ? 'Oui' : 'Non') : 'Non trouvé';
+      }
+      if (debugPv) {
+        debugPv.textContent = pvCheckbox ? (pvCheckbox.checked ? 'Oui' : 'Non') : 'Non trouvé';
+      }
+    }
+    
+    // Mise à jour initiale
+    updateDebugInfo();
+  });
+  
+  // Fonction pour tester la soumission du formulaire
+  function testFormSubmission() {
+    console.log('🧪 Testing form submission...');
+    
+    if (validateForm()) {
+      console.log('✅ Form validation passed, submitting...');
+      
+      // Récupérer le formulaire
+      const form = document.querySelector('form');
+      const formData = new FormData(form);
+      
+      // Afficher les données qui seront envoyées
+      console.log('📤 Data to be submitted:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`  ${key}: ${value}`);
+      }
+      
+      // Simuler la soumission
+      console.log('📤 Simulating form submission to:', form.action);
+      
+      // Optionnel: Soumettre réellement le formulaire
+      // form.submit();
+    } else {
+      console.log('❌ Form validation failed');
+    }
+  }
+  
+  // Fonction pour logger les données du formulaire
+  function logFormData() {
+    console.log('📋 Logging form data...');
+    
+    const form = document.querySelector('form');
+    const formData = new FormData(form);
+    
+    console.log('📋 All form data:');
+    for (let [key, value] of formData.entries()) {
+      console.log(`  ${key}: ${value}`);
+    }
+    
+    // Vérifier les champs cachés
+    console.log('🔍 Hidden fields:');
+    const hiddenFields = form.querySelectorAll('input[type="hidden"]');
+    hiddenFields.forEach(field => {
+      console.log(`  ${field.name}: ${field.value}`);
+    });
+    
+    // Vérifier les champs visibles
+    console.log('🔍 Visible fields:');
+    const visibleFields = form.querySelectorAll('input:not([type="hidden"]), select, textarea');
+    visibleFields.forEach(field => {
+      if (field.name) {
+        console.log(`  ${field.name}: ${field.value || field.checked || 'Non défini'}`);
+      }
+    });
+  }
+
+  function livraisonForm() {
+    return {
+      init() {
+        console.log('🚀 Initializing livraisonForm...');
+        this.setupEventListeners();
+        // S'assurer que les matériels sont cachés au début
+        this.clearCommandeInfo();
+      },
+      setupEventListeners() {
+        const typeCommandeSelect = document.getElementById('type-commande');
+        const commandeSelectDisplay = document.getElementById('commande-select-display');
+        const commandeSelectHidden = document.getElementById('commande-select');
+        
+        console.log('🔧 Setting up event listeners...');
+        console.log('typeCommandeSelect:', typeCommandeSelect);
+        console.log('commandeSelectDisplay:', commandeSelectDisplay);
+        console.log('commandeSelectHidden:', commandeSelectHidden);
+        
+        if (typeCommandeSelect) {
+          typeCommandeSelect.addEventListener('change', () => { 
+            console.log('🔄 Type commande changed to:', typeCommandeSelect.value);
+            // Effacer les informations précédentes quand le type change
+            this.clearCommandeInfo();
+            this.loadCommandes(); 
+          });
+        }
+        if (commandeSelectDisplay) {
+          commandeSelectDisplay.addEventListener('change', () => {
+            console.log('🔄 Commande selected:', commandeSelectDisplay.value);
+            commandeSelectHidden.value = commandeSelectDisplay.value;
+            this.loadCommandeDetails();
+          });
+        }
+      },
+      async loadCommandes() {
+        const typeCommande = document.getElementById('type-commande').value;
+        const commandeSelectDisplay = document.getElementById('commande-select-display');
+        const commandeSelectHidden = document.getElementById('commande-select');
+        
+        console.log('📥 loadCommandes called with typeCommande:', typeCommande);
+        console.log('commandeSelectDisplay:', commandeSelectDisplay);
+        console.log('commandeSelectHidden:', commandeSelectHidden);
+        
+        if (!typeCommande) {
+          console.log('❌ No type selected, clearing commandes');
+          commandeSelectDisplay.innerHTML = '<option value="">Sélectionner une commande</option>';
+          commandeSelectHidden.value = '';
+          return;
+        }
+        
+        try {
+          const url = `{% url 'livraison:api_commandes' %}?type=${typeCommande}`;
+          console.log('🌐 Fetching from URL:', url);
+          
+          const response = await fetch(url);
+          console.log('📡 Response status:', response.status);
+          
+          const data = await response.json();
+          console.log('📦 Response data:', data);
+          
+          commandeSelectDisplay.innerHTML = '<option value="">Sélectionner une commande</option>';
+          
+          if (data.success && data.commandes) {
+            console.log('✅ Found', data.commandes.length, 'commandes');
+                    data.commandes.forEach(commande => {
+                        const option = document.createElement('option');
+                        option.value = commande.id;
+              option.textContent = commande.numero_commande;
+              commandeSelectDisplay.appendChild(option);
+                    });
+                } else {
+            console.error('❌ API returned error:', data.error);
+          }
+          
+          commandeSelectHidden.value = '';
+        } catch (e) { 
+          console.error('❌ Error in loadCommandes:', e); 
+        }
+      },
+      async loadCommandeDetails() {
+        const commandeId = document.getElementById('commande-select').value;
+        const typeCommande = document.getElementById('type-commande').value;
+        
+        console.log('📥 loadCommandeDetails called with commandeId:', commandeId, 'typeCommande:', typeCommande);
+        
+        if (!commandeId || !typeCommande) { 
+          console.log('❌ No commande or type, clearing info');
+          this.clearCommandeInfo(); 
+          return; 
+        }
+        
+        try {
+          const url = `{% url 'livraison:api_commande_details' 0 %}`.replace('0', commandeId) + `?type=${typeCommande}`;
+          console.log('🌐 Fetching commande details from:', url);
+          
+          const response = await fetch(url);
+          const data = await response.json();
+          
+          console.log('📦 Commande details response:', data);
+          
+                if (data.success) {
+            document.getElementById('fournisseur-display').value = data.commande.fournisseur || '';
+            this.displayMateriels(data.materiels || []);
+          } else {
+            console.error('❌ API error:', data.error);
+            this.clearCommandeInfo();
+          }
+        } catch (e) { 
+          console.error('❌ Error in loadCommandeDetails:', e); 
+          this.clearCommandeInfo();
+        }
+      },
+      displayMateriels(materiels) {
+        const materielsSection = document.getElementById('materiels-section');
+        const materielsList = document.getElementById('materiels-list');
+        
+        if (!materiels || materiels.length === 0) { 
+          materielsSection.classList.add('hidden'); 
+          return; 
+        }
+        
+        materielsSection.classList.remove('hidden');
+                    materielsList.innerHTML = '';
+        
+        materiels.forEach(m => {
+          const div = document.createElement('div');
+          div.className = 'bg-white border border-gray-200 rounded-lg p-4';
+          div.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="font-semibold text-gray-900 text-lg mb-1">${m.designation}</div>
+                ${m.description ? `<div class="text-sm text-gray-600 mb-2">${m.description}</div>` : ''}
+                <div class="flex items-center gap-4 text-sm text-gray-500">
+                  <span>Quantité: ${m.quantite}</span>
+                  <span>Prix unitaire: ${m.prix_unitaire} DH</span>
+                                    </div>
+                                </div>
+              <div class="text-right ml-4">
+                <div class="text-lg font-bold text-blue-600">${m.prix_total} DH</div>
+                <div class="text-xs text-gray-500">Total</div>
+              </div>
+            </div>`;
+          materielsList.appendChild(div);
+        });
+      },
+      clearCommandeInfo() {
+        console.log('🧹 Clearing commande info...');
+        
+        // Effacer le fournisseur
+        const fournisseurDisplay = document.getElementById('fournisseur-display');
+        if (fournisseurDisplay) {
+          fournisseurDisplay.value = '';
+          console.log('✅ Fournisseur cleared');
+        }
+        
+        // Cacher la section des matériels
+        const materielsSection = document.getElementById('materiels-section');
+        if (materielsSection) {
+          materielsSection.classList.add('hidden');
+          console.log('✅ Section matériels hidden');
+        }
+        
+        // Effacer la liste des matériels
+        const materielsList = document.getElementById('materiels-list');
+        if (materielsList) {
+        materielsList.innerHTML = '';
+          console.log('✅ Matériels list cleared');
+        }
+        
+        // Effacer la sélection de commande
+        const commandeSelectDisplay = document.getElementById('commande-select-display');
+        if (commandeSelectDisplay) {
+          commandeSelectDisplay.innerHTML = '<option value="">Sélectionner une commande</option>';
+          console.log('✅ Commande select display cleared');
+        }
+        
+        const commandeSelectHidden = document.getElementById('commande-select');
+        if (commandeSelectHidden) {
+          commandeSelectHidden.value = '';
+          console.log('✅ Commande select hidden cleared');
+        }
+        
+        console.log('✅ Commande info completely cleared');
+      },
+
+    }
+  }
+</script>
+{% endblock %}
+
+    <!-- Styles personnalisés pour le formulaire -->
+    <style>
+      /* Assurer que les champs de formulaire sont visibles */
+      .form-control {
+        display: block !important;
+        width: 100% !important;
+        padding: 0.75rem 1rem !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.5rem !important;
+        background-color: white !important;
+        color: #374151 !important;
+        font-size: 0.875rem !important;
+        line-height: 1.25rem !important;
+        transition: all 0.2s ease-in-out !important;
+      }
+      
+      .form-control:focus {
+        outline: none !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+      }
+      
+      .form-control:read-only {
+        background-color: #f9fafb !important;
+        color: #6b7280 !important;
+        cursor: not-allowed !important;
+      }
+      
+      /* Assurer que les champs cachés sont bien cachés mais accessibles */
+      input[type="hidden"] {
+        position: absolute !important;
+        left: -9999px !important;
+        width: 1px !important;
+        height: 1px !important;
+        opacity: 0 !important;
+      }
+      
+      /* Debug section styling */
+      .debug-section {
+        background-color: #f3f4f6;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin: 1rem 0;
+      }
+      
+      .debug-section h4 {
+        color: #374151;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+      
+      .debug-section .debug-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.25rem 0;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      
+      .debug-section .debug-item:last-child {
+        border-bottom: none;
+      }
+      
+      .debug-section .debug-label {
+        font-weight: 500;
+        color: #6b7280;
+      }
+      
+      .debug-section .debug-value {
+        font-family: monospace;
+        background-color: #f9fafb;
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.25rem;
+        border: 1px solid #e5e7eb;
+        color: #374151;
+      }
+    </style>

@@ -75,12 +75,68 @@ class DemandeEquipementForm(forms.ModelForm):
         self.fields['designation_bureau'].widget.attrs['class'] += ' conditional-field'
         self.fields['description_bureau'].widget.attrs['class'] += ' conditional-field'
         self.fields['fourniture'].widget.attrs['class'] += ' conditional-field'
+        
+        # Si c'est une modification (instance existante), charger les données
+        if self.instance.pk:
+            # Définir la valeur initiale pour type_demande
+            self.fields['type_demande'].initial = self.instance.type_demande
+            
+            # Charger les désignations et descriptions selon la catégorie
+            if self.instance.categorie == 'informatique':
+                # Charger les désignations informatiques
+                self.fields['designation_info'].queryset = DesignationInfo.objects.all()
+                if self.instance.designation_info:
+                    # Charger les descriptions pour la désignation sélectionnée
+                    self.fields['description_info'].queryset = DescriptionInfo.objects.filter(
+                        designation=self.instance.designation_info
+                    )
+                    # Définir la valeur initiale
+                    self.fields['designation_info'].initial = self.instance.designation_info.id
+                    if self.instance.description_info:
+                        self.fields['description_info'].initial = self.instance.description_info.id
+            elif self.instance.categorie == 'bureau':
+                # Charger les désignations de bureau
+                self.fields['designation_bureau'].queryset = DesignationBureau.objects.all()
+                if self.instance.designation_bureau:
+                    # Charger les descriptions pour la désignation sélectionnée
+                    self.fields['description_bureau'].queryset = DescriptionBureau.objects.filter(
+                        designation=self.instance.designation_bureau
+                    )
+                    # Définir la valeur initiale
+                    self.fields['designation_bureau'].initial = self.instance.designation_bureau.id
+                    if self.instance.description_bureau:
+                        self.fields['description_bureau'].initial = self.instance.description_bureau.id
+            
+            # Charger les fournitures selon la catégorie
+            if self.instance.type_article == 'fourniture':
+                if self.instance.categorie == 'informatique':
+                    self.fields['fourniture'].queryset = Fourniture.get_by_categorie('informatique')
+                elif self.instance.categorie == 'bureau':
+                    self.fields['fourniture'].queryset = Fourniture.get_by_categorie('bureautique')
+                if self.instance.fourniture:
+                    self.fields['fourniture'].initial = self.instance.fourniture.id
     
     def clean(self):
         cleaned_data = super().clean()
         categorie = cleaned_data.get('categorie')
         type_article = cleaned_data.get('type_article')
         type_demande = cleaned_data.get('type_demande')
+        
+        # Si c'est une modification (instance existante), préserver les valeurs existantes
+        if self.instance and self.instance.pk:
+            # Préserver les valeurs existantes si elles ne sont pas dans les données POST
+            if 'type_demande' not in self.data and self.instance.type_demande:
+                cleaned_data['type_demande'] = self.instance.type_demande
+            if 'designation_info' not in self.data and self.instance.designation_info:
+                cleaned_data['designation_info'] = self.instance.designation_info
+            if 'description_info' not in self.data and self.instance.description_info:
+                cleaned_data['description_info'] = self.instance.description_info
+            if 'designation_bureau' not in self.data and self.instance.designation_bureau:
+                cleaned_data['designation_bureau'] = self.instance.designation_bureau
+            if 'description_bureau' not in self.data and self.instance.description_bureau:
+                cleaned_data['description_bureau'] = self.instance.description_bureau
+            if 'fourniture' not in self.data and self.instance.fourniture:
+                cleaned_data['fourniture'] = self.instance.fourniture
         
         # Validation pour les fournitures
         if type_article == 'fourniture':

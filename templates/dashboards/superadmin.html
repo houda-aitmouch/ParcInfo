@@ -1,181 +1,86 @@
+{% extends 'dashboards/base_superadmin.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Super Admin - ADD</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="superadmin.css">
-    <script src="{% static 'js/superadmin.js' %}"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-      body { font-family: 'Inter', sans-serif; }
-      .dashboard-gradient-bg {
-        background: linear-gradient(120deg, #f0f4ff 0%, #e0e7ff 100%);
-      }
-      .dashboard-card {
-        transition: box-shadow 0.2s, transform 0.2s, border 0.2s;
-        border: 2px solid transparent;
-        position: relative;
-      }
-      .dashboard-card:hover {
-        border-image: linear-gradient(90deg, #6366f1, #06b6d4) 1;
-        box-shadow: 0 8px 32px 0 rgba(99,102,241,0.12), 0 1.5px 6px 0 rgba(6,182,212,0.08);
-        transform: translateY(-4px) scale(1.03);
-      }
-      .dashboard-title-gradient {
-        background: linear-gradient(90deg, #6366f1, #06b6d4);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 700;
-      }
-      .icon-bg {
-        box-shadow: 0 2px 8px 0 rgba(99,102,241,0.08);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-    </style>
-</head>
-<body class="dashboard-gradient-bg min-h-screen">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg border-b border-gray-200" x-data="{ mobileMenuOpen: false, userMenuOpen: false }">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo et titre -->
-                <div class="flex items-center space-x-4">
-                    <img src="{% static 'images/ADD.png' %}" alt="ADD Logo" class="h-10 w-auto">
-                    <div class="hidden md:block">
-                    </div>
-                </div>
 
-                <!-- Menu desktop -->
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="{% url 'users:profil' %}" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Mon profil</a>
-                    <a href="{% url 'materiel_informatique:mes_equipements_informatiques' %}" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Mes équipements informatiques</a>
-                    <a href="{% url 'materiel_bureautique:mes_equipements_bureautiques' %}" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Mes équipements bureautiques</a>
-                    <a href="{% url 'users:dashboard_garantie' %}" class="nav-link text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">🛡️ Dashboard Garantie</a>
-                    
-                    <!-- Notifications -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="relative rounded-full p-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                            </svg>
-                            {% if warranty_notifications %}
-                            <span class="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-medium leading-none text-white bg-red-600 rounded-full">{{ warranty_notifications|length }}</span>
-                            {% endif %}
-                        </button>
-                        <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute right-0 mt-2 w-96 max-w-[90vw] bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                            <div class="p-3 border-b border-gray-100 flex items-center justify-between">
-                                <h3 class="text-sm font-semibold text-gray-800">Notifications garanties</h3>
-                                <span class="text-xs text-gray-500">{{ warranty_notifications|length }} élément(s)</span>
-                            </div>
-                            <div class="max-h-80 overflow-auto divide-y divide-gray-100">
-                                {% if warranty_notifications %}
-                                    {% for n in warranty_notifications %}
-                                    <div class="p-3 hover:bg-gray-50">
-                                        <div class="flex items-start justify-between">
-                                            <div class="flex items-center gap-2">
-                                                {% if n.type == 'Informatique' %}
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Informatique</span>
-                                                {% else %}
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Bureau</span>
-                                                {% endif %}
-                                                <span class="text-sm font-medium text-gray-900">Commande {{ n.numero_commande }}</span>
-                                            </div>
-                                            <span class="text-xs font-medium text-yellow-700">{{ n.jours_restants }} j</span>
-                                        </div>
-                                        <div class="mt-1 text-xs text-gray-600">Fournisseur: {{ n.fournisseur }} · Fin: {{ n.fin_garantie|date:'d/m/Y' }}</div>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="p-4 text-sm text-gray-600">Aucune notification</div>
-                                {% endif %}
-                            </div>
-                            <div class="p-2 border-t border-gray-100 text-right">
-                                <a href="{% url 'users:dashboard_garantie' %}" class="text-xs font-medium text-blue-600 hover:text-blue-700">Voir le dashboard garantie</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Menu utilisateur -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open"
-                                class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span>Super Admin</span>
-                            <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': open}" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                            </svg>
-                        </button>
+{% block title %}Dashboard Super Admin - ParcInfo{% endblock %}
 
-                        <div x-show="open"
-                             x-transition:enter="transition ease-out duration-100"
-                             x-transition:enter-start="transform opacity-0 scale-95"
-                             x-transition:enter-end="transform opacity-100 scale-100"
-                             x-transition:leave="transition ease-in duration-75"
-                             x-transition:leave-start="transform opacity-100 scale-100"
-                             x-transition:leave-end="transform opacity-0 scale-95"
-                             @click.away="open = false"
-                             class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                            <a href="#"
-                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
-                                <svg class="w-4 h-4 inline-block mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
-                                </svg>
-                                Se déconnecter
-                            </a>
-                        </div>
-                    </div>
-                </div>
+{% block extra_css %}
+<style>
+.dashboard-title-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
 
-                <!-- Bouton menu mobile -->
-                <div class="md:hidden">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen"
-                            class="text-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset rounded-md p-2">
-                        <svg class="w-6 h-6" :class="{'hidden': mobileMenuOpen, 'block': !mobileMenuOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                        <svg class="w-6 h-6" :class="{'block': mobileMenuOpen, 'hidden': !mobileMenuOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
+.chart-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
 
-            <!-- Menu mobile -->
-            <div x-show="mobileMenuOpen"
-                 x-transition:enter="transition ease-out duration-200"
-                 x-transition:enter-start="opacity-0 transform scale-95"
-                 x-transition:enter-end="opacity-100 transform scale-100"
-                 x-transition:leave="transition ease-in duration-150"
-                 x-transition:leave-start="opacity-100 transform scale-100"
-                 x-transition:leave-end="opacity-0 transform scale-95"
-                 class="md:hidden border-t border-gray-200">
-                <div class="px-2 pt-2 pb-3 space-y-1">
-                    <a href="{% url 'users:profil' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Mon profil</a>
-                    <a href="{% url 'materiel_informatique:mes_equipements_informatiques' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Mes équipements informatiques</a>
-                    <a href="{% url 'materiel_bureautique:mes_equipements_bureautiques' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Mes équipements bureautiques</a>
-                    <a href="{% url 'users:dashboard_garantie' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">🛡️ Dashboard Garantie</a>
-                    <a href="{% url 'admin:index' %}"
-                       class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">
-                        Administration Django
-                    </a>
-                    <a href="#"
-                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                       class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">
-                        Se déconnecter
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
+.chart-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        height: 250px;
+    }
+}
+
+@media (max-width: 640px) {
+    .chart-container {
+        height: 200px;
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.icon-bg {
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover .icon-bg {
+    transform: scale(1.1);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div x-data="{ mobileMenuOpen: false }" class="min-h-screen bg-gray-50">
+    <!-- Navigation Header -->
 
     <!-- Formulaire de déconnexion caché -->
     <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
@@ -189,396 +94,335 @@
             <h1 class="text-4xl dashboard-title-gradient mb-2">Tableau de bord Super Admin</h1>
             <p class="text-gray-600">Gérez vos équipements, matériels et fournisseurs</p>
         </div>
-        
 
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Materials -->
+            <div class="bg-white rounded-xl shadow-sm border p-6 animate-slide-up">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Matériels</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ total_materials|default:"0" }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <span class="text-sm text-green-600">+12%</span>
+                    <span class="text-sm text-gray-500">vs mois dernier</span>
+                </div>
+            </div>
 
-        <!-- Cartes de navigation -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" x-data="{ hoveredCard: null }">
-            <!-- Carte utilisateurs -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'utilisateurs'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'admin:index' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-blue-100 p-4 rounded-full shadow-lg">
-                                <!-- Utilisateurs : Icône utilisateur multiple -->
-                                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-7a4 4 0 11-8 0 4 4 0 018 0zm6 16v-2a4 4 0 00-3-3.87M6 16v-2a4 4 0 013-3.87" />
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'utilisateurs'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            <!-- Active Warranties -->
+            <div class="bg-white rounded-xl shadow-sm border p-6 animate-slide-up">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Garanties Actives</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ active_warranties|default:"0" }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Administration des Utilisateurs</h3>
-                    <p class="text-gray-600 text-sm">Gérer les comptes des Utilisateurs</p>
-                </a>
+                </div>
+                <div class="mt-4">
+                    <span class="text-sm text-green-600">+5%</span>
+                    <span class="text-sm text-gray-500">vs mois dernier</span>
+                </div>
             </div>
-            <!-- Carte Fournisseurs -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'fournisseurs'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'fournisseurs:fournisseur_list' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-purple-100 p-4 rounded-full shadow-lg">
-                                <!-- Fournisseurs : Icône de carnet d'adresses -->
-                                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                  <rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2" stroke="currentColor" fill="none"/>
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18" />
-                                  <circle cx="12" cy="14" r="3" />
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'fournisseurs'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Fournisseurs</h3>
-                    <p class="text-gray-600 text-sm">Gérer la liste des fournisseurs partenaires</p>
-                </a>
-            </div>
-            <!-- Carte Matériel Informatique -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'materiel'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'materiel_informatique:liste_materiels' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-green-100 p-4 rounded-full shadow-lg">
-                                <!-- Matériel Informatique : Icône ordinateur portable -->
-                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                  <rect x="3" y="5" width="18" height="12" rx="2" stroke-width="2" stroke="currentColor" fill="none"/>
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M2 17h20M8 21h8" />
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'materiel'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Matériel Informatique</h3>
-                    <p class="text-gray-600 text-sm">Gérer la liste des matériels informatiques</p>
-                </a>
-            </div>
-            <!-- Carte Commandes Informatique -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'commandes_info'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'commandes_informatique:liste_commandes' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-yellow-100 p-4 rounded-full shadow-lg">
-                                <!-- Commandes Informatique : Icône ordinateur avec document -->
-                                <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                  <rect x="3" y="5" width="18" height="12" rx="2" stroke-width="2" stroke="currentColor" fill="none"/>
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M2 17h20M8 21h8" />
-                                  <rect x="7" y="7" width="10" height="6" rx="1" stroke-width="2" stroke="currentColor" fill="none"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'commandes_info'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Commandes Informatique</h3>
-                    <p class="text-gray-600 text-sm">Gérer les commandes de matériel informatique</p>
-                </a>
-            </div>
-            <!-- Carte Commandes Bureau -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'commandes_bureau'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'commandes_bureau:liste_commandes' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-orange-100 p-4 rounded-full shadow-lg">
-                                <!-- Commandes Bureau : Icône bureau avec document -->
-                                <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                  <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2" stroke="currentColor" fill="none"/>
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 11h8M8 15h5" />
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18" />
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'commandes_bureau'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Commandes Bureau</h3>
-                    <p class="text-gray-600 text-sm">Gérer les commandes de fournitures de bureau</p>
-                </a>
-            </div>
-            <!-- Carte Livraisons -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'livraisons'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'livraison:liste_livraisons' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-indigo-100 p-4 rounded-full shadow-lg">
-                                <!-- Livraisons : Icône camion de livraison -->
-                                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                                  <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2" stroke="currentColor" fill="none"/>
-                                  <circle cx="7" cy="7" r="1" stroke-width="2" stroke="currentColor" fill="none"/>
-                                  <circle cx="17" cy="17" r="1" stroke-width="2" stroke="currentColor" fill="none"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'livraisons'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Livraisons</h3>
-                    <p class="text-gray-600 text-sm">Gérer les livraisons et suivi des commandes</p>
-                </a>
-            </div>
-            <!-- Carte Matériel Bureautique -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'materiel_bureau'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'materiel_bureautique:liste_materiels' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-red-100 p-4 rounded-full shadow-lg">
-                                <!-- Matériel Bureautique : Icône bureau avec équipement -->
-                                <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                  <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2" stroke="currentColor" fill="none"/>
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 11h8M8 15h5" />
-                                  <circle cx="12" cy="12" r="3" stroke-width="2" stroke="currentColor" fill="none"/>
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18" />
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'materiel_bureau'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Matériel Bureautique</h3>
-                    <p class="text-gray-600 text-sm">Gérer la liste des matériels de bureau</p>
-                </a>
-            </div>
-            <!-- Carte Mes Équipements Informatiques -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'equipements_info'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'materiel_informatique:mes_equipements_informatiques' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-blue-100 p-4 rounded-full shadow-lg">
-                                <!-- Icône équipements informatiques -->
-                                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <rect x="3" y="5" width="18" height="12" rx="2" stroke-width="2" stroke="currentColor" fill="none"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2 17h20M8 21h8" />
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'equipements_info'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Mes Équipements informatiques</h3>
-                    <p class="text-gray-600 text-sm">Voir la liste des équipements informatiques qui me sont affectés</p>
-                </a>
-            </div>
-            
-            <!-- Carte Mes Équipements Bureautiques -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'equipements_bureau'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'materiel_bureautique:mes_equipements_bureautiques' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-purple-100 p-4 rounded-full shadow-lg">
-                                <!-- Icône équipements bureautiques -->
-                                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'equipements_bureau'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Mes Équipements bureautiques</h3>
-                    <p class="text-gray-600 text-sm">Voir la liste des équipements bureautiques qui me sont affectés</p>
-                </a>
-            </div>
-            <!-- Carte Nouvelle Demande -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'nouvelle_demande'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'demande_equipement:nouvelle_demande' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-green-100 p-4 rounded-full shadow-lg">
-                                <!-- Icône nouvelle demande -->
-                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'nouvelle_demande'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Nouvelle Demande d'Équipement</h3>
-                    <p class="text-gray-600 text-sm">Soumettre une nouvelle demande d'équipement informatique ou de bureau</p>
-                </a>
-            </div>
-            
-            <!-- Carte Mes Demandes -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'mes_demandes'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'demande_equipement:liste_demandes' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-orange-100 p-4 rounded-full shadow-lg">
-                                <!-- Icône mes demandes -->
-                                <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'mes_demandes'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Mes Demandes</h3>
-                    <p class="text-gray-600 text-sm">Consulter l'état de mes demandes d'équipement</p>
-                </a>
-            </div>
-            
-            <!-- Carte Traiter les Demandes -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'traiter_demandes'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'demande_equipement:liste_toutes_demandes' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-teal-100 p-4 rounded-full shadow-lg">
-                                <!-- Icône traiter les demandes -->
-                                <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'traiter_demandes'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Traiter les Demandes</h3>
-                    <p class="text-gray-600 text-sm">Approuver ou refuser toutes les demandes d'équipement</p>
-                </a>
-            </div>
-            
 
-            
-            <!-- Carte Consulter les Archives -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'consulter_archives'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'demande_equipement:consulter_archives' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-purple-100 p-4 rounded-full shadow-lg">
-                                <!-- Icône consulter archives -->
-                                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'consulter_archives'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            <!-- Total Users -->
+            <div class="bg-white rounded-xl shadow-sm border p-6 animate-slide-up">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Utilisateurs</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ total_users|default:"0" }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Consulter les Archives</h3>
-                    <p class="text-gray-600 text-sm">Rechercher et télécharger les décharges archivées</p>
-                </a>
+                </div>
+                <div class="mt-4">
+                    <span class="text-sm text-green-600">+8%</span>
+                    <span class="text-sm text-gray-500">vs mois dernier</span>
+                </div>
             </div>
-            <!-- Carte Chatbot IA -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'chatbot'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'chatbot:chatbot-ui' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-sky-100 p-4 rounded-full shadow-lg">
-                                <!-- Icône chatbot -->
-                                <svg class="w-8 h-8 text-sky-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M16 10h.01M12 14h.01M21 12c0 4.418-4.03 8-9 8a9.77 9.77 0 01-4-.84L3 20l1.28-3.83A7.98 7.98 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'chatbot'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Chatbot IA</h3>
-                    <p class="text-gray-600 text-sm">Discuter avec l'assistant intelligent connecté aux données</p>
-                </a>
-            </div>
-            
-            <!-- Carte Dashboard Garantie -->
-            <div class="dashboard-card bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
-                 @mouseenter="hoveredCard = 'dashboard_garantie'"
-                 @mouseleave="hoveredCard = null">
-                <a href="{% url 'users:dashboard_garantie' %}" class="block p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="icon-bg bg-emerald-100 p-4 rounded-full shadow-lg">
-                                <!-- Icône dashboard garantie -->
-                                <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                             :class="{'translate-x-1': hoveredCard === 'dashboard_garantie'}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Dashboard Garantie</h3>
-                    <p class="text-gray-600 text-sm">Visualiser et analyser les durées de garantie de toutes les commandes</p>
-                </a>
-            </div>
-        
-            
 
+            <!-- Pending Requests -->
+            <div class="bg-white rounded-xl shadow-sm border p-6 animate-slide-up">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Demandes en Attente</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ pending_requests|default:"0" }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <span class="text-sm text-red-600">-3%</span>
+                    <span class="text-sm text-gray-500">vs mois dernier</span>
+                </div>
+            </div>
         </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+            <!-- Materials Distribution Chart -->
+            <div class="chart-card bg-white rounded-xl shadow-sm border p-6 animate-slide-up">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">Répartition des Matériels</h3>
+                                        <div class="chart-container">
+                            <canvas id="materialsChart" 
+                                    data-labels="{{ chart_materials_data.labels|join:',' }}"
+                                    data-values="{{ chart_materials_data.data|join:',' }}"
+                                    data-colors="{{ chart_materials_data.colors|join:',' }}"></canvas>
+                        </div>
+            </div>
+
+            <!-- Warranty Status Chart -->
+            <div class="chart-card bg-white rounded-xl shadow-sm border p-6 animate-slide-up">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">Statut des Garanties</h3>
+                                        <div class="chart-container">
+                            <canvas id="warrantyChart"
+                                    data-labels="{{ chart_warranty_data.labels|join:',' }}"
+                                    data-values="{{ chart_warranty_data.data|join:',' }}"
+                                    data-colors="{{ chart_warranty_data.colors|join:',' }}"></canvas>
+                        </div>
+            </div>
+        </div>
+
+        <!-- Section Informations Récentes -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Matériels Récents -->
+            <div class="bg-white rounded-xl shadow-sm border p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Matériels Récents</h3>
+                <div class="space-y-3">
+                    {% if recent_materiels %}
+                        {% for materiel in recent_materiels %}
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ materiel.code_inventaire }}</p>
+                                    <p class="text-xs text-gray-500">{{ materiel.designation }}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs px-2 py-1 rounded-full 
+                                {% if materiel.statut == 'Opérationnel' %}bg-green-100 text-green-800
+                                {% elif materiel.statut == 'affecte' %}bg-blue-100 text-blue-800
+                                {% elif materiel.statut == 'en panne' %}bg-orange-100 text-orange-800
+                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ materiel.statut }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-8 text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            <p>Aucun matériel récent</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Demandes Récentes -->
+            <div class="bg-white rounded-xl shadow-sm border p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Demandes Récentes</h3>
+                <div class="space-y-3">
+                    {% if recent_demandes %}
+                        {% for demande in recent_demandes %}
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ demande.demandeur.get_full_name|default:demande.demandeur.username }}</p>
+                                    <p class="text-xs text-gray-500">{{ demande.get_categorie_display }} - {{ demande.get_type_demande_display }}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs px-2 py-1 rounded-full 
+                                {% if demande.statut == 'en_attente' %}bg-yellow-100 text-yellow-800
+                                {% elif demande.statut == 'approuvee' %}bg-green-100 text-green-800
+                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ demande.get_statut_display }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-8 text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                            </svg>
+                            <p>Aucune demande récente</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
     </main>
-</body>
-</html>
+
+    <!-- Formulaire de déconnexion caché -->
+    <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+        {% csrf_token %}
+    </form>
+</div>
+
+    <!-- JavaScript pour les graphiques -->
+    <script>
+        // Attendre que le DOM soit chargé
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuration des couleurs
+            const colors = {
+                primary: '#3b82f6',
+                secondary: '#8b5cf6',
+                success: '#10b981',
+                warning: '#f59e0b',
+                danger: '#ef4444',
+                info: '#06b6d4'
+            };
+
+            // Graphique de répartition des matériels
+            const materialsCtx = document.getElementById('materialsChart');
+            if (materialsCtx) {
+                const labels = materialsCtx.dataset.labels.split(',');
+                const values = materialsCtx.dataset.values.split(',').map(v => parseInt(v));
+                const colors = materialsCtx.dataset.colors.split(',');
+                
+                new Chart(materialsCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: colors,
+                            borderWidth: 2,
+                            borderColor: '#ffffff',
+                            hoverBorderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 25,
+                                    usePointStyle: true,
+                                    font: {
+                                        size: 14,
+                                        weight: '500'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: colors.primary,
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                displayColors: true
+                            }
+                        },
+                        cutout: '60%',
+                        radius: '90%'
+                    }
+                });
+            }
+
+            // Graphique de statut des garanties
+            const warrantyCtx = document.getElementById('warrantyChart');
+            if (warrantyCtx) {
+                const labels = warrantyCtx.dataset.labels.split(',');
+                const values = warrantyCtx.dataset.values.split(',').map(v => parseInt(v));
+                const colors = warrantyCtx.dataset.colors.split(',');
+                
+                new Chart(warrantyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Nombre de garanties',
+                            data: values,
+                            backgroundColor: colors,
+                            borderRadius: 12,
+                            borderSkipped: false,
+                            borderWidth: 0,
+                            hoverBackgroundColor: colors.map(color => {
+                                // Assombrir légèrement la couleur pour l'effet hover
+                                return color === '#10b981' ? '#059669' : 
+                                       color === '#ef4444' ? '#dc2626' : color;
+                            })
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: colors.success,
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                displayColors: true
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    display: true,
+                                    color: '#f3f4f6',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 12,
+                                        weight: '500'
+                                    },
+                                    color: '#6b7280'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 12,
+                                        weight: '500'
+                                    },
+                                    color: '#6b7280'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

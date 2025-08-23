@@ -1,0 +1,219 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" x-data="{ mobileMenuOpen: false }" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supprimer un fournisseur - ParcInfo</title>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/parcinfo-ui.css' %}">
+  <link rel="stylesheet" href="{% static 'react/assets/index.css' %}">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .dashboard-gradient-bg {
+            background: linear-gradient(120deg, #f0f4ff 0%, #e0e7ff 100%);
+        }
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+        .nav-link:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="dashboard-gradient-bg min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b border-gray-200" x-data="{ mobileMenuOpen: false }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo et titre -->
+                <div class="flex items-center space-x-4">
+                    <img src="{% static 'images/ADD.png' %}" alt="ADD Logo" class="h-10 w-auto">
+                    <span class="text-xl font-bold text-gray-900">ParcInfo</span>
+                </div>
+                
+                <!-- Menu desktop -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="{% url 'users:profil' %}" class="nav-link text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Mon profil</a>
+                    
+                    <!-- Menu selon le rôle -->
+                    {% if user.groups.all %}
+                        {% for group in user.groups.all %}
+                            {% if group.name == 'Gestionnaire Bureau' %}
+                                <a href="{% url 'fournisseurs:fournisseur_list' %}" class="nav-link text-indigo-600 bg-indigo-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Fournisseurs</a>
+                                <a href="{% url 'commandes_bureau:liste_commandes' %}" class="nav-link text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Commandes Bureau</a>
+                                <a href="{% url 'materiel_bureautique:liste_materiels' %}" class="nav-link text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Matériel Bureautique</a>
+                                <a href="{% url 'livraison:liste_livraisons' %}" class="nav-link text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Livraisons</a>
+                                <a href="{% url 'demande_equipement:liste_toutes_demandes' %}" class="nav-link text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Traiter Demandes</a>
+                            {% elif group.name == 'Gestionnaire Informatique' %}
+                                <a href="{% url 'fournisseurs:fournisseur_list' %}" class="nav-link text-indigo-600 bg-indigo-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Fournisseurs</a>
+                                <a href="{% url 'materiel_informatique:liste_materiels' %}" class="nav-link text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Matériel Informatique</a>
+                                <a href="{% url 'commandes_informatique:liste_commandes' %}" class="nav-link text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Commandes IT</a>
+                                <a href="{% url 'livraison:liste_livraisons' %}" class="nav-link text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Livraisons</a>
+                                <a href="{% url 'demande_equipement:liste_toutes_demandes' %}" class="nav-link text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Traiter Demandes</a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <a href="{% url 'materiel_informatique:mes_equipements_informatiques' %}" class="nav-link text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Mes équipements IT</a>
+                    <a href="{% url 'materiel_bureautique:mes_equipements_bureautiques' %}" class="nav-link text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Mes équipements Bureau</a>
+                    <a href="{% url 'users:dashboard_garantie' %}" class="nav-link text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">🛡️ Dashboard Garantie</a>
+                    <a href="{% url 'chatbot:chatbot-ui' %}" class="nav-link text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Chatbot IA</a>
+                    
+                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="text-red-600 hover:text-red-800 font-medium transition">Se déconnecter</a>
+                </div>
+                
+                <!-- Bouton menu mobile -->
+                <div class="md:hidden">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen"
+                            class="text-gray-700 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset rounded-md p-2">
+                        <svg class="w-6 h-6" :class="{'hidden': mobileMenuOpen, 'block': !mobileMenuOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        <svg class="w-6 h-6" :class="{'block': mobileMenuOpen, 'hidden': !mobileMenuOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Menu mobile -->
+            <div x-show="mobileMenuOpen"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 transform scale-95"
+                 x-transition:enter-end="opacity-100 transform scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 transform scale-100"
+                 x-transition:leave-end="opacity-0 transform scale-95"
+                 class="md:hidden border-t border-gray-200">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <a href="{% url 'users:profil' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">Mon profil</a>
+                    
+                    {% if user.groups.all %}
+                        {% for group in user.groups.all %}
+                            {% if group.name == 'Gestionnaire Bureau' %}
+                                <a href="{% url 'fournisseurs:fournisseur_list' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-indigo-600 bg-indigo-50">Fournisseurs</a>
+                                <a href="{% url 'commandes_bureau:liste_commandes' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">Commandes Bureau</a>
+                                <a href="{% url 'materiel_bureautique:liste_materiels' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">Matériel Bureautique</a>
+                                <a href="{% url 'livraison:liste_livraisons' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">Livraisons</a>
+                                <a href="{% url 'demande_equipement:liste_toutes_demandes' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">Traiter Demandes</a>
+                            {% elif group.name == 'Gestionnaire Informatique' %}
+                                <a href="{% url 'fournisseurs:fournisseur_list' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-indigo-600 bg-indigo-50">Fournisseurs</a>
+                                <a href="{% url 'materiel_informatique:liste_materiels' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">Matériel Informatique</a>
+                                <a href="{% url 'commandes_informatique:liste_commandes' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">Commandes IT</a>
+                                <a href="{% url 'livraison:liste_livraisons' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">Livraisons</a>
+                                <a href="{% url 'demande_equipement:liste_toutes_demandes' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">Traiter Demandes</a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <a href="{% url 'materiel_informatique:mes_equipements_informatiques' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">Mes équipements IT</a>
+                    <a href="{% url 'materiel_bureautique:mes_equipements_bureautiques' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">Mes équipements Bureau</a>
+                    <a href="{% url 'users:dashboard_garantie' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">🛡️ Dashboard Garantie</a>
+                    <a href="{% url 'chatbot:chatbot-ui' %}" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">Chatbot IA</a>
+                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="block px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-800 hover:bg-red-50">Se déconnecter</a>
+                </div>
+            </div>
+        </div>
+        <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+            {% csrf_token %}
+        </form>
+    </nav>
+
+    <!-- Contenu principal -->
+    <main class="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- En-tête -->
+        <div class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Confirmer la suppression</h1>
+            <p class="text-lg text-gray-600">Cette action est irréversible</p>
+        </div>
+
+        <!-- Formulaire de confirmation -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="px-8 py-6 border-b border-gray-200 bg-red-50">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-semibold text-red-800">Attention !</h2>
+                        <p class="text-red-700">Cette action est irréversible</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8 text-center">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                    <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </div>
+                
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Supprimer le fournisseur</h3>
+                <p class="text-gray-600 mb-6">
+                    Êtes-vous sûr de vouloir supprimer le fournisseur 
+                    <span class="font-semibold text-gray-900">{{ fournisseur.nom }}</span> ?
+                </p>
+                
+                <div class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                    <h4 class="text-sm font-medium text-gray-900 mb-2">Informations du fournisseur :</h4>
+                    <div class="text-sm text-gray-600 space-y-1">
+                        <p><span class="font-medium">Nom :</span> {{ fournisseur.nom }}</p>
+                        {% if fournisseur.if_fiscal %}
+                            <p><span class="font-medium">IF Fiscal :</span> {{ fournisseur.if_fiscal }}</p>
+                        {% endif %}
+                        {% if fournisseur.ice %}
+                            <p><span class="font-medium">ICE :</span> {{ fournisseur.ice }}</p>
+                        {% endif %}
+                        {% if fournisseur.registre_commerce %}
+                            <p><span class="font-medium">RC :</span> {{ fournisseur.registre_commerce }}</p>
+                        {% endif %}
+                        {% if fournisseur.adresse %}
+                            <p><span class="font-medium">Adresse :</span> {{ fournisseur.adresse }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                <strong>Attention :</strong> Cette action supprimera définitivement le fournisseur et toutes ses données associées.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" class="space-y-4">
+      {% csrf_token %}
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button type="submit" 
+                                class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 shadow-lg hover:shadow-xl">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            Confirmer la suppression
+      </button>
+                        <a href="{% url 'fournisseurs:fournisseur_list' %}" 
+                           class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                            Annuler
+                        </a>
+                    </div>
+    </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -156,52 +156,41 @@ def generate_decharge_pdf(demande):
     
     # 6. Liste des équipements personnalisée selon le type de demande
     if demande.type_article == 'fourniture':
-        # Pour les fournitures, afficher un message générique
-        equipements = [
-            "• Fournitures de bureau diverses (papeterie, consommables, etc.)",
-            "• Quantité et types selon la demande approuvée"
-        ]
-    elif demande.type_article == 'materiel' and demande.materiel_selectionne_id:
-        # Récupérer les informations du matériel affecté
+        # Pour les fournitures, afficher les détails
+        if demande.fourniture:
+            equipements = [
+                f"• {demande.fourniture.nom}, numéro de série: {demande.fourniture.numero_serie}"
+            ]
+        else:
+            equipements = [
+                "• Fournitures de bureau diverses (papeterie, consommables, etc.)",
+                "• Quantité et types selon la demande approuvée"
+            ]
+    elif demande.type_article == 'materiel':
+        # Utiliser les informations de la demande directement
         if demande.categorie == 'informatique':
-            from apps.materiel_informatique.models import MaterielInformatique
-            try:
-                materiel = MaterielInformatique.objects.get(id=demande.materiel_selectionne_id)
-                designation = materiel.ligne_commande.designation.nom
-                description = materiel.ligne_commande.description.nom
-                code_inventaire = materiel.code_inventaire
-                numero_serie = materiel.numero_serie if materiel.numero_serie else "N/A"
-                
-                # Créer la liste des équipements
+            if demande.designation_info and demande.description_info:
                 equipements = [
-                    f"• {designation} {description}, SN: {numero_serie}, numéro d'inventaire: {code_inventaire};"
+                    f"• {demande.designation_info.nom} {demande.description_info.nom}"
                 ]
                 
                 # Ajouter les accessoires si c'est un ordinateur
-                if 'ordinateur' in designation.lower() or 'pc' in designation.lower():
+                if 'ordinateur' in demande.designation_info.nom.lower() or 'pc' in demande.designation_info.nom.lower():
                     equipements.append("• Accessoires: clavier, souris, sacoche, câble anti-vol, disque dur")
-                
-            except MaterielInformatique.DoesNotExist:
-                equipements = ["• Matériel non trouvé"]
+            else:
+                equipements = ["• Matériel informatique demandé (détails non spécifiés)"]
                 
         elif demande.categorie == 'bureau':
-            from apps.materiel_bureautique.models import MaterielBureau
-            try:
-                materiel = MaterielBureau.objects.get(id=demande.materiel_selectionne_id)
-                designation = materiel.ligne_commande.designation.nom
-                description = materiel.ligne_commande.description.nom
-                code_inventaire = materiel.code_inventaire
-                
+            if demande.designation_bureau and demande.description_bureau:
                 equipements = [
-                    f"• {designation} {description}, numéro d'inventaire: {code_inventaire};"
+                    f"• {demande.designation_bureau.nom} {demande.description_bureau.nom}"
                 ]
-                
-            except MaterielBureau.DoesNotExist:
-                equipements = ["• Matériel non trouvé"]
+            else:
+                equipements = ["• Matériel de bureau demandé (détails non spécifiés)"]
         else:
-            equipements = ["• Matériel demandé"]
+            equipements = ["• Matériel demandé (catégorie non spécifiée)"]
     else:
-        equipements = ["• Équipement demandé (non encore affecté)"]
+        equipements = ["• Équipement demandé (type non spécifié)"]
     
     # Ajouter chaque équipement
     for equipement in equipements:

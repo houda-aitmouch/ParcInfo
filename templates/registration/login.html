@@ -4,132 +4,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion</title>
+    <title>Connexion - ParcInfo</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        secondary: {
+                            50: '#faf5ff',
+                            100: '#f3e8ff',
+                            200: '#e9d5ff',
+                            300: '#d8b4fe',
+                            400: '#c084fc',
+                            500: '#a855f7',
+                            600: '#9333ea',
+                            700: '#7c3aed',
+                            800: '#6b21a8',
+                            900: '#581c87',
+                        },
+                        add: {
+                            blue: '#3399FF',
+                            purple: '#8B5CF6',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'bounce-in': 'bounceIn 0.6s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(30px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        bounceIn: {
+                            '0%': { transform: 'scale(0.3)', opacity: '0' },
+                            '50%': { transform: 'scale(1.05)' },
+                            '70%': { transform: 'scale(0.9)' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    
+    <!-- Alpine.js -->
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="{% static 'css/parcinfo-ui.css' %}">
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-    <div class="w-full max-w-md" x-data="loginForm()">
-        <div class="bg-white shadow-2xl rounded-2xl p-8 animate-fade-in">
-            <!-- En-tête -->
-            <div class="text-center mb-8">
-                <div class="mb-6">
-                    <img src="{% static 'images/ADD.png' %}" alt="Logo" class="w-27 h-20 mx-auto object-contain">
-                </div>
-                <h2 class="text-3xl font-bold text-gray-900 mb-2">Connexion</h2>
-                <p class="text-gray-600">Connectez-vous à votre compte</p>
+    <div class="w-full max-w-md mx-auto">
+        <!-- Logo avec animation et effet -->
+        <div class="flex justify-center mb-8 animate-bounce-in">
+            <div class="relative group">
+                <img src="{% static 'images/ADD.png' %}" alt="ADD - Agence de Développement du Digital" class="h-16 w-auto drop-shadow-lg transition-transform duration-300 group-hover:scale-105">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
+        </div>
+        
+        <!-- Titre principal -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">ParcInfo</h1>
+            <p class="text-gray-600">Système de Gestion de Parc Informatique</p>
+            <div class="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-500 mx-auto rounded-full mt-3"></div>
+        </div>
 
-            {% if messages %}
-              {% for message in messages %}
-                <div class="mb-4 bg-red-100 text-red-700 p-2 rounded text-center">
-                  {{ message }}
+        <div class="w-full">
+            <div class="bg-white/95 backdrop-blur-sm shadow-2xl border-0 rounded-3xl p-8 animate-fade-in">
+                <!-- Card Header -->
+                <div class="space-y-1 text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Connexion</h2>
+                    <p class="text-gray-600">Accédez à votre espace de travail</p>
                 </div>
-              {% endfor %}
-            {% endif %}
+                
+                <!-- Messages d'erreur -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-4 rounded-lg border border-red-200 bg-red-50 text-red-800">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>{{ message }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
 
-            {% if form.errors %}
-              <div class="mb-4 bg-red-100 text-red-700 p-2 rounded text-center">
-                Nom d'utilisateur ou mot de passe incorrect.
-              </div>
-            {% endif %}
+                {% if form.errors %}
+                    <div class="mb-4 p-4 rounded-lg border border-red-200 bg-red-50 text-red-800">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Identifiants incorrects. Veuillez réessayer.</span>
+                        </div>
+                    </div>
+                {% endif %}
 
-            <!-- Formulaire -->
-            <form method="post" action="{% url 'login' %}" @submit="handleSubmit($event)">
-                {% csrf_token %}
+                <!-- Formulaire -->
+                <form method="post" action="{% url 'login' %}" class="space-y-4">
+                    {% csrf_token %}
+                    {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                    {% endif %}
 
-                <!-- Champ nom d'utilisateur -->
-                <div class="mb-6" x-data="inputField()">
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-user text-gray-400 mr-2"></i>
-                        Nom d'utilisateur
-                    </label>
-                    <div class="relative">
+                    <!-- Champ nom d'utilisateur -->
+                    <div class="space-y-2">
+                        <label for="username" class="block text-sm font-medium text-gray-700">
+                            Nom d'utilisateur
+                        </label>
                         <input
                             type="text"
                             id="username"
                             name="username"
-                            x-model="formData.username"
-                            @focus="handleFocus()"
-                            @blur="handleBlur()"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                            placeholder="Saisissez votre nom d'utilisateur"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                            placeholder="votre.nom@add.gov.ma"
                             required
-                        >
-                        <div class="focus-overlay"></div>
+                        />
                     </div>
-                </div>
 
-                <!-- Champ mot de passe -->
-                <div class="mb-6" x-data="passwordToggle()">
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-lock text-gray-400 mr-2"></i>
-                        Mot de passe
-                    </label>
-                    <div class="relative">
-                        <input
-                            :type="showPassword ? 'text' : 'password'"
-                            id="password"
-                            name="password"
-                            x-model="formData.password"
-                            @focus="focused = true"
-                            @blur="focused = false"
-                            class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                            placeholder="Saisissez votre mot de passe"
-                            required
-                        >
-                        <button
-                            type="button"
-                            class="password-toggle"
-                            @click="toggleVisibility()"
-                            :aria-label="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
-                        >
-                            <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                        </button>
-                        <div class="focus-overlay"></div>
+                    <!-- Champ mot de passe -->
+                    <div class="space-y-2">
+                        <label for="password" class="block text-sm font-medium text-gray-700">
+                            Mot de passe
+                        </label>
+                        <div class="relative">
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                                placeholder="••••••••"
+                                required
+                            />
+                        </div>
                     </div>
-                </div>
 
-                <!-- Se souvenir de moi et mot de passe oublié -->
-                <div class="flex items-center justify-between mb-6">
-                    <label class="flex items-center">
-                        <input
-                            type="checkbox"
-                            name="remember_me"
-                            x-model="formData.rememberMe"
-                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                        >
-                        <span class="ml-2 text-sm text-gray-600">Se souvenir de moi</span>
-                    </label>
-                </div>
-
-                <!-- Bouton de soumission -->
-                <button
-                    type="submit"
-                    class="login-button btn-primary"
-                    :class="{ 'btn-disabled': loading }"
-                    :disabled="loading"
-                >
-                    <span x-show="!loading" class="flex items-center justify-center">
-                        <i class="fas fa-sign-in-alt mr-2"></i>
-                        Se connecter
-                    </span>
-                    <span x-show="loading" class="flex items-center justify-center">
-                        <i class="fas fa-spinner loading-spinner"></i>
-                        Connexion en cours...
-                    </span>
-                </button>
-            </form>
-
-            <!-- Footer -->
-            <div class="mt-8 text-center">
-                <p class="text-xs text-gray-500">
-                    © 2025 Agence de Développement du Digital (ADD). Tous droits réservés.
-
-                </p>
+                    <!-- Bouton de soumission -->
+                    <button 
+                        type="submit" 
+                        class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-4 px-6 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    >
+                        <span class="flex items-center justify-center space-x-3">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Se connecter</span>
+                        </span>
+                    </button>
+                </form>
             </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 animate-fade-in" style="animation-delay: 0.5s;">
+            <p class="text-gray-500 text-sm">
+                © 2024 ADD - Agence de Développement du Digital
+            </p>
+            <p class="text-gray-400 text-xs mt-2">
+                Système de Gestion de Parc Informatique
+            </p>
         </div>
     </div>
 

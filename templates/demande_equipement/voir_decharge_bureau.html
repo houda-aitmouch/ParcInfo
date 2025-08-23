@@ -1,0 +1,124 @@
+{% extends 'dashboards/base_gestionnaire_bureau.html' %}
+{% load static %}
+
+{% block title %}Visualiser la Décharge - Demande {{ demande.id }}{% endblock %}
+{% block extra_head %}
+<style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+</style>
+<link rel="stylesheet" href="{% static 'css/parcinfo-ui.css' %}">
+<link rel="stylesheet" href="{% static 'react/assets/index.css' %}">
+{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-6">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- En-tête -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                        Décharge - Demande #{{ demande.id }}
+                    </h1>
+                    <p class="text-gray-600">
+                        Visualisation du document de décharge pour {{ demande.demandeur.get_full_name }}
+                    </p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'demande_equipement:telecharger_decharge' demande.pk %}" 
+                       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+                        <span>📄</span>
+                        <span>Télécharger</span>
+                    </a>
+                    <a href="{% url 'demande_equipement:liste_toutes_demandes' %}" 
+                       class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                        Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Informations de la demande -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Informations de la demande</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Demandeur</span>
+                    <p class="text-gray-900">{{ demande.demandeur.get_full_name }}</p>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Date de demande</span>
+                    <p class="text-gray-900">{{ demande.date_demande|date:"d/m/Y" }}</p>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Date d'affectation</span>
+                    <p class="text-gray-900">
+                        {% if demande.date_affectation %}
+                            {{ demande.date_affectation|date:"d/m/Y" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Catégorie</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if demande.categorie == 'bureau' %}
+                            bg-blue-100 text-blue-800
+                        {% else %}
+                            bg-green-100 text-green-800
+                        {% endif %}">
+                        {{ demande.get_categorie_display }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Type</span>
+                    <p class="text-gray-900">{{ demande.get_type_article_display }}</p>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Statut</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if demande.statut == 'approuvee' %}
+                            bg-green-100 text-green-800
+                        {% elif demande.statut == 'terminee' %}
+                            bg-gray-100 text-gray-800
+                        {% endif %}">
+                        {{ demande.get_statut_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- Visualiseur PDF -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Document de décharge</h3>
+                <p class="text-sm text-gray-600">Visualisez le PDF directement dans votre navigateur</p>
+            </div>
+            <div class="p-4">
+                <div class="bg-gray-100 rounded-lg p-8 text-center">
+                    <div class="mb-4">
+                        <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">PDF de décharge généré</h3>
+                    <p class="text-gray-600 mb-4">
+                        Le document de décharge a été généré avec succès pour la demande #{{ demande.id }}.
+                    </p>
+                    <div class="flex justify-center space-x-4">
+                        <a href="{% url 'demande_equipement:telecharger_decharge' demande.pk %}" 
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            <span class="mr-2">📄</span>
+                            Télécharger le PDF
+                        </a>
+                        <button onclick="window.open('{% url 'demande_equipement:telecharger_decharge' demande.pk %}?inline=1', '_blank')" 
+                                class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <span class="mr-2">👁️</span>
+                            Ouvrir dans un nouvel onglet
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% endblock %}

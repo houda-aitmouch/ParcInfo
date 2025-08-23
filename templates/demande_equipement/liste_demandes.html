@@ -1,15 +1,11 @@
+{% extends base_template %}
+
 {% load static %}
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Mes demandes d'équipement - ADD</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-</head>
-<body class="bg-gradient-to-br from-indigo-50 to-white min-h-screen font-sans">
-    <div class="max-w-6xl mx-auto py-10 px-4">
+
+{% block title %}Mes demandes d'équipement - ADD{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-10 px-4">
         <!-- En-tête -->
         <div class="flex justify-between items-center mb-8">
             <div>
@@ -72,10 +68,23 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {% if demande.type_article == 'materiel' %}
-                                            {% if demande.designation %}
-                                                <div class="font-medium">{{ demande.designation.nom }}</div>
-                                                {% if demande.description %}
-                                                    <div class="text-gray-500">{{ demande.description.nom }}</div>
+                                            {% if demande.categorie == 'informatique' %}
+                                                {% if demande.designation_info %}
+                                                    <div class="font-medium">{{ demande.designation_info.nom }}</div>
+                                                    {% if demande.description_info %}
+                                                        <div class="text-gray-500">{{ demande.description_info.nom }}</div>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-gray-400">-</span>
+                                                {% endif %}
+                                            {% elif demande.categorie == 'bureau' %}
+                                                {% if demande.designation_bureau %}
+                                                    <div class="font-medium">{{ demande.designation_bureau.nom }}</div>
+                                                    {% if demande.description_bureau %}
+                                                        <div class="text-gray-500">{{ demande.description_bureau.nom }}</div>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-gray-400">-</span>
                                                 {% endif %}
                                             {% else %}
                                                 <span class="text-gray-400">-</span>
@@ -163,10 +172,23 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {% if demande.type_article == 'materiel' %}
-                                            {% if demande.designation %}
-                                                <div class="font-medium">{{ demande.designation.nom }}</div>
-                                                {% if demande.description %}
-                                                    <div class="text-gray-500">{{ demande.description.nom }}</div>
+                                            {% if demande.categorie == 'informatique' %}
+                                                {% if demande.designation_info %}
+                                                    <div class="font-medium">{{ demande.designation_info.nom }}</div>
+                                                    {% if demande.description_info %}
+                                                        <div class="text-gray-500">{{ demande.description_info.nom }}</div>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-gray-400">-</span>
+                                                {% endif %}
+                                            {% elif demande.categorie == 'bureau' %}
+                                                {% if demande.designation_bureau %}
+                                                    <div class="font-medium">{{ demande.designation_bureau.nom }}</div>
+                                                    {% if demande.description_bureau %}
+                                                        <div class="text-gray-500">{{ demande.description_bureau.nom }}</div>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-gray-400">-</span>
                                                 {% endif %}
                                             {% else %}
                                                 <span class="text-gray-400">-</span>
@@ -260,5 +282,4 @@
             </div>
         {% endif %}
         </div>
-    </body>
-</html> 
+{% endblock %} 

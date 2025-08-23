@@ -47,6 +47,52 @@ function loginForm() {
             // Le loading sera réinitialisé au chargement de la nouvelle page
         },
 
+        // Gestion des connexions de démonstration
+        handleDemoLogin(demoUsername) {
+            this.formData.username = demoUsername;
+            this.formData.password = 'admin123';
+            this.loading = true;
+
+            // Mise à jour des champs du formulaire
+            const usernameField = document.querySelector('input[name="username"]');
+            const passwordField = document.querySelector('input[name="password"]');
+            
+            if (usernameField) usernameField.value = demoUsername;
+            if (passwordField) passwordField.value = 'admin123';
+
+            // Ajout d'un feedback visuel
+            this.showDemoLoginFeedback(demoUsername);
+
+            // Soumission automatique du formulaire après un court délai
+            setTimeout(() => {
+                const form = document.querySelector('form');
+                if (form) {
+                    form.submit();
+                }
+            }, 500);
+        },
+
+        // Feedback visuel pour la connexion démo
+        showDemoLoginFeedback(username) {
+            // Créer un message de feedback temporaire
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg bg-blue-500 text-white text-sm transform transition-all duration-300';
+            feedbackDiv.textContent = `Connexion en tant que ${username}...`;
+
+            document.body.appendChild(feedbackDiv);
+
+            // Animation d'entrée
+            setTimeout(() => {
+                feedbackDiv.style.transform = 'translateX(0)';
+            }, 10);
+
+            // Suppression automatique
+            setTimeout(() => {
+                feedbackDiv.style.transform = 'translateX(100%)';
+                setTimeout(() => feedbackDiv.remove(), 300);
+            }, 2000);
+        },
+
         // Validation basique du formulaire
         validateForm() {
             const username = document.querySelector('input[name="username"]');

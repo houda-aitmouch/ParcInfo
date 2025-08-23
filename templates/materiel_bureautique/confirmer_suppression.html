@@ -3,8 +3,8 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Confirmer la suppression - Matériel de bureau</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Confirmer la suppression - Matériel de bureau</title>  <link rel="stylesheet" href="{% static 'css/parcinfo-ui.css' %}">
+  <link rel="stylesheet" href="{% static 'react/assets/index.css' %}">
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
   <div class="bg-white p-8 rounded shadow max-w-md w-full">
@@ -21,6 +21,5 @@
       <a href="{% url 'materiel_bureautique:liste_materiels' %}" class="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 transition">Annuler</a>
       <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition">Supprimer</button>
     </form>
-  </div>
-</body>
+  </div></body>
 </html> 

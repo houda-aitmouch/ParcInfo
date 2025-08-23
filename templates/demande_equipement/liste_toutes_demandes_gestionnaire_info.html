@@ -1,0 +1,315 @@
+{% extends 'dashboards/base_gestionnaire_info.html' %}
+{% load static %}
+
+{% block title %}Toutes les demandes d'équipement - ADD{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-10 px-4">
+        <!-- En-tête -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+                    {% if categorie_gestionnaire %}
+                        Demandes d'équipement {{ categorie_gestionnaire|title }}
+                    {% else %}
+                        Toutes les demandes d'équipement
+                    {% endif %}
+                </h1>
+                <p class="text-gray-600 mt-2">
+                    {% if categorie_gestionnaire %}
+                        Gérez et approuvez les demandes d'équipement {{ categorie_gestionnaire }} des utilisateurs
+                    {% else %}
+                        Gérez et approuvez toutes les demandes d'équipement des utilisateurs
+                    {% endif %}
+                </p>
+            </div>
+            <div class="flex space-x-4">
+                <a href="{% url 'demande_equipement:consulter_archives' %}" 
+                   class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all">
+                    📚 Archives
+                </a>
+                <a href="{% url dashboard_url %}" 
+                   class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all">
+                    Retour au Dashboard
+                </a>
+            </div>
+        </div>
+
+        {% if demandes %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-indigo-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Date
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Demandeur
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Catégorie
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Type
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Désignation
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Description
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Code inventaire
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Effectif
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Stock
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Date d'affectation
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Statut
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Décharge
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for demande in demandes %}
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ demande.date_demande|date:"d/m/Y" }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-8 w-8">
+                                                <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                                    <span class="text-sm font-medium text-indigo-600">
+                                                        {{ demande.demandeur.first_name|first|upper }}{{ demande.demandeur.last_name|first|upper }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="ml-3">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    {{ demande.demandeur.get_full_name }}
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    {{ demande.demandeur.email }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            {% if demande.categorie == 'informatique' %}
+                                                bg-blue-100 text-blue-800
+                                            {% else %}
+                                                bg-green-100 text-green-800
+                                            {% endif %}">
+                                            {{ demande.get_categorie_display }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div>
+                                            <div class="font-medium">{{ demande.get_type_article_display }}</div>
+                                            <div class="text-gray-500">{{ demande.get_type_demande_display }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {% if demande.type_article == 'materiel' %}
+                                            {% if demande.designation %}
+                                                <div class="font-medium">{{ demande.designation.nom }}</div>
+                                            {% else %}
+                                                <span class="text-gray-400">-</span>
+                                            {% endif %}
+                                        {% elif demande.type_article == 'fourniture' %}
+                                            {% if demande.fourniture %}
+                                                <div class="font-medium">{{ demande.fourniture.nom }}</div>
+                                            {% else %}
+                                                <span class="text-red-400">Fourniture non sélectionnée</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {% if demande.type_article == 'materiel' %}
+                                            {% if demande.description %}
+                                                <div class="text-gray-700">{{ demande.description.nom }}</div>
+                                            {% else %}
+                                                <span class="text-gray-400">-</span>
+                                            {% endif %}
+                                        {% elif demande.type_article == 'fourniture' %}
+                                            {% if demande.fourniture %}
+                                                <div class="text-gray-700">{{ demande.fourniture.numero_serie }}</div>
+                                            {% else %}
+                                                <span class="text-red-400">-</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {% if demande.type_article == 'materiel' %}
+                                            {% if demande.code_inventaire_exemple and demande.code_inventaire_exemple != "N/A" %}
+                                                {% if demande.code_inventaire_exemple|slice:":1" == "❌" %}
+                                                    <span class="font-mono text-red-600">{{ demande.code_inventaire_exemple }}</span>
+                                                {% else %}
+                                                    <span class="font-mono text-blue-600">{{ demande.code_inventaire_exemple }}</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-gray-400">N/A</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {% if demande.type_article == 'materiel' %}
+                                            {% if demande.effectif_total > 0 %}
+                                                {{ demande.effectif_total }}
+                                            {% else %}
+                                                <span class="text-red-500 font-medium">0</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {% if demande.type_article == 'materiel' %}
+                                            {% if demande.stock_disponible > 0 %}
+                                                <span class="text-green-600 font-medium">{{ demande.stock_disponible }}</span>
+                                            {% else %}
+                                                <span class="text-red-500 font-medium">0</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {% if demande.date_affectation %}
+                                            {{ demande.date_affectation|date:"d/m/Y" }}
+                                        {% elif demande.statut in 'approuvee,en_cours,terminee' %}
+                                            <span class="text-green-600 font-medium">Affecté</span>
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            {% if demande.statut == 'en_attente' %}
+                                                bg-yellow-100 text-yellow-800
+                                            {% elif demande.statut == 'approuvee' and demande.decharge_signee %}
+                                                bg-purple-100 text-purple-800
+                                            {% elif demande.statut == 'approuvee' %}
+                                                bg-green-100 text-green-800
+                                            {% elif demande.statut == 'refusee' %}
+                                                bg-red-100 text-red-800
+                                            {% elif demande.statut == 'en_cours' %}
+                                                bg-blue-100 text-blue-800
+                                            {% elif demande.statut == 'terminee' %}
+                                                bg-gray-100 text-gray-800
+                                            {% endif %}">
+                                            {% if demande.statut == 'approuvee' and demande.decharge_signee %}
+                                                Décharge signée
+                                            {% else %}
+                                                {{ demande.get_statut_display }}
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <!-- Colonne Décharge -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        {% if demande.statut == 'approuvee' or demande.statut == 'terminee' %}
+                                            {% if demande.decharge_signee %}
+                                                <div class="flex flex-col space-y-1">
+                                                    <span class="text-green-600 font-medium">✅ Signée</span>
+                                                    <span class="text-xs text-gray-500">{{ demande.date_signature_formatted }}</span>
+                                                    <div class="flex space-x-1">
+                                                        <a href="{% url 'demande_equipement:telecharger_decharge' demande.pk %}?inline=1" 
+                                                           target="_blank"
+                                                           class="text-green-600 hover:text-green-900 text-xs transition-colors">
+                                                            👁️ Voir
+                                                        </a>
+                                                        <a href="{% url 'demande_equipement:telecharger_decharge' demande.pk %}" 
+                                                           class="text-blue-600 hover:text-blue-900 text-xs transition-colors">
+                                                            📄 Télécharger
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <div class="flex flex-col space-y-1">
+                                                    <span class="text-yellow-600 font-medium">⏳ En attente</span>
+                                                    <span class="text-xs text-gray-500">À signer par {{ demande.demandeur.get_full_name }}</span>
+                                                    <div class="flex space-x-1">
+                                                        <a href="{% url 'demande_equipement:telecharger_decharge' demande.pk %}?inline=1" 
+                                                           target="_blank"
+                                                           class="text-blue-600 hover:text-blue-900 text-xs transition-colors">
+                                                            👁️ Voir
+                                                        </a>
+                                                        <a href="{% url 'demande_equipement:telecharger_decharge' demande.pk %}" 
+                                                           class="text-blue-600 hover:text-blue-900 text-xs transition-colors">
+                                                            📄 Télécharger
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <!-- Colonne Actions -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            {% if demande.statut == 'en_attente' %}
+                                                <a href="{% url 'demande_equipement:approuver_demande' demande.pk %}" 
+                                                   class="text-green-600 hover:text-green-900 transition-colors">
+                                                    Approuver
+                                                </a>
+                                                <a href="{% url 'demande_equipement:approuver_demande' demande.pk %}" 
+                                                   class="text-red-600 hover:text-red-900 transition-colors">
+                                                    Refuser
+                                                </a>
+                                            {% elif demande.statut == 'en_cours' %}
+                                                <a href="{% url 'demande_equipement:approuver_demande' demande.pk %}" 
+                                                   class="text-gray-600 hover:text-gray-900 transition-colors">
+                                                    Terminer
+                                                </a>
+                                            {% elif demande.statut == 'refusee' %}
+                                                <span class="text-red-600 font-medium">Refusée</span>
+                                            {% else %}
+                                                <span class="text-gray-400">-</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center py-12">
+                <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune demande</h3>
+                <p class="text-gray-500 mb-6">Aucune demande d'équipement n'a été soumise pour le moment.</p>
+                <a href="{% url 'demande_equipement:nouvelle_demande' %}" 
+                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors">
+                    Créer une demande
+                </a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %} 

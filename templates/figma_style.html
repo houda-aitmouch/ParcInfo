@@ -1,0 +1,135 @@
+{% extends 'base_figma_exact.html' %}
+{% load static %}
+
+{% block title %}Style Figma Exact - ParcInfo{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Titre avec gradient exact du Figma -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gradient mb-2">Tableau de bord ParcInfo</h1>
+        <p class="text-gray-600">Gérez vos équipements, matériels et fournisseurs</p>
+    </div>
+
+    <!-- Cartes KPI exactes du Figma -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-lg shadow-card border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Équipements Totaux</p>
+                    <p class="text-2xl font-bold text-gray-900">1,247</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <span class="text-sm text-green-600 font-medium">+5.2%</span>
+                <span class="text-sm text-gray-500">vs mois dernier</span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-card border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Demandes en cours</p>
+                    <p class="text-2xl font-bold text-gray-900">56</p>
+                </div>
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <span class="text-sm text-yellow-600 font-medium">+8</span>
+                <span class="text-sm text-gray-500">nouvelles demandes</span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-card border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Livraisons</p>
+                    <p class="text-2xl font-bold text-gray-900">23</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <span class="text-sm text-green-600 font-medium">+15%</span>
+                <span class="text-sm text-gray-500">vs semaine dernière</span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-card border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Budget utilisé</p>
+                    <p class="text-2xl font-bold text-gray-900">78%</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 h-2 rounded-full" style="width: 78%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Boutons exacts du Figma -->
+    <div class="bg-white rounded-lg shadow-card border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Boutons du style Figma</h3>
+        <div class="flex flex-wrap gap-4">
+            <button class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-200 shadow-md">
+                Bouton Principal
+            </button>
+            <button class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                Bouton Contour
+            </button>
+            <button class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                Bouton Fantôme
+            </button>
+        </div>
+    </div>
+
+    <!-- Badges exacts du Figma -->
+    <div class="bg-white rounded-lg shadow-card border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Badges du style Figma</h3>
+        <div class="flex flex-wrap gap-4">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-red-500 to-pink-500 text-white">
+                Superadmin
+            </span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
+                IT Manager
+            </span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-purple-500 to-violet-500 text-white">
+                Bureau Manager
+            </span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-orange-300 text-orange-600 bg-transparent">
+                Employé
+            </span>
+        </div>
+    </div>
+
+    <!-- Message de succès -->
+    <div class="p-4 rounded-lg border bg-green-50 border-green-200 text-green-800">
+        <div class="flex items-center space-x-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Style Figma reproduit avec succès ! 🎉</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

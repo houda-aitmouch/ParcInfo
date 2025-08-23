@@ -37,6 +37,14 @@ class Commande(models.Model):
 
     def __str__(self):
         return f"{self.mode_passation} - {self.numero_commande}"
+    
+    @property
+    def montant_total(self):
+        """Calcule le montant total de la commande"""
+        total = 0
+        for ligne in self.lignes.all():
+            total += ligne.quantite * ligne.prix_unitaire
+        return total
 
 
 # apps/commande/models.py

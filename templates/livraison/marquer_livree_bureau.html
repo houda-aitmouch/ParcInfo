@@ -1,0 +1,54 @@
+{% extends 'dashboards/base_gestionnaire_bureau.html' %}
+
+{% block title %}Marquer Livree - ParcInfo{% endblock %}
+
+{% block content %}
+{% load static %}
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto">
+            <!-- Header -->
+            <div class="mb-8 text-center">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Marquer comme livrée</h1>
+                <p class="text-gray-600">Confirmer que cette livraison a été effectuée</p>
+            </div>
+            <!-- Informations de la livraison -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Numéro de commande:</span>
+                        <span class="font-semibold">{{ livraison.numero_commande }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Type:</span>
+                        <span class="font-semibold">{{ livraison.get_type_commande_display }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Date prévue:</span>
+                        <span class="font-semibold">{{ livraison.date_livraison_prevue|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Statut actuel:</span>
+                        <span class="font-semibold text-yellow-600">{{ livraison.get_statut_livraison_display }}</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Boutons -->
+            <div class="flex gap-4">
+                <form method="post" class="flex-1">
+                    {% csrf_token %}
+                    <button type="submit" 
+                            class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Marquer comme livrée
+                    </button>
+                </form>
+                <a href="{% url 'livraison:detail_livraison' livraison.pk %}" 
+                   class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-200 text-center">
+                    Annuler
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

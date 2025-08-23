@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Déconnexion - ParcInfo</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        secondary: {
+                            50: '#faf5ff',
+                            100: '#f3e8ff',
+                            200: '#e9d5ff',
+                            300: '#d8b4fe',
+                            400: '#c084fc',
+                            500: '#a855f7',
+                            600: '#9333ea',
+                            700: '#7c3aed',
+                            800: '#6b21a8',
+                            900: '#581c87',
+                        },
+                        add: {
+                            blue: '#3399FF',
+                            purple: '#8B5CF6',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'bounce-in': 'bounceIn 0.6s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(30px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        bounceIn: {
+                            '0%': { transform: 'scale(0.3)', opacity: '0' },
+                            '50%': { transform: 'scale(1.05)' },
+                            '70%': { transform: 'scale(0.9)' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    
+    <!-- Alpine.js -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-md mx-auto">
+        <!-- Logo avec animation -->
+        <div class="flex justify-center mb-8 animate-bounce-in">
+            <div class="relative">
+                <img src="{% static 'images/ADD.png' %}" alt="ADD - Agence de Développement du Digital" class="h-16 w-auto drop-shadow-lg">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur-xl"></div>
+            </div>
+        </div>
+
+        <!-- Carte principale -->
+        <div class="bg-white/95 backdrop-blur-sm shadow-2xl border-0 rounded-3xl p-8 animate-fade-in">
+            <!-- Icône de succès -->
+            <div class="flex justify-center mb-6">
+                <div class="w-20 h-20 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg animate-slide-up">
+                    <i class="fas fa-check text-white text-2xl"></i>
+                </div>
+            </div>
+
+            <!-- Message de déconnexion -->
+            <div class="text-center space-y-4 mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 animate-slide-up" style="animation-delay: 0.1s;">
+                    Déconnexion réussie
+                </h1>
+                <p class="text-gray-600 text-lg animate-slide-up" style="animation-delay: 0.2s;">
+                    Vous avez été déconnecté(e) avec succès de ParcInfo
+                </p>
+                <div class="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-500 mx-auto rounded-full animate-slide-up" style="animation-delay: 0.3s;"></div>
+            </div>
+
+            <!-- Message de sécurité -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 animate-slide-up" style="animation-delay: 0.4s;">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-shield-alt text-blue-500 mt-1"></i>
+                    <div>
+                        <p class="text-blue-800 font-medium">Sécurité</p>
+                        <p class="text-blue-700 text-sm">
+                            Pour votre sécurité, fermez votre navigateur si vous utilisez un ordinateur partagé.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="space-y-4">
+                <!-- Bouton de reconnexion -->
+                <a href="{% url 'login' %}" 
+                   class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl transform hover:scale-105 animate-slide-up"
+                   style="animation-delay: 0.5s;">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Se reconnecter</span>
+                </a>
+
+                <!-- Lien vers l'accueil -->
+                <a href="/" 
+                   class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 animate-slide-up"
+                   style="animation-delay: 0.6s;">
+                    <i class="fas fa-home"></i>
+                    <span>Retour à l'accueil</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 animate-fade-in" style="animation-delay: 0.7s;">
+            <p class="text-gray-500 text-sm">
+                © 2024 ADD - Agence de Développement du Digital
+            </p>
+            <p class="text-gray-400 text-xs mt-2">
+                Système de Gestion de Parc Informatique
+            </p>
+        </div>
+    </div>
+
+    <!-- Script pour redirection automatique (optionnel) -->
+    <script>
+        // Redirection automatique après 30 secondes (optionnel)
+        // setTimeout(() => {
+        //     window.location.href = "{% url 'login' %}";
+        // }, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+{% extends 'dashboards/base_gestionnaire_bureau.html' %}
+{% load static %}
+
+{% block title %}Supprimer un matériel bureautique - Gestionnaire Bureau{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- En-tête avec breadcrumb -->
+    <div class="mb-8">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="{% url 'users:gestionnaire_bureau_dashboard' %}" class="text-gray-500 hover:text-blue-600 transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                        </svg>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <a href="{% url 'materiel_bureautique:liste_materiels_gestionnaire_bureau' %}" class="ml-1 text-gray-500 hover:text-blue-600 transition-colors md:ml-2">Matériel Bureau</a>
+                    </div>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="ml-1 text-gray-900 font-medium md:ml-2">Supprimer</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+        
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Supprimer le matériel</h1>
+                <p class="text-lg text-gray-600">Confirmez la suppression de <span class="font-semibold text-red-600">{{ materiel.designation }}</span></p>
+            </div>
+            <a href="{% url 'materiel_bureautique:liste_materiels_gestionnaire_bureau' %}" 
+               class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-all duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Retour à la liste
+            </a>
+        </div>
+    </div>
+    
+    <!-- Carte de confirmation -->
+    <div class="chart-card border-l-4 border-red-500 bg-red-50">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-lg font-medium text-red-800">
+                    Attention : Action irréversible
+                </h3>
+                <div class="mt-2 text-sm text-red-700">
+                    <p>Vous êtes sur le point de supprimer définitivement le matériel <strong>{{ materiel.designation }}</strong>.</p>
+                    <p class="mt-2">Cette action ne peut pas être annulée et supprimera toutes les données associées à ce matériel.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Informations du matériel -->
+    <div class="chart-card mt-6">
+        <div class="flex items-center mb-6">
+            <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl flex items-center justify-center mr-4 shadow-md">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-gray-900">Informations du matériel</h2>
+                <p class="text-sm text-gray-600">Détails du matériel à supprimer</p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Désignation</h3>
+                <p class="text-lg font-semibold text-gray-900">{{ materiel.designation }}</p>
+            </div>
+            
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Marque</h3>
+                <p class="text-lg text-gray-900">{{ materiel.marque|default:"Non renseignée" }}</p>
+            </div>
+            
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Modèle</h3>
+                <p class="text-lg text-gray-900">{{ materiel.modele|default:"Non renseigné" }}</p>
+            </div>
+            
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Numéro de série</h3>
+                <p class="text-lg text-gray-900">{{ materiel.numero_serie|default:"Non renseigné" }}</p>
+            </div>
+            
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-2">État</h3>
+                <p class="text-lg text-gray-900">{{ materiel.get_etat_display|default:"Non renseigné" }}</p>
+            </div>
+            
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Prix</h3>
+                <p class="text-lg text-gray-900">{{ materiel.prix|default:"Non renseigné" }}</p>
+            </div>
+            
+            <div class="md:col-span-2">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Notes</h3>
+                <p class="text-lg text-gray-900">{{ materiel.notes|default:"Aucune note" }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Actions -->
+    <div class="flex justify-end space-x-4 mt-8">
+        <a href="{% url 'materiel_bureautique:liste_materiels_gestionnaire_bureau' %}" 
+           class="px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+            Annuler
+        </a>
+        <form method="post" class="inline">
+            {% csrf_token %}
+            <button type="submit" 
+                    class="px-6 py-3 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200">
+                <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Confirmer la suppression
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends 'dashboards/base_gestionnaire_bureau.html' %}
+
+{% block title %}Rapports - ParcInfo{% endblock %}
+
+{% block content %}
+{% load static %}
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-gray-900">Rapports de livraison</h1>
+                <a href="{% url 'livraison:liste_livraisons' %}" 
+                   class="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Retour à la liste
+                </a>
+            </div>
+        </div>
+        <!-- Statistiques générales -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total livraisons</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ total_livraisons }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Livrées</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ livraisons_livrees }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Conformes</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ livraisons_conformes }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">PV reçus</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ pv_recus }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Répartition par type -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Répartition par type</h2>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-blue-500 rounded-full mr-3"></div>
+                            <span class="font-medium">Bureau</span>
+                        </div>
+                        <span class="text-2xl font-bold text-blue-600">{{ livraisons_bureau }}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-green-500 rounded-full mr-3"></div>
+                            <span class="font-medium">Bureau</span>
+                        </div>
+                        <span class="text-2xl font-bold text-green-600">{{ livraisons_bureau }}</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Répartition par statut -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Répartition par statut</h2>
+                <div class="space-y-3">
+                    {% for statut in livraisons_par_statut %}
+                    <div class="flex items-center justify-between">
+                        <span class="font-medium">
+                            {% if statut.statut_livraison == 'en_attente' %}
+                                En attente
+                            {% elif statut.statut_livraison == 'en_cours' %}
+                                En cours
+                            {% elif statut.statut_livraison == 'livree' %}
+                                Livrée
+                            {% elif statut.statut_livraison == 'retardee' %}
+                                Retardée
+                            {% elif statut.statut_livraison == 'annulee' %}
+                                Annulée
+                            {% else %}
+                                {{ statut.statut_livraison }}
+                            {% endif %}
+                        </span>
+                        <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-semibold">
+                            {{ statut.count }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <!-- Top fournisseurs -->
+        {% if livraisons_par_fournisseur %}
+        <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">Top fournisseurs</h2>
+            <div class="space-y-3">
+                {% for fournisseur in livraisons_par_fournisseur %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span class="font-medium">{{ fournisseur.commande_bureau__fournisseur__nom|default:"Fournisseur inconnu" }}</span>
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
+                        {{ fournisseur.count }} livraison{{ fournisseur.count|pluralize:"s" }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <!-- Taux de conformité -->
+        <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">Taux de conformité</h2>
+            <div class="flex items-center">
+                <div class="flex-1 bg-gray-200 rounded-full h-4 mr-4">
+                    {% if total_livraisons > 0 %}
+                        {% widthratio livraisons_conformes total_livraisons 100 as taux %}
+                        <div class="bg-green-500 h-4 rounded-full" style="width: {{ taux }}%"></div>
+                    {% endif %}
+                </div>
+                <span class="text-2xl font-bold text-green-600">
+                    {% if total_livraisons > 0 %}
+                        {% widthratio livraisons_conformes total_livraisons 100 %}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </span>
+            </div>
+            <p class="text-sm text-gray-600 mt-2">
+                {{ livraisons_conformes }} livraison{{ livraisons_conformes|pluralize:"s" }} conforme{{ livraisons_conformes|pluralize:"s" }} sur {{ total_livraisons }} total
+            </p>
+        </div>
+    </div>
+{% endblock %}

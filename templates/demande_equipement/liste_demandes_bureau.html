@@ -1,0 +1,259 @@
+{% extends 'dashboards/base_gestionnaire_bureau.html' %}
+{% load static %}
+
+{% block title %}Mes demandes d'équipement - ADD{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/parcinfo-ui.css' %}">
+<link rel="stylesheet" href="{% static 'react/assets/index.css' %}">
+{% endblock %}
+{% block content %}
+    <div class="max-w-6xl mx-auto py-6 px-2">
+        <!-- En-tête -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+                    Mes demandes d'équipement
+                </h1>
+                <p class="text-gray-600 mt-2">Consultez l'état de vos demandes d'équipement</p>
+            </div>
+            <div class="flex space-x-4">
+                <a href="{% url dashboard_url %}" 
+                   class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all">
+                    Retour au Dashboard
+                </a>
+                <a href="{% url 'demande_equipement:nouvelle_demande' %}" 
+                   class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-cyan-500 text-white rounded-lg hover:from-indigo-700 hover:to-cyan-600 transition-all transform hover:scale-105">
+                    Nouvelle demande
+                </a>
+            </div>
+        </div>
+        <!-- Décharges à signer -->
+        {% if demandes_a_signer %}
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl shadow-lg overflow-hidden mb-8">
+                <div class="bg-yellow-100 px-6 py-3 border-b border-yellow-200">
+                    <h2 class="text-lg font-semibold text-yellow-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        Décharges à signer
+                    </h2>
+                    <p class="text-sm text-yellow-700 mt-1">Vous avez des demandes approuvées qui nécessitent votre signature</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-yellow-200">
+                        <thead class="bg-yellow-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Catégorie</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Désignation</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-yellow-200">
+                            {% for demande in demandes_a_signer %}
+                                <tr class="hover:bg-yellow-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ demande.date_demande|date:"d/m/Y" }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            {{ demande.get_categorie_display }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div>
+                                            <div class="font-medium">{{ demande.get_type_article_display }}</div>
+                                            <div class="text-gray-500">{{ demande.get_type_demande_display }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {% if demande.type_article == 'materiel' %}
+                                            {% if demande.designation %}
+                                                <div class="font-medium">{{ demande.designation.nom }}</div>
+                                                {% if demande.description %}
+                                                    <div class="text-gray-500">{{ demande.description.nom }}</div>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-gray-400">-</span>
+                                            {% endif %}
+                                        {% elif demande.type_article == 'fourniture' %}
+                                            {% if demande.fourniture %}
+                                                <div class="font-medium">{{ demande.fourniture.nom }}</div>
+                                                <div class="text-gray-500">{{ demande.fourniture.numero_serie }}</div>
+                                            {% else %}
+                                                <span class="text-red-400">Fourniture non sélectionnée</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <a href="{% url 'demande_equipement:signer_decharge' demande.pk %}" 
+                                               class="text-yellow-600 hover:text-yellow-900 bg-yellow-100 hover:bg-yellow-200 px-3 py-1 rounded-md text-xs font-medium transition-colors">
+                                                ✍️ Signer décharge
+                                            </a>
+                                            <a href="{% url 'demande_equipement:telecharger_decharge' demande.pk %}?inline=1" 
+                                               target="_blank"
+                                               class="text-blue-600 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-xs font-medium transition-colors">
+                                                👁️ Voir décharge
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+        <!-- Autres demandes -->
+        {% if autres_demandes %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-indigo-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Date
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Catégorie
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Type
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Désignation
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Statut
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for demande in autres_demandes %}
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ demande.date_demande|date:"d/m/Y" }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            {% if demande.categorie == 'bureau' %}
+                                                bg-blue-100 text-blue-800
+                                            {% else %}
+                                                bg-green-100 text-green-800
+                                            {% endif %}">
+                                            {{ demande.get_categorie_display }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div>
+                                            <div class="font-medium">{{ demande.get_type_article_display }}</div>
+                                            <div class="text-gray-500">{{ demande.get_type_demande_display }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {% if demande.type_article == 'materiel' %}
+                                            {% if demande.designation %}
+                                                <div class="font-medium">{{ demande.designation.nom }}</div>
+                                                {% if demande.description %}
+                                                    <div class="text-gray-500">{{ demande.description.nom }}</div>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-gray-400">-</span>
+                                            {% endif %}
+                                        {% elif demande.type_article == 'fourniture' %}
+                                            {% if demande.fourniture %}
+                                                <div class="font-medium">{{ demande.fourniture.nom }}</div>
+                                                <div class="text-gray-500">{{ demande.fourniture.numero_serie }}</div>
+                                            {% else %}
+                                                <span class="text-red-400">Fourniture non sélectionnée</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-gray-400">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            {% if demande.statut == 'en_attente' %}
+                                                bg-yellow-100 text-yellow-800
+                                            {% elif demande.statut == 'approuvee' and demande.decharge_signee %}
+                                                bg-purple-100 text-purple-800
+                                            {% elif demande.statut == 'approuvee' %}
+                                                bg-green-100 text-green-800
+                                            {% elif demande.statut == 'refusee' %}
+                                                bg-red-100 text-red-800
+                                            {% elif demande.statut == 'en_cours' %}
+                                                bg-blue-100 text-blue-800
+                                            {% elif demande.statut == 'terminee' %}
+                                                bg-gray-100 text-gray-800
+                                            {% endif %}">
+                                            {% if demande.statut == 'approuvee' and demande.decharge_signee %}
+                                                Décharge signée
+                                            {% else %}
+                                                {{ demande.get_statut_display }}
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            {% if demande.statut == 'en_attente' %}
+                                                <a href="{% url 'demande_equipement:modifier_demande' demande.pk %}" 
+                                                   class="text-indigo-600 hover:text-indigo-900 transition-colors">
+                                                    Modifier
+                                                </a>
+                                                <a href="{% url 'demande_equipement:supprimer_demande' demande.pk %}" 
+                                                   class="text-red-600 hover:text-red-900 transition-colors">
+                                                    Supprimer
+                                                </a>
+                                            {% elif demande.statut == 'approuvee' and demande.decharge_signee %}
+                                                <div class="flex flex-col space-y-1">
+                                                    <span class="text-green-600 font-medium text-xs">Décharge signée</span>
+                                                    <span class="text-xs text-gray-500">{{ demande.date_signature_formatted }}</span>
+                                                    <div class="flex space-x-2">
+                                                        <a href="{% url 'demande_equipement:telecharger_decharge' demande.pk %}?inline=1" 
+                                                           target="_blank"
+                                                           class="text-green-600 hover:text-green-900 text-xs transition-colors">
+                                                            👁️ Voir décharge
+                                                        </a>
+                                                        <a href="{% url 'demande_equipement:telecharger_decharge' demande.pk %}" 
+                                                           class="text-blue-600 hover:text-blue-900 text-xs transition-colors">
+                                                            📄 Télécharger
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-gray-400">-</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                                </div>
+            </div>
+        {% endif %}
+        {% if not demandes_a_signer and not autres_demandes %}
+            <div class="text-center py-12">
+                <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune demande</h3>
+                <p class="text-gray-500 mb-6">Vous n'avez pas encore soumis de demande d'équipement.</p>
+                <a href="{% url 'demande_equipement:nouvelle_demande' %}" 
+                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors">
+                    Créer votre première demande
+                </a>
+            </div>
+        {% endif %}
+        </div>
+{% endblock %}
+{% endblock %}

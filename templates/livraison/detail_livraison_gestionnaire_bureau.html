@@ -1,0 +1,86 @@
+{% extends 'dashboards/base_gestionnaire_bureau.html' %}
+{% load static %}
+
+{% block title %}Détail livraison - Gestionnaire Bureau{% endblock %}
+
+{% block content %}
+<div>
+  <div class="mb-4 flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-gray-900">Détail de la livraison</h1>
+    <div class="flex gap-2">
+      <a href="{% url 'livraison:modifier_livraison_gestionnaire_bureau' livraison.pk %}" class="px-3 py-2 text-xs rounded bg-yellow-600 text-white">Modifier</a>
+      <a href="{% url 'livraison:liste_livraisons_gestionnaire_bureau' %}" class="px-3 py-2 text-xs rounded bg-gray-600 text-white">Retour à la liste</a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="chart-card">
+      <h2 class="text-lg font-semibold mb-4">Informations</h2>
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between"><span class="text-gray-600">N° commande</span><span class="font-medium">{{ livraison.numero_commande }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-600">Type</span><span class="font-medium">{{ livraison.get_type_commande_display }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-600">Fournisseur</span><span class="font-medium">{{ livraison.fournisseur.nom|default:"-" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-600">Date prévue</span><span class="font-medium">{{ livraison.date_livraison_prevue|date:"d/m/Y" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-600">Date effective</span><span class="font-medium">{{ livraison.date_livraison_effective|date:"d/m/Y"|default:"-" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-600">Statut</span><span class="font-medium">{{ livraison.get_statut_livraison_display }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-600">Conforme</span><span class="font-medium">{% if livraison.conforme %}Oui{% else %}Non{% endif %}</span></div>
+        <div class="flex justify-between"><span class="text-gray-600">PV réception</span><span class="font-medium">{% if livraison.pv_reception_recu %}Oui{% else %}Non{% endif %}</span></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h2 class="text-lg font-semibold mb-4">Actions</h2>
+      <div class="space-y-2">
+        {% if livraison.statut_livraison != 'livree' %}
+        <a href="{% url 'livraison:marquer_livree_gestionnaire_bureau' livraison.pk %}" class="block w-full text-center px-3 py-2 text-xs rounded bg-green-600 text-white">Marquer comme livrée</a>
+        {% endif %}
+        {% if not livraison.pv_reception_recu %}
+        <a href="{% url 'livraison:valider_pv_reception_gestionnaire_bureau' livraison.pk %}" class="block w-full text-center px-3 py-2 text-xs rounded bg-purple-600 text-white">Valider PV réception</a>
+        {% endif %}
+        <a href="{% url 'livraison:supprimer_livraison_gestionnaire_bureau' livraison.pk %}" class="block w-full text-center px-3 py-2 text-xs rounded bg-red-600 text-white">Supprimer</a>
+      </div>
+
+      <!-- Traçabilité -->
+      <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-4">Traçabilité</h3>
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between">
+          <span class="text-gray-600">Créé par:</span>
+          <span class="font-medium">{{ livraison.cree_par.get_full_name|default:livraison.cree_par.username }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">Date création:</span>
+          <span class="font-medium">{{ livraison.date_creation|date:"d/m/Y H:i" }}</span>
+        </div>
+        {% if livraison.modifie_par %}
+        <div class="flex justify-between">
+          <span class="text-gray-600">Modifié par:</span>
+          <span class="font-medium">{{ livraison.modifie_par.get_full_name|default:livraison.modifie_par.username }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">Date modification:</span>
+          <span class="font-medium">{{ livraison.date_modification|date:"d/m/Y H:i" }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-card mt-4">
+    <h2 class="text-lg font-semibold mb-4">Matériels</h2>
+    {% if materiels %}
+    <div class="overflow-x-auto">
+      <table class="w-full table-auto text-sm">
+        <thead><tr><th class="px-2 py-2 text-left">Désignation</th><th class="px-2 py-2 text-left">Description</th><th class="px-2 py-2 text-left">Quantité</th><th class="px-2 py-2 text-left">Prix unitaire</th><th class="px-2 py-2 text-left">Total</th></tr></thead>
+        <tbody>
+          {% for materiel in materiels %}
+          <tr class="hover:bg-gray-50"><td class="px-2 py-2">{{ materiel.designation.nom }}</td><td class="px-2 py-2">{{ materiel.description.nom }}</td><td class="px-2 py-2">{{ materiel.quantite }}</td><td class="px-2 py-2">{{ materiel.prix_unitaire }} MAD</td><td class="px-2 py-2">{{ materiel.total }} MAD</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-gray-500">Aucun matériel</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

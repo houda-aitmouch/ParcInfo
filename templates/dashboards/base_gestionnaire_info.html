@@ -301,7 +301,7 @@
                         this.error = null;
                         try {
                             console.log('🔄 Chargement des notifications...');
-                            const url = '{% url "users:warranty_notifications_json" %}';
+                            const url = '{% url "users:notifications_garantie" %}';
                             console.log('📡 URL:', url);
                             
                             const response = await fetch(url);
@@ -314,8 +314,19 @@
                             const data = await response.json();
                             console.log('📊 Données reçues:', data);
                             
-                            this.notifications = data.notifications || [];
-                            this.notificationCount = data.count || 0;
+                            // Transformer les notifications pour l'affichage
+                            this.notifications = (data.notifications || []).map(notif => ({
+                                titre: `${notif.designation} - ${notif.description}`,
+                                description: `Code: ${notif.code_inventaire} | Fournisseur: ${notif.fournisseur}`,
+                                details: `Commande: ${notif.numero_commande} | Utilisateur: ${notif.utilisateur}`,
+                                jours_restants: `${notif.jours_restants} jours`,
+                                urgence: notif.urgence === 'critique' ? 'urgente' : 
+                                         notif.urgence === 'warning' ? 'attention' : 'info',
+                                timestamp: `Expire le ${notif.date_fin_garantie}`,
+                                type: notif.type
+                            }));
+                            
+                            this.notificationCount = this.notifications.length;
                             console.log('✅ Notifications chargées:', this.notifications);
                             console.log('🔢 Count:', this.notificationCount);
                         } catch (error) {
@@ -329,7 +340,7 @@
                             console.log('🏁 Chargement terminé. Count:', this.notificationCount);
                         }
                     }
-                }" x-init="loadNotifications()">
+                }" x-init="loadNotifications(); setInterval(loadNotifications, 5 * 60 * 1000);">
                     <button @click="notificationsOpen = !notificationsOpen" 
                             class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg relative transition-all duration-200"
                             title="Notifications de garantie">
@@ -707,8 +718,7 @@
         <!-- Contenu principal -->
         <main class="flex-1" :class="sidebarOpen ? 'ml-50' : 'ml-16'" style="transition: margin-left 0.3s ease; min-width: 0; width: calc(100vw - 200px);" x-bind:style="sidebarOpen ? 'width: calc(100vw - 200px);' : 'width: calc(100vw - 64px);'">
             <div class="p-2 w-full" :class="sidebarOpen ? 'p-3' : 'p-2'">
-                <!-- Notifications de Garantie -->
-                <div id="notifications-garantie" class="mb-4"></div>
+
                 
                 {% block content %}
                 {% endblock %}
@@ -717,115 +727,6 @@
     
     {% block extra_scripts %}{% endblock %}
     
-    <!-- Script pour les notifications de garantie -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            loadNotificationsGarantie();
-            
-            // Recharger les notifications toutes les 5 minutes
-            setInterval(loadNotificationsGarantie, 5 * 60 * 1000);
-        });
-        
-        function loadNotificationsGarantie() {
-            fetch('{% url "users:notifications_garantie" %}')
-                .then(response => response.json())
-                .then(data => {
-                    displayNotificationsGarantie(data.notifications);
-                })
-                .catch(error => {
-                    console.error('Erreur lors du chargement des notifications:', error);
-                });
-        }
-        
-        function displayNotificationsGarantie(notifications) {
-            const container = document.getElementById('notifications-garantie');
-            
-            if (!notifications || notifications.length === 0) {
-                container.innerHTML = '';
-                return;
-            }
-            
-            let html = '<div class="bg-white rounded-lg shadow-md p-4 mb-4">';
-            html += '<h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">';
-            html += '<svg class="w-5 h-5 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">';
-            html += '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>';
-            html += '</svg>';
-            html += `Alertes Garantie (${notifications.length})`;
-            html += '</h3>';
-            
-            // Grouper par urgence
-            const critiques = notifications.filter(n => n.urgence === 'critique');
-            const warnings = notifications.filter(n => n.urgence === 'warning');
-            const infos = notifications.filter(n => n.urgence === 'info');
-            
-            // Afficher les critiques en premier
-            if (critiques.length > 0) {
-                html += '<div class="mb-4">';
-                html += '<h4 class="font-medium text-red-700 mb-2">⚠️ Garanties expirant dans moins de 7 jours</h4>';
-                html += displayNotificationGroup(critiques);
-                html += '</div>';
-            }
-            
-            // Afficher les warnings
-            if (warnings.length > 0) {
-                html += '<div class="mb-4">';
-                html += '<h4 class="font-medium text-orange-700 mb-2">⚠️ Garanties expirant dans 8-15 jours</h4>';
-                html += displayNotificationGroup(warnings);
-                html += '</div>';
-            }
-            
-            // Afficher les infos
-            if (infos.length > 0) {
-                html += '<div class="mb-4">';
-                html += '<h4 class="font-medium text-blue-700 mb-2">ℹ️ Garanties expirant dans 16-30 jours</h4>';
-                html += displayNotificationGroup(infos);
-                html += '</div>';
-            }
-            
-            html += '</div>';
-            container.innerHTML = html;
-        }
-        
-        function displayNotificationGroup(notifications) {
-            let html = '<div class="space-y-2">';
-            
-            notifications.forEach(notification => {
-                const bgColor = notification.urgence === 'critique' ? 'bg-red-50 border-red-200' : 
-                               notification.urgence === 'warning' ? 'bg-orange-50 border-orange-200' : 
-                               'bg-blue-50 border-blue-200';
-                
-                const textColor = notification.urgence === 'critique' ? 'text-red-800' : 
-                                 notification.urgence === 'warning' ? 'text-orange-800' : 
-                                 'text-blue-800';
-                
-                html += `<div class="p-3 rounded-md border ${bgColor}">`;
-                html += `<div class="flex justify-between items-start">`;
-                html += `<div class="flex-1">`;
-                html += `<div class="font-medium ${textColor}">${notification.designation} - ${notification.description}</div>`;
-                html += `<div class="text-sm text-gray-600 mt-1">`;
-                html += `<span class="font-medium">Code:</span> ${notification.code_inventaire}`;
-                if (notification.numero_serie) {
-                    html += ` | <span class="font-medium">Série:</span> ${notification.numero_serie}`;
-                }
-                html += ` | <span class="font-medium">Fournisseur:</span> ${notification.fournisseur}`;
-                html += `</div>`;
-                html += `<div class="text-sm text-gray-600 mt-1">`;
-                html += `<span class="font-medium">Commande:</span> ${notification.numero_commande}`;
-                html += ` | <span class="font-medium">Utilisateur:</span> ${notification.utilisateur}`;
-                html += ` | <span class="font-medium">Statut:</span> ${notification.statut}`;
-                html += `</div>`;
-                html += `</div>`;
-                html += `<div class="ml-4 text-right">`;
-                html += `<div class="text-lg font-bold ${textColor}">${notification.jours_restants} jours</div>`;
-                html += `<div class="text-sm text-gray-500">Expire le ${notification.date_fin_garantie}</div>`;
-                html += `</div>`;
-                html += `</div>`;
-                html += `</div>`;
-            });
-            
-            html += '</div>';
-            return html;
-        }
-    </script>
+
 </body>
 </html>

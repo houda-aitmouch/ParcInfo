@@ -88,6 +88,44 @@ class RechercheLivraisonForm(forms.Form):
     )
 
 
+class RechercheLivraisonBureauForm(forms.Form):
+    """Formulaire de recherche de livraisons pour le gestionnaire bureau (sans type_commande)"""
+    
+    search = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Rechercher par numéro de commande, fournisseur...'
+        })
+    )
+    
+    statut_livraison = forms.ChoiceField(
+        choices=[('', 'Tous les statuts')] + Livraison.STATUT_LIVRAISON_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    conforme = forms.ChoiceField(
+        choices=[
+            ('', 'Toutes'),
+            ('True', 'Conformes'),
+            ('False', 'Non conformes')
+        ],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    pv_reception = forms.ChoiceField(
+        choices=[
+            ('', 'Tous'),
+            ('True', 'PV reçus'),
+            ('False', 'PV non reçus')
+        ],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+
 class NouvelleLivraisonForm(forms.Form):
     """Formulaire personnalisé pour créer une nouvelle livraison"""
     

@@ -1,14 +1,18 @@
-/* Variables CSS personnalisées */
+/* Variables CSS personnalisées - Thème ADD */
 :root {
-    --brand-blue: #3399FF;
-    --brand-purple: #8B5CF6;
+    --add-blue: #3399FF;
+    --add-purple: #8B5CF6;
+    --add-blue-light: #60a5fa;
+    --add-purple-light: #c084fc;
     --gray-50: #F9FAFB;
     --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
     --gray-300: #D1D5DB;
     --gray-400: #9CA3AF;
     --gray-500: #6B7280;
     --gray-600: #4B5563;
     --gray-700: #374151;
+    --gray-800: #1F2937;
     --gray-900: #111827;
     --red-400: #F87171;
     --red-500: #EF4444;
@@ -19,6 +23,7 @@
     --blue-50: #EFF6FF;
     --red-50: #FEF2F2;
     --green-50: #ECFDF5;
+    --purple-50: #FAF5FF;
 }
 
 /* Animations */
@@ -64,6 +69,32 @@
     to { transform: rotate(360deg); }
 }
 
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(51, 153, 255, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(51, 153, 255, 0.6);
+    }
+}
+
 /* Classes d'animation */
 .animate-fade-in {
     animation: fade-in 0.6s ease-out;
@@ -75,6 +106,14 @@
 
 .animate-spin-slow {
     animation: spin-slow 2s linear infinite;
+}
+
+.animate-bounce-in {
+    animation: bounceIn 0.6s ease-out;
+}
+
+.animate-glow {
+    animation: glow 2s ease-in-out infinite;
 }
 
 .error-fade-in {
@@ -119,14 +158,14 @@
 
 /* Lien mot de passe oublié */
 .forgot-password-link {
-    color: var(--brand-blue);
+    color: var(--add-blue);
     font-weight: 500;
     transition: color 0.2s ease-in-out;
     text-decoration: none;
 }
 
 .forgot-password-link:hover {
-    color: var(--brand-purple);
+    color: var(--add-purple);
 }
 
 /* Alertes */
@@ -151,7 +190,7 @@
 
 .alert-info {
     background-color: var(--blue-50);
-    border-color: var(--brand-blue);
+    border-color: var(--add-blue);
     color: var(--gray-700);
 }
 
@@ -170,14 +209,20 @@
 }
 
 .btn-primary {
-    background: linear-gradient(to right, var(--brand-blue), var(--brand-purple));
+    background: linear-gradient(135deg, var(--add-blue), var(--add-purple));
     color: white;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(to right, #2563EB, #7C3AED);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    background: linear-gradient(135deg, #2563EB, #7C3AED);
+    box-shadow: 0 20px 25px -5px rgba(51, 153, 255, 0.3), 0 10px 10px -5px rgba(139, 92, 246, 0.2);
     transform: scale(1.02);
+}
+
+.btn-primary:focus {
+    box-shadow: 0 0 0 3px rgba(51, 153, 255, 0.3);
 }
 
 .btn-primary:active {

@@ -5,3 +5,6 @@ class LivraisonConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'apps.livraison'
     verbose_name = 'Gestion des Livraisons'
+    
+    def ready(self):
+        import apps.livraison.signals

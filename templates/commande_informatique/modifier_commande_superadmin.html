@@ -1,0 +1,223 @@
+{% extends 'dashboards/base_superadmin.html' %}
+{% load static %}
+
+{% block title %}Modifier une commande IT - Super Admin{% endblock %}
+
+{% block content %}
+<div x-data="dataCommande()" x-init="init()" x-cloak>
+    <!-- En-tête avec breadcrumb -->
+    <div class="mb-8">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="{% url 'users:superadmin_dashboard' %}" class="text-gray-500 hover:text-blue-600 transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                        </svg>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <a href="{% url 'commandes_informatique:liste_commandes_superadmin' %}" class="ml-1 text-gray-500 hover:text-blue-600 transition-colors md:ml-2">Commandes IT</a>
+                    </div>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="ml-1 text-gray-900 font-medium md:ml-2">Modifier commande</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+        
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Modifier commande Informatique</h1>
+                <p class="text-lg text-gray-600">Modifiez les informations de la commande <span class="font-semibold text-blue-600">{{ commande.numero_commande }}</span></p>
+            </div>
+            <a href="{% url 'commandes_informatique:liste_commandes_superadmin' %}" 
+               class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-all duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Retour à la liste
+            </a>
+        </div>
+    </div>
+    <!-- Formulaire principal -->
+    <div class="max-w-4xl mx-auto">
+
+  <div class="chart-card">
+    <form method="post" x-ref="formDjango" class="space-y-6">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div><label class="block text-sm font-semibold mb-1">Mode de passation</label>{{ form.mode_passation }}</div>
+        <div><label class="block text-sm font-semibold mb-1">Numéro de commande</label>{{ form.numero_commande }}</div>
+        <div><label class="block text-sm font-semibold mb-1">Date de commande</label><input type="date" name="date_commande" class="w-full border rounded px-3 py-2" required value="{{ commande.date_commande|date:'Y-m-d' }}" /></div>
+        <div class="relative">
+          <label class="block text-sm font-semibold mb-1">Fournisseur</label>
+          <select name="fournisseur" x-model="fournisseurId" class="w-full border rounded px-3 py-2" x-ref="fournisseurSelect" required>
+            <option value="">-- Choisir --</option>
+            {% for f in fournisseurs %}
+              <option value="{{ f.id }}" {% if commande.fournisseur_id == f.id %}selected{% endif %}>{{ f.nom }}</option>
+            {% endfor %}
+          </select>
+          <button type="button" @click="showFournisseurModal = true" class="absolute right-2 top-8 text-green-600 font-bold px-2 rounded hover:bg-green-100" title="Ajouter un fournisseur">+</button>
+        </div>
+        <div><label class="block text-sm font-semibold mb-1">Date de réception</label><input type="date" name="date_reception" class="w-full border rounded px-3 py-2" required value="{{ commande.date_reception|date:'Y-m-d' }}" /></div>
+        <div><label class="block text-sm font-semibold mb-1">Numéro de facture</label><input type="text" name="numero_facture" class="w-full border rounded px-3 py-2" required value="{{ commande.numero_facture }}" /></div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Durée de garantie</label>
+          <div class="flex gap-2 items-end"><div>{{ form.duree_garantie_valeur }}</div><div>{{ form.duree_garantie_unite }}</div></div>
+        </div>
+      </div>
+
+      <template x-for="(ligne, index) in lignesCommande" :key="index">
+        <div class="border rounded p-4 bg-gray-50 relative">
+          <input type="hidden" :name="`lignes-${index}-id`" :value="ligne.id">
+          <button type="button" @click="supprimerLigne(index)" class="absolute top-2 right-2 text-red-600 font-bold" title="Supprimer">✕</button>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-semibold mb-1">Désignation</label>
+              <div class="relative">
+                <select :name="`lignes-${index}-designation`" x-model="ligne.designationId" @change="fetchDescriptions(index)" class="w-full border rounded px-3 py-2" required x-effect="$el.value = ligne.designationId;">
+                  <option value="">-- Choisir --</option>
+                  <template x-for="d in designations" :key="d.id">
+                    <option :value="'' + d.id" x-text="d.nom"></option>
+                  </template>
+                </select>
+                <button type="button" @click="showDesignationModal = true" class="absolute right-2 top-2 text-green-600 font-bold px-2 rounded hover:bg-green-100" title="Ajouter une désignation">+</button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">Description</label>
+              <div class="relative">
+                <select :name="`lignes-${index}-description`" x-model="ligne.descriptionId" class="w-full border rounded px-3 py-2" required :key="ligne.descriptionId + '-' + ligne.descriptions.length" x-effect="$el.value = ligne.descriptionId;">
+                  <option value="">-- Choisir --</option>
+                  <template x-for="desc in ligne.descriptions" :key="desc.id">
+                    <option :value="'' + desc.id" x-text="desc.nom"></option>
+                  </template>
+                </select>
+                <button type="button" @click="showDescriptionModal = true" class="absolute right-2 top-2 text-green-600 font-bold px-2 rounded hover:bg-green-100" title="Ajouter une description">+</button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">Quantité</label>
+              <input type="number" min="1" :name="`lignes-${index}-quantite`" x-model.number="ligne.quantite" class="w-full border rounded px-3 py-2" required>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Prix unitaire</label>
+            <input type="number" min="0" step="0.01" :name="`lignes-${index}-prix_unitaire`" x-model.number="ligne.prix_unitaire" class="w-full border rounded px-3 py-2" required>
+          </div>
+        </div>
+      </template>
+
+      <div class="flex items-center justify-between">
+        <button type="button" @click="ajouterLigne" class="inline-flex items-center px-3 py-2 text-xs font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700">Autre</button>
+        <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-emerald-600 hover:bg-emerald-700">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Modals: même logique que version standard -->
+  <div x-show="showFournisseurModal" x-cloak class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded shadow-lg w-96 max-h-[90vh] overflow-auto">
+      <h2 class="text-lg font-bold mb-4">Ajouter un fournisseur</h2>
+      <div class="space-y-4">
+        <div><label class="block font-semibold mb-1">Nom *</label><input type="text" x-model="newFournisseur.nom" class="w-full border px-3 py-2 rounded" required></div>
+        <div><label class="block font-semibold mb-1">Identifiant Fiscal (IF) *</label><input type="text" x-model="newFournisseur.if_fiscal" class="w-full border px-3 py-2 rounded" required></div>
+        <div><label class="block font-semibold mb-1">ICE</label><input type="text" x-model="newFournisseur.ice" class="w-full border px-3 py-2 rounded"></div>
+        <div><label class="block font-semibold mb-1">Registre Commerce (RC)</label><input type="text" x-model="newFournisseur.registre_commerce" class="w-full border px-3 py-2 rounded"></div>
+        <div><label class="block font-semibold mb-1">Adresse</label><textarea x-model="newFournisseur.adresse" class="w-full border px-3 py-2 rounded"></textarea></div>
+      </div>
+      <div class="text-right mt-6"><button type="button" @click="showFournisseurModal=false" class="mr-2 text-gray-600">Annuler</button><button type="button" @click="ajouterFournisseur" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Ajouter</button></div>
+    </div>
+  </div>
+
+  <div x-show="showDesignationModal" x-cloak class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded shadow-lg w-96">
+      <h2 class="text-lg font-bold mb-4">Nouvelle Désignation</h2>
+      <input type="text" x-model="newDesignation" class="w-full border px-3 py-2 rounded mb-4" placeholder="Nom désignation">
+      <div class="text-right"><button type="button" @click="showDesignationModal=false" class="mr-2 text-gray-600">Annuler</button><button type="button" @click="ajouterDesignation" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Ajouter</button></div>
+    </div>
+  </div>
+
+  <div x-show="showDescriptionModal" x-cloak class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded shadow-lg w-96 max-h-[90vh] overflow-auto">
+      <h2 class="text-lg font-bold mb-4">Nouvelle Description</h2>
+      <input type="text" x-model="newDescription" class="w-full border px-3 py-2 rounded mb-4" placeholder="Texte description">
+      <label class="block mb-2 font-semibold">Désignation liée</label>
+      <select x-model="designationForDescription" class="w-full border rounded px-3 py-2 mb-4" required>
+        <option value="">-- Choisir --</option>
+        <template x-for="d in designations" :key="d.id">
+          <option :value="'' + d.id" x-text="d.nom"></option>
+        </template>
+      </select>
+      <div class="text-right"><button type="button" @click="showDescriptionModal=false" class="mr-2 text-gray-600">Annuler</button><button type="button" @click="ajouterDescription" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Ajouter</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function dataCommande() {
+  return {
+    fournisseurId: '{{ commande.fournisseur_id }}',
+    newFournisseur: { nom:'', if_fiscal:'', ice:'', registre_commerce:'', adresse:'' },
+    showFournisseurModal: false,
+    designations: JSON.parse('{{ designations_json|escapejs }}'),
+    lignesCommande: (() => { try { const data = JSON.parse('{{ lignes_commande_json|escapejs }}'); return data.map(l=>({ ...l, id:l.id, designationId: l.designationId?String(l.designationId):'', descriptionId: l.descriptionId?String(l.descriptionId):'' })); } catch { return [{ designationId:'', descriptionId:'', descriptions:[], quantite:1, prix_unitaire:'' }]; } })(),
+    showDesignationModal: false,
+    newDesignation: '',
+    showDescriptionModal: false,
+    newDescription: '',
+    designationForDescription: '',
+    init() {
+      this.lignesCommande.forEach((ligne, index) => {
+        if (ligne.designationId) {
+          this.$nextTick(() => { const select = document.querySelector(`[name='lignes-${index}-designation']`); if (select) select.value = this.lignesCommande[index].designationId; });
+          fetch(`/commande-informatique/api/descriptions/${ligne.designationId}/`).then(r=>r.json()).then(data=>{
+            this.lignesCommande[index].descriptions = data;
+            if (data.some(desc => String(desc.id) === String(ligne.descriptionId))) { this.lignesCommande[index].descriptionId = String(ligne.descriptionId); }
+            else if (data.length > 0) { this.lignesCommande[index].descriptionId = String(data[0].id); }
+            else { this.lignesCommande[index].descriptionId = ''; }
+            this.$nextTick(() => { const select = document.querySelector(`[name='lignes-${index}-description']`); if (select) select.value = this.lignesCommande[index].descriptionId; });
+          });
+        }
+      });
+    },
+    fetchDescriptions(index) {
+      const ligne = this.lignesCommande[index];
+      if (!ligne.designationId) { ligne.descriptions = []; ligne.descriptionId = ''; return; }
+      fetch(`/commande-informatique/api/descriptions/${ligne.designationId}/`).then(r=>r.json()).then(data=>{ this.lignesCommande[index].descriptions = data; this.lignesCommande[index].descriptionId = ''; this.$nextTick(()=>{ const select=document.querySelector(`[name='lignes-${index}-description']`); if(select) select.value=''; }); });
+    },
+    ajouterLigne() { this.lignesCommande.push({ designationId:'', descriptionId:'', descriptions:[], quantite:1, prix_unitaire:'' }); },
+    supprimerLigne(index) { this.lignesCommande.splice(index,1); },
+    ajouterFournisseur() {
+      if (!this.newFournisseur.nom.trim() || !this.newFournisseur.if_fiscal.trim()) { alert("Le nom et l'IF sont obligatoires"); return; }
+      fetch('/commande-informatique/api/ajouter_fournisseur/', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-CSRFToken':'{{ csrf_token }}' }, body: JSON.stringify(this.newFournisseur) })
+        .then(r=>r.json()).then(data=>{ if (data.id){ const select = this.$refs.fournisseurSelect; const opt=document.createElement('option'); opt.value=data.id; opt.text=data.nom; opt.selected=true; select.appendChild(opt); this.fournisseurId=data.id; this.newFournisseur={ nom:'', if_fiscal:'', ice:'', registre_commerce:'', adresse:'' }; this.showFournisseurModal=false; } else { alert(data.error||'Erreur'); } });
+    },
+    ajouterDesignation() {
+      if (!this.newDesignation.trim()) { alert('Nom requis'); return; }
+      fetch('/commande-informatique/api/ajouter_designation/', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-CSRFToken':'{{ csrf_token }}' }, body: JSON.stringify({ nom: this.newDesignation.trim() }) })
+        .then(r=>r.json()).then(data=>{ if(data.id){ this.designations.push(data); this.newDesignation=''; this.showDesignationModal=false; } else { alert(data.error||'Erreur'); } });
+    },
+    ajouterDescription() {
+      if (!this.newDescription.trim() || !this.designationForDescription) { alert('Champs requis'); return; }
+      fetch('/commande-informatique/api/ajouter_description/', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-CSRFToken':'{{ csrf_token }}' }, body: JSON.stringify({ nom: this.newDescription.trim(), designation_id: this.designationForDescription }) })
+        .then(r=>r.json()).then(data=>{ if(data.id){ this.lignesCommande.forEach(l=>{ if(l.designationId==this.designationForDescription){ l.descriptions.push(data); } }); this.newDescription=''; this.showDescriptionModal=false; } else { alert(data.error||'Erreur'); } });
+    },
+  }
+}
+</script>
+{% endblock %}
+
+

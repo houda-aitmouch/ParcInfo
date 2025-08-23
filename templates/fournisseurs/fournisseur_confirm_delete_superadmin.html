@@ -1,0 +1,220 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" x-data="{ sidebarOpen: false }" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supprimer un fournisseur - Super Admin</title>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/parcinfo-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'react/assets/index.css' %}">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .dashboard-gradient-bg {
+            background: linear-gradient(120deg, #f0f4ff 0%, #e0e7ff 100%);
+        }
+        .sidebar-gradient {
+            background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+        }
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="dashboard-gradient-bg min-h-screen">
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 left-0 z-50 w-64 sidebar-gradient transform transition-transform duration-300 ease-in-out"
+         :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
+        <div class="flex items-center justify-between h-16 px-6 border-b border-gray-600">
+            <div class="flex items-center space-x-3">
+                <img src="{% static 'images/ADD.png' %}" alt="ADD Logo" class="h-8 w-auto">
+                <span class="text-white font-bold text-lg">ParcInfo</span>
+            </div>
+            <button @click="sidebarOpen = false" class="text-gray-300 hover:text-white lg:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <nav class="mt-6 px-4 space-y-2">
+            <a href="{% url 'users:superadmin_dashboard' %}" class="nav-link flex items-center px-4  py-3 text-gray-300 hover:text-white rounded-lg">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+                </svg>
+                Dashboard
+            </a>
+            
+            <a href="{% url 'fournisseurs:fournisseur_list' %}" class="nav-link flex items-center px-4 py-3 text-white bg-blue-600 rounded-lg">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                Fournisseurs
+            </a>
+            
+            <a href="{% url 'admin:index' %}" class="nav-link flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                </svg>
+                Utilisateurs
+            </a>
+            
+            <a href="{% url 'demande_equipement:liste_toutes_demandes' %}" class="nav-link flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Demandes
+            </a>
+            
+            <a href="{% url 'chatbot:chatbot-ui' %}" class="nav-link flex items-center px-4 py-3 text-gray-300 hover:text-white rounded-lg">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                Chatbot IA
+            </a>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-600">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                    <span class="text-white font-semibold text-sm">{{ user.username|first|upper }}</span>
+                </div>
+                <div>
+                    <p class="text-white text-sm font-medium">{{ user.get_full_name|default:user.username }}</p>
+                    <p class="text-gray-400 text-xs">Super Admin</p>
+                </div>
+            </div>
+            <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
+               class="mt-3 w-full flex items-center justify-center px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                Déconnexion
+            </a>
+        </div>
+    </div>
+
+    <!-- Overlay pour mobile -->
+    <div x-show="sidebarOpen" @click="sidebarOpen = false" 
+         class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"></div>
+
+    <!-- Contenu principal -->
+    <div class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center space-x-4">
+                    <button @click="sidebarOpen = true" class="text-gray-500 hover:text-gray-700 lg:hidden">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    <h1 class="text-2xl font-bold text-gray-900">Confirmer la suppression</h1>
+                </div>
+                <a href="{% url 'fournisseurs:fournisseur_list' %}" class="text-indigo-600 hover:text-indigo-700 font-medium transition">
+                    ← Retour à la liste
+                </a>
+            </div>
+        </header>
+
+        <!-- Contenu -->
+        <main class="p-6">
+            <div class="max-w-md mx-auto">
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                    <div class="px-8 py-6 border-b border-gray-200 bg-red-50">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <svg class="h-8 w-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h2 class="text-lg font-medium text-red-800">Attention !</h2>
+                                <p class="text-sm text-red-700 mt-1">Cette action est irréversible</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-8 text-center">
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                            <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </div>
+                        
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Supprimer le fournisseur</h3>
+                        <p class="text-gray-600 mb-6">
+                            Êtes-vous sûr de vouloir supprimer le fournisseur 
+                            <span class="font-semibold text-gray-900">{{ fournisseur.nom }}</span> ?
+                        </p>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                            <h4 class="text-sm font-medium text-gray-900 mb-2">Informations du fournisseur :</h4>
+                            <div class="text-sm text-gray-600 space-y-1">
+                                <p><span class="font-medium">Nom :</span> {{ fournisseur.nom }}</p>
+                                {% if fournisseur.if_fiscal %}
+                                    <p><span class="font-medium">IF Fiscal :</span> {{ fournisseur.if_fiscal }}</p>
+                                {% endif %}
+                                {% if fournisseur.ice %}
+                                    <p><span class="font-medium">ICE :</span> {{ fournisseur.ice }}</p>
+                                {% endif %}
+                                {% if fournisseur.registre_commerce %}
+                                    <p><span class="font-medium">RC :</span> {{ fournisseur.registre_commerce }}</p>
+                                {% endif %}
+                                {% if fournisseur.adresse %}
+                                    <p><span class="font-medium">Adresse :</span> {{ fournisseur.adresse }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-yellow-700">
+                                        <strong>Attention :</strong> Cette action supprimera définitivement le fournisseur et toutes ses données associées.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form method="post" class="space-y-4">
+                            {% csrf_token %}
+                            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                <button type="submit" 
+                                        class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 shadow-lg hover:shadow-xl">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                    Confirmer la suppression
+                                </button>
+                                <a href="{% url 'fournisseurs:fournisseur_list' %}" 
+                                   class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                    </svg>
+                                    Annuler
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+        {% csrf_token %}
+    </form>
+</body>
+</html>

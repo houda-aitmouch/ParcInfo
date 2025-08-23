@@ -10,58 +10,100 @@ from .forms import FournisseurForm
 
 
 def is_gestionnaire_ou_superadmin(user):
-    return user.groups.filter(name__in=['Gestionnaire Informatique', 'Super Admin', 'Gestionnaire Bureau']).exists()
+    return user.groups.filter(name__in=['Gestionnaire Informatique', 'Super Admin', 'Gestionnaire Bureau']).exists() or user.is_superuser
+
+
+def _use_superadmin_layout(user) -> bool:
+    """Return True if the user should see the superadmin layout."""
+    if not user or not user.is_authenticated:
+        return False
+    # Superuser or explicit Super Admin group or Gestionnaire Informatique group or Gestionnaire Bureau group
+    return bool(user.is_superuser or user.groups.filter(name__in=['Super Admin', 'Gestionnaire Informatique', 'Gestionnaire Bureau']).exists())
 
 
 @user_passes_test(is_gestionnaire_ou_superadmin)
 def fournisseur_list(request):
-    fournisseurs = Fournisseur.objects.all()  # récupère tous les fournisseurs
-    total = fournisseurs.count()               # compte le nombre total
-    return render(request, 'fournisseurs/fournisseur_list.html', {
+    fournisseurs = Fournisseur.objects.all().order_by('nom')
+    total = fournisseurs.count()
+    
+    # Choisir le template selon le rôle
+    if _use_superadmin_layout(request.user):
+        if request.user.groups.filter(name='Gestionnaire Informatique').exists():
+            template_name = 'fournisseurs/fournisseur_list_gestionnaire_info.html'
+        elif request.user.groups.filter(name='Gestionnaire Bureau').exists():
+            template_name = 'fournisseurs/fournisseur_list_gestionnaire_bureau_superadmin.html'
+        else:
+            template_name = 'fournisseurs/fournisseur_list_superadmin.html'
+    else:
+        template_name = 'fournisseurs/fournisseur_list.html'
+    
+    return render(request, template_name, {
         'fournisseurs': fournisseurs,
         'total': total,
     })
-@user_passes_test(is_gestionnaire_ou_superadmin)
-def fournisseur_create(request):
-    if request.method == 'POST':
-        form = FournisseurForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Fournisseur ajouté avec succès.")
-            return redirect('fournisseurs:fournisseur_list')
-    else:
-        form = FournisseurForm()
-    return render(request, 'fournisseurs/fournisseur_form.html', {
-        'form': form,
-        'title': 'Ajouter un fournisseur'
-    })
+
+
+
 
 
 @user_passes_test(is_gestionnaire_ou_superadmin)
-def fournisseur_update(request, pk):
-    fournisseur = get_object_or_404(Fournisseur, pk=pk)
+def fournisseur_form(request, pk=None):
+    fournisseur = None
+    if pk:
+        fournisseur = get_object_or_404(Fournisseur, pk=pk)
+    
     if request.method == 'POST':
         form = FournisseurForm(request.POST, instance=fournisseur)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Fournisseur mis à jour avec succès.")
+            fournisseur = form.save()
+            messages.success(request, "Fournisseur ajouté avec succès." if not pk else "Fournisseur modifié avec succès.")
             return redirect('fournisseurs:fournisseur_list')
     else:
-        form = FournisseurForm(instance=fournisseur)
-    return render(request, 'fournisseurs/fournisseur_form.html', {
+        # Vérifier si on modifie un fournisseur existant
+        if pk:
+            form = FournisseurForm(instance=fournisseur)
+        else:
+            form = FournisseurForm()
+    
+    # Choisir le template selon le rôle
+    if _use_superadmin_layout(request.user):
+        if request.user.groups.filter(name='Gestionnaire Informatique').exists():
+            template_name = 'fournisseurs/fournisseur_form_gestionnaire_info.html'
+        elif request.user.groups.filter(name='Gestionnaire Bureau').exists():
+            template_name = 'fournisseurs/fournisseur_form_gestionnaire_bureau_superadmin.html'
+        else:
+            template_name = 'fournisseurs/fournisseur_form_superadmin.html'
+    else:
+        template_name = 'fournisseurs/fournisseur_form.html'
+    
+    return render(request, template_name, {
         'form': form,
-        'title': 'Modifier le fournisseur'
+        'fournisseur': fournisseur,
     })
 
 
 @user_passes_test(is_gestionnaire_ou_superadmin)
-def fournisseur_delete(request, pk):
+def fournisseur_confirm_delete(request, pk):
     fournisseur = get_object_or_404(Fournisseur, pk=pk)
     if request.method == 'POST':
         fournisseur.delete()
         messages.success(request, "Fournisseur supprimé avec succès.")
         return redirect('fournisseurs:fournisseur_list')
-    return render(request, 'fournisseurs/fournisseur_confirm_delete.html', {'fournisseur': fournisseur})
+    
+    # Choisir le template selon le rôle
+    if _use_superadmin_layout(request.user):
+        if request.user.groups.filter(name='Gestionnaire Informatique').exists():
+            template_name = 'fournisseurs/fournisseur_confirm_delete_gestionnaire_info.html'
+        elif request.user.groups.filter(name='Gestionnaire Bureau').exists():
+            template_name = 'fournisseurs/fournisseur_confirm_delete_gestionnaire_bureau_superadmin.html'
+        else:
+            template_name = 'fournisseurs/fournisseur_confirm_delete_superadmin.html'
+    else:
+        template_name = 'fournisseurs/fournisseur_confirm_delete.html'
+    
+    return render(request, template_name, {
+        'fournisseur': fournisseur
+    })
 
 
 @user_passes_test(is_gestionnaire_ou_superadmin)
@@ -99,59 +141,42 @@ def exporter_fournisseurs_excel(request):
             bottom=Side(style='thin', color='B0C4DE'),
         )
         cell.border = thin_border
-    ws.row_dimensions[header_row].height = 22
+        ws.column_dimensions[get_column_letter(col_num)].width = 20
 
-    # --- Corps du tableau ---
-    fill_even = PatternFill("solid", fgColor="F7FAFC")  # blanc cassé très clair
-    fill_odd = PatternFill("solid", fgColor="FFFFFF")   # blanc pur
-    content_font = Font(name='Calibri', size=11, color='2C3E50')  # gris foncé
-    thin_border = Border(
-        left=Side(style='thin', color='D1D9E6'),
-        right=Side(style='thin', color='D1D9E6'),
-        top=Side(style='thin', color='D1D9E6'),
-        bottom=Side(style='thin', color='D1D9E6'),
-    )
-
-    for i, fournisseur in enumerate(fournisseurs, start=header_row + 1):
-        fill = fill_even if i % 2 == 0 else fill_odd
-        row_values = [
-            fournisseur.nom or '',
-            fournisseur.if_fiscal or '',
-            fournisseur.ice or '',
-            fournisseur.registre_commerce or '',
-            fournisseur.adresse or '',
-        ]
-        for col_num, value in enumerate(row_values, 1):
-            cell = ws.cell(row=i, column=col_num, value=value)
-            cell.font = content_font
-            cell.fill = fill
-            # Alignement colonne
-            if col_num == 1 or col_num == 5:  # Texte à gauche (Nom, Adresse)
-                cell.alignment = Alignment(horizontal='left', vertical='top', wrap_text=True)
-            else:  # Numéros centrés
-                cell.alignment = Alignment(horizontal='center', vertical='top')
+    # --- Données ---
+    data_row = header_row + 1
+    for fournisseur in fournisseurs:
+        ws.cell(row=data_row, column=1, value=fournisseur.nom)
+        ws.cell(row=data_row, column=2, value=fournisseur.if_fiscal or '')
+        ws.cell(row=data_row, column=3, value=fournisseur.ice or '')
+        ws.cell(row=data_row, column=4, value=fournisseur.registre_commerce or '')
+        ws.cell(row=data_row, column=5, value=fournisseur.adresse or '')
+        
+        # Appliquer les bordures aux cellules de données
+        for col_num in range(1, 6):
+            cell = ws.cell(row=data_row, column=col_num)
             cell.border = thin_border
-        ws.row_dimensions[i].height = 18
+            cell.alignment = Alignment(horizontal="left", vertical="center")
+        
+        data_row += 1
 
-    # --- Ligne résumé ---
-    summary_row = ws.max_row + 1
-    ws.merge_cells(start_row=summary_row, start_column=1, end_row=summary_row, end_column=5)
-    summary_cell = ws.cell(row=summary_row, column=1)
-    summary_cell.value = f"Nombre total de fournisseurs : {total}"
-    summary_cell.font = Font(name='Calibri', size=12, italic=True, color='4A4A4A')
-    summary_cell.alignment = Alignment(horizontal='right', vertical='center')
-    summary_cell.fill = PatternFill("solid", fgColor="E2E8F0")  # Gris clair
-    ws.row_dimensions[summary_row].height = 20
+    # --- Total en bas ---
+    total_row = data_row + 1
+    ws.merge_cells(f'A{total_row}:D{total_row}')
+    total_cell = ws[f'A{total_row}']
+    total_cell.value = f"Total : {total} fournisseurs"
+    total_cell.font = Font(name='Segoe UI', size=12, bold=True, color='2C3E50')
+    total_cell.alignment = Alignment(horizontal="right", vertical="center")
+    total_cell.fill = PatternFill("solid", fgColor="E8F4FD")  # Bleu très clair
 
-    # --- Ajustement largeur colonnes ---
-    for col_num, _ in enumerate(headers, 1):
-        col_letter = get_column_letter(col_num)
-        max_length = max(
-            (len(str(ws.cell(row=row, column=col_num).value or "")) for row in range(1, ws.max_row + 1)),
-            default=10
-        )
-        adjusted_width = min(max(max_length + 5, 15), 60)  # min 15, max 60 pour confort lecture
-        ws.column_dimensions[col_letter].width = adjusted_width
+    # --- Réponse HTTP ---
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="fournisseurs_{total}.xlsx"'
+    
+    wb.save(response)
+    return response
 
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -159,3 +184,6 @@ def exporter_fournisseurs_excel(request):
     response['Content-Disposition'] = 'attachment; filename=liste_fournisseurs.xlsx'
     wb.save(response)
     return response
+
+# ============================================================================
+# VUES GESTIONNAIRE BUREAU (mêmes fonctionnalités, templates dédiés)

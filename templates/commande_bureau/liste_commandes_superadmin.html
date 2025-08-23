@@ -1,0 +1,303 @@
+{% extends 'dashboards/base_superadmin.html' %}
+{% load static %}
+
+{% block title %}Liste des commandes Bureau - Super Admin{% endblock %}
+
+{% block content %}
+<div x-data="{ search: '' }">
+    <!-- En-tête -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Gestion des Commandes Bureau</h1>
+        <p class="text-lg text-gray-600">
+            Gérez vos commandes bureautiques - 
+            <span class="font-semibold text-blue-600">{{ commandes|length }} commande{{ commandes|length|pluralize }}</span> enregistrée{{ commandes|length|pluralize }}
+        </p>
+    </div>
+    <!-- Barre d'actions -->
+    <div class="chart-card mb-8">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div class="flex flex-wrap gap-3">
+                <a href="{% url 'commandes_bureau:ajouter_commande_superadmin' %}"
+                   class="inline-flex items-center px-3 py-2 text-xs font-medium rounded-lg text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm hover:shadow-md transition-all duration-200">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+          Nouvelle commande
+        </a>
+                
+                <a href="{% url 'commandes_bureau:export_excel' %}"
+                   class="inline-flex items-center px-3 py-2 text-xs font-medium rounded-lg text-white bg-orange-600 hover:bg-orange-700 shadow-sm hover:shadow-md transition-all duration-200">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+          Export Excel
+        </a>
+      </div>
+            
+            <div class="relative w-full lg:w-auto">
+                <input type="search" placeholder="Rechercher une commande..."
+                       class="w-full lg:w-80 border border-gray-200 rounded-lg px-4 py-3 pl-10 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200"
+                       x-model="search" />
+                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau -->
+  <div class="chart-card animate-slide-up">
+    <div class="overflow-x-auto">
+      <table class="w-full table-auto" style="min-width: 1200px;">
+        <thead>
+          <tr class="border-b-2 border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
+            <th class="px-3 py-4 text-left text-xs font-bold text-gray-800 uppercase tracking-wider w-[140px]">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Commande
+                </div>
+            </th>
+            <th class="px-2 py-4 text-left text-xs font-bold text-gray-800 uppercase tracking-wider w-[100px]">Numéro</th>
+            <th class="px-2 py-4 text-left text-xs font-bold text-gray-800 uppercase tracking-wider w-[120px]">Fournisseur</th>
+            <th class="px-2 py-4 text-left text-xs font-bold text-gray-800 uppercase tracking-wider w-[90px]">Date Cmd</th>
+            <th class="px-2 py-4 text-left text-xs font-bold text-gray-800 uppercase tracking-wider w-[90px]">Réception</th>
+            <th class="px-2 py-4 text-left text-xs font-bold text-gray-800 uppercase tracking-wider w-[80px]">Facture</th>
+            <th class="px-2 py-4 text-left text-xs font-bold text-gray-800 uppercase tracking-wider w-[80px]">Garantie</th>
+            <th class="px-2 py-4 text-left text-xs font-bold text-gray-800 uppercase tracking-wider w-[150px]">Désignation</th>
+            <th class="px-2 py-4 text-left text-xs font-bold text-gray-800 uppercase tracking-wider w-[150px]">Description</th>
+            <th class="px-2 py-4 text-center text-xs font-bold text-gray-800 uppercase tracking-wider w-[60px]">Qté</th>
+            <th class="px-2 py-4 text-right text-xs font-bold text-gray-800 uppercase tracking-wider w-[80px]">Prix</th>
+            <th class="px-2 py-4 text-center text-xs font-bold text-gray-800 uppercase tracking-wider w-[120px]">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for commande in commandes %}
+            {% with lignes=commande.lignes.all %}
+            {% with ligne_count=lignes.count %}
+              {% if ligne_count > 0 %}
+                {% for ligne in lignes %}
+                  <tr x-show="('{{ commande.numero_commande|escapejs }} {{ commande.fournisseur.nom|escapejs }} {{ commande.mode_passation|escapejs }} {{ commande.numero_facture|escapejs }} {% for ligne in commande.lignes.all %}{{ ligne.designation.nom|escapejs }} {{ ligne.description.nom|escapejs }} {% endfor %}'.toLowerCase().includes(search.toLowerCase())) || search === ''"
+                      class="hover:bg-gray-50 transition-colors duration-200">
+                    {% if forloop.first %}
+                      <td class="px-3 py-4 align-top" rowspan="{{ ligne_count }}">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mr-3 shadow-md">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm font-bold text-gray-900 truncate" title="{{ commande.mode_passation }}">{{ commande.mode_passation }}</div>
+                            </div>
+                        </div>
+                      </td>
+                      <td class="px-2 py-4 align-top" rowspan="{{ ligne_count }}">
+                        <div class="bg-blue-50 px-2 py-1 rounded text-center">
+                            <span class="text-xs text-blue-800 font-mono font-semibold">{{ commande.numero_commande }}</span>
+                        </div>
+                      </td>
+                      <td class="px-2 py-4 align-top" rowspan="{{ ligne_count }}">
+                        <div class="text-sm font-medium text-gray-900 truncate" title="{{ commande.fournisseur.nom }}">{{ commande.fournisseur.nom }}</div>
+                      </td>
+                      <td class="px-2 py-4 align-top" rowspan="{{ ligne_count }}">
+                        <div class="text-xs text-gray-700">
+                            {% if commande.date_commande %}
+                                <div class="flex items-center">
+                                    <svg class="w-3 h-3 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    {{ commande.date_commande|date:'d/m/Y' }}
+                                </div>
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </div>
+                      </td>
+                      <td class="px-2 py-4 align-top" rowspan="{{ ligne_count }}">
+                        <div class="text-xs text-gray-700">
+                            {% if commande.date_reception %}
+                                <div class="flex items-center">
+                                    <svg class="w-3 h-3 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    {{ commande.date_reception|date:'d/m/Y' }}
+                                </div>
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </div>
+                      </td>
+                      <td class="px-2 py-4 align-top" rowspan="{{ ligne_count }}">
+                        <div class="bg-orange-50 px-2 py-1 rounded text-center">
+                            <span class="text-xs text-orange-800 font-mono font-semibold">{{ commande.numero_facture|default:"-" }}</span>
+                        </div>
+                      </td>
+                      <td class="px-2 py-4 align-top" rowspan="{{ ligne_count }}">
+                        <div class="text-xs text-gray-700">
+                            {% if commande.duree_garantie_valeur %}
+                                <div class="flex items-center">
+                                    <svg class="w-3 h-3 mr-1 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                    </svg>
+                                    {{ commande.duree_garantie_valeur }} {{ commande.get_duree_garantie_unite_display }}
+                                </div>
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </div>
+                      </td>
+                    {% endif %}
+                    <td class="px-2 py-4">
+                      <div class="text-sm font-medium text-gray-900 truncate" title="{{ ligne.designation.nom }}">{{ ligne.designation.nom }}</div>
+                    </td>
+                    <td class="px-2 py-4">
+                      <div class="text-sm text-gray-700 truncate" title="{{ ligne.description.nom }}">{{ ligne.description.nom }}</div>
+                    </td>
+                    <td class="px-2 py-4 text-center">
+                      <div class="bg-yellow-50 px-2 py-1 rounded text-center">
+                        <span class="text-xs text-yellow-800 font-semibold">{{ ligne.quantite }}</span>
+                      </div>
+                    </td>
+                    <td class="px-2 py-4 text-right">
+                      <div class="bg-green-50 px-2 py-1 rounded text-center">
+                        <span class="text-xs text-green-800 font-semibold">{{ ligne.prix_unitaire|floatformat:'2' }} DH</span>
+                      </div>
+                    </td>
+                    {% if forloop.first %}
+                      <td class="px-3 py-4 text-center align-top" rowspan="{{ ligne_count }}">
+                        <div class="flex flex-col gap-2 items-center">
+                          <a href="{% url 'commandes_bureau:modifier_commande_superadmin' commande.id %}"
+                             class="inline-flex items-center px-3 py-2 text-xs font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow-md transition-all duration-200">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Modifier
+                          </a>
+                          <form method="post" action="{% url 'commandes_bureau:supprimer_commande' commande.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="inline-flex items-center px-3 py-2 text-xs font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 shadow-sm hover:shadow-md transition-all duration-200" onclick="return confirm('Supprimer cette commande ?');">
+                              <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                              </svg>
+                              Supprimer
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    {% endif %}
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 transition-all duration-200 border-l-4 border-transparent hover:border-purple-300">
+                  <td class="px-3 py-4">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                      {{ commande.mode_passation }}
+                    </span>
+                  </td>
+                  <td class="px-3 py-4">
+                    <div class="font-semibold text-gray-900">{{ commande.numero_commande }}</div>
+                  </td>
+                  <td class="px-3 py-4">
+                    <div class="flex items-center gap-2">
+                      <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                      </div>
+                      <div class="font-medium text-gray-900">{{ commande.fournisseur.nom }}</div>
+                    </div>
+                  </td>
+                  <td class="px-3 py-4">
+                    {% if commande.date_commande %}
+                      <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0V6a2 2 0 012-2h4a2 2 0 012 2v1m-6 0h8m-9 0v10a2 2 0 002 2h8a2 2 0 002-2V7H7z"/>
+                        </svg>
+                        <span class="text-sm text-gray-700">{{ commande.date_commande|date:"d/m/Y" }}</span>
+                      </div>
+                    {% else %}
+                      <span class="text-gray-400">-</span>
+                    {% endif %}
+                  </td>
+                  <td class="px-3 py-4">
+                    {% if commande.date_reception %}
+                      <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        <span class="text-sm text-gray-700">{{ commande.date_reception|date:"d/m/Y" }}</span>
+                      </div>
+                    {% else %}
+                      <span class="text-gray-400">-</span>
+                    {% endif %}
+                  </td>
+                  <td class="px-3 py-4">
+                    {% if commande.numero_facture %}
+                      <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
+                        {{ commande.numero_facture }}
+                      </span>
+                    {% else %}
+                      <span class="text-gray-400">-</span>
+                    {% endif %}
+                  </td>
+                  <td class="px-3 py-4">
+                    <div class="flex items-center gap-2">
+                      <svg class="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      <span class="text-sm font-medium text-gray-700">{{ commande.duree_garantie_valeur }} {{ commande.get_duree_garantie_unite_display }}</span>
+                    </div>
+                  </td>
+                  <td colspan="4" class="px-3 py-4 text-center">
+                    <div class="flex items-center justify-center gap-2 text-gray-500 italic">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                      </svg>
+                      <span>Aucune ligne de commande</span>
+                    </div>
+                  </td>
+                  <td class="px-3 py-4 text-center">
+                    <a href="{% url 'commandes_bureau:modifier_commande_superadmin' commande.id %}" class="inline-flex items-center px-3 py-2 text-xs font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
+                      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                      </svg>
+                      Modifier
+                    </a>
+                  </td>
+                </tr>
+              {% endif %}
+            {% endwith %}
+            {% endwith %}
+          {% empty %}
+            <tr>
+              <td colspan="12" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center gap-4">
+                  <div class="w-16 h-16 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                  </div>
+                  <div class="text-center">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune commande bureau trouvée</h3>
+                    <p class="text-gray-500 mb-4">Commencez par créer votre première commande de matériel bureautique.</p>
+                    <a href="{% url 'commandes_bureau:ajouter_commande_superadmin' %}" class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                      </svg>
+                      Créer une commande
+                    </a>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

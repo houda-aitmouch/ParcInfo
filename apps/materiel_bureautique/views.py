@@ -13,6 +13,12 @@ from django.contrib.auth.decorators import login_required
 def is_gestionnaire_ou_superadmin(user):
     return user.groups.filter(name__in=['Gestionnaire Bureau', 'Super Admin']).exists()
 
+def is_gestionnaire_bureau(user):
+    return user.groups.filter(name='Gestionnaire Bureau').exists()
+
+def is_superadmin(user):
+    return user.is_superuser
+
 
 def liste_materiels(request):
     if not is_gestionnaire_ou_superadmin(request.user):
@@ -215,4 +221,419 @@ def export_materiels_excel(request):
 @login_required
 def mes_equipements_bureautiques(request):
     equipements = MaterielBureau.objects.filter(utilisateur=request.user, statut='affecte')
-    return render(request, 'materiel_bureautique/mes_equipements_bureautiques.html', {'equipements': equipements})
+    
+    # Déterminer le template de base selon le rôle de l'utilisateur
+    user = request.user
+    if user.is_superuser:
+        base_template = 'dashboards/base_superadmin.html'
+    elif user.groups.filter(name='Gestionnaire Informatique').exists():
+        base_template = 'dashboards/base_gestionnaire_info.html'
+    elif user.groups.filter(name='Gestionnaire Bureau').exists():
+        base_template = 'dashboards/base_gestionnaire_bureau.html'
+    elif user.groups.filter(name='Employés').exists():
+        base_template = 'dashboards/base_employe.html'
+    else:
+        base_template = 'dashboards/base_employe.html'  # Par défaut pour les utilisateurs sans groupe
+    
+    context = {
+        'equipements': equipements,
+        'base_template': base_template
+    }
+    return render(request, 'materiel_bureautique/mes_equipements_bureautiques.html', context)
+
+# ============================================================================
+# VUES SUPERADMIN
+# ============================================================================
+
+def is_superadmin(user):
+    """Vérifie si l'utilisateur est super admin"""
+    return user.groups.filter(name='Super Admin').exists()
+
+def is_gestionnaire_info(user):
+    """Vérifie si l'utilisateur est gestionnaire info"""
+    return user.groups.filter(name='Gestionnaire Informatique').exists()
+
+def liste_materiels_superadmin(request):
+    """Vue superadmin pour la liste des équipements bureautiques"""
+    if not is_superadmin(request.user):
+        raise PermissionDenied
+    
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+    
+    # Récupération des équipements avec pagination
+    materiels_list = MaterielBureau.objects.all().select_related(
+        'ligne_commande__designation',
+        'ligne_commande__description', 
+        'ligne_commande__commande__fournisseur',
+        'utilisateur'
+    ).order_by('-id')
+    
+    # Recherche
+    search_query = request.GET.get('search', '')
+    if search_query:
+        materiels_list = materiels_list.filter(
+            Q(numero_serie__icontains=search_query) |
+            Q(code_inventaire__icontains=search_query) |
+            Q(ligne_commande__designation__nom__icontains=search_query) |
+            Q(ligne_commande__description__nom__icontains=search_query) |
+            Q(ligne_commande__commande__fournisseur__nom__icontains=search_query) |
+            Q(ligne_commande__commande__numero_facture__icontains=search_query) |
+            Q(statut__icontains=search_query) |
+            Q(utilisateur__username__icontains=search_query) |
+            Q(utilisateur__first_name__icontains=search_query) |
+            Q(utilisateur__last_name__icontains=search_query)
+        )
+    
+    # Filtrage par statut
+    status_filter = request.GET.get('status', '')
+    if status_filter and status_filter != 'all':
+        materiels_list = materiels_list.filter(statut=status_filter)
+    
+    # Pagination
+    paginator = Paginator(materiels_list, 20)  # 20 équipements par page
+    page_number = request.GET.get('page')
+    materiels = paginator.get_page(page_number)
+    
+    context = {
+        'materiels': materiels,
+        'total': paginator.count,
+        'search_query': search_query,
+        'status_filter': status_filter,
+    }
+    
+    return render(request, 'materiel_bureautique/liste_materiels_superadmin.html', context)
+
+def liste_materiels_gestionnaire_info(request):
+    """Vue gestionnaire info pour la liste des équipements bureautiques"""
+    if not (is_gestionnaire_info(request.user) or is_superadmin(request.user)):
+        raise PermissionDenied
+    
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+    
+    # Récupération des équipements avec pagination
+    materiels_list = MaterielBureau.objects.all().select_related(
+        'ligne_commande__designation',
+        'ligne_commande__description', 
+        'ligne_commande__commande__fournisseur',
+        'utilisateur'
+    ).order_by('-id')
+    
+    # Recherche
+    search_query = request.GET.get('search', '')
+    if search_query:
+        materiels_list = materiels_list.filter(
+            Q(numero_serie__icontains=search_query) |
+            Q(code_inventaire__icontains=search_query) |
+            Q(ligne_commande__designation__nom__icontains=search_query) |
+            Q(ligne_commande__description__nom__icontains=search_query) |
+            Q(ligne_commande__commande__fournisseur__nom__icontains=search_query) |
+            Q(ligne_commande__commande__numero_facture__icontains=search_query) |
+            Q(statut__icontains=search_query) |
+            Q(utilisateur__username__icontains=search_query) |
+            Q(utilisateur__first_name__icontains=search_query) |
+            Q(utilisateur__last_name__icontains=search_query)
+        )
+    
+    # Filtrage par statut
+    status_filter = request.GET.get('status', '')
+    if status_filter and status_filter != 'all':
+        materiels_list = materiels_list.filter(statut=status_filter)
+    
+    # Pagination
+    paginator = Paginator(materiels_list, 20)  # 20 équipements par page
+    page_number = request.GET.get('page')
+    materiels = paginator.get_page(page_number)
+    
+    context = {
+        'materiels': materiels,
+        'total': paginator.count,
+        'search_query': search_query,
+        'status_filter': status_filter,
+    }
+    
+    return render(request, 'materiel_bureautique/liste_materiels_gestionnaire_info.html', context)
+
+def liste_materiels_gestionnaire_bureau(request):
+    """Vue gestionnaire bureau pour la liste des équipements bureautiques"""
+    if not (is_gestionnaire_bureau(request.user) or is_superadmin(request.user)):
+        raise PermissionDenied
+    
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+    
+    # Récupération des équipements avec pagination
+    materiels_list = MaterielBureau.objects.all().select_related(
+        'ligne_commande__designation',
+        'ligne_commande__description', 
+        'ligne_commande__commande__fournisseur',
+        'utilisateur'
+    ).order_by('-id')
+    
+    # Recherche
+    search_query = request.GET.get('search', '')
+    if search_query:
+        materiels_list = materiels_list.filter(
+            Q(numero_serie__icontains=search_query) |
+            Q(code_inventaire__icontains=search_query) |
+            Q(ligne_commande__designation__nom__icontains=search_query) |
+            Q(ligne_commande__description__nom__icontains=search_query) |
+            Q(ligne_commande__commande__fournisseur__nom__icontains=search_query) |
+            Q(ligne_commande__commande__numero_facture__icontains=search_query) |
+            Q(statut__icontains=search_query) |
+            Q(utilisateur__username__icontains=search_query) |
+            Q(utilisateur__first_name__icontains=search_query) |
+            Q(utilisateur__last_name__icontains=search_query)
+        )
+    
+    # Filtrage par statut
+    status_filter = request.GET.get('status', '')
+    if status_filter and status_filter != 'all':
+        materiels_list = materiels_list.filter(statut=status_filter)
+    
+    # Pagination
+    paginator = Paginator(materiels_list, 20)  # 20 équipements par page
+    page_number = request.GET.get('page')
+    materiels = paginator.get_page(page_number)
+    
+    context = {
+        'materiels': materiels,
+        'total': paginator.count,
+        'search_query': search_query,
+        'status_filter': status_filter,
+    }
+    
+    return render(request, 'materiel_bureautique/liste_materiels_gestionnaire_bureau.html', context)
+
+def ajouter_materiel_gestionnaire_bureau(request):
+    """Vue gestionnaire bureau pour ajouter un équipement bureautique"""
+    if not (is_gestionnaire_bureau(request.user) or is_superadmin(request.user)):
+        raise PermissionDenied
+    
+    if request.method == 'POST':
+        form = MaterielBureauForm(request.POST)
+        if form.is_valid():
+            # Récupérer la ligne de commande depuis les champs cachés
+            designation_id = request.POST.get('designation')
+            description_id = request.POST.get('description')
+            
+            if designation_id and description_id:
+                try:
+                    ligne_commande = LigneCommandeBureau.objects.get(
+                        designation_id=designation_id,
+                        description_id=description_id,
+                        commande=form.cleaned_data['commande']
+                    )
+                    
+                    # Compter le nombre de matériels existants pour cette ligne
+                    materiels_existants = MaterielBureau.objects.filter(ligne_commande=ligne_commande).count()
+                    
+                    # Vérifier si on peut encore ajouter des matériels
+                    if materiels_existants >= ligne_commande.quantite:
+                        form.add_error(None, f"Impossible d'ajouter plus de matériels. Quantité commandée: {ligne_commande.quantite}, Matériels existants: {materiels_existants}")
+                        return render(request, 'materiel_bureautique/ajouter_materiel_gestionnaire_bureau.html', {'form': form})
+                    
+                    # Créer le matériel avec la ligne de commande trouvée
+                    materiel = form.save(commit=False)
+                    materiel.ligne_commande = ligne_commande
+                    materiel.save()
+                    return redirect('materiel_bureautique:liste_materiels_gestionnaire_bureau')
+                    
+                except LigneCommandeBureau.DoesNotExist:
+                    form.add_error(None, "Ligne de commande introuvable")
+                    return render(request, 'materiel_bureautique/ajouter_materiel_gestionnaire_bureau.html', {'form': form})
+            else:
+                form.add_error(None, "Veuillez sélectionner une désignation et une description")
+                return render(request, 'materiel_bureautique/ajouter_materiel_gestionnaire_bureau.html', {'form': form})
+    else:
+        form = MaterielBureauForm()
+    
+    context = {
+        'form': form,
+        'is_edit': False,
+    }
+    
+    return render(request, 'materiel_bureautique/ajouter_materiel_gestionnaire_bureau.html', context)
+
+def modifier_materiel_gestionnaire_bureau(request, pk):
+    """Vue gestionnaire bureau pour modifier un équipement bureautique"""
+    if not (is_gestionnaire_bureau(request.user) or is_superadmin(request.user)):
+        raise PermissionDenied
+    
+    materiel = get_object_or_404(MaterielBureau, pk=pk)
+    
+    if request.method == 'POST':
+        form = MaterielBureauForm(request.POST, instance=materiel)
+        if form.is_valid():
+            materiel = form.save()
+            return redirect('materiel_bureautique:liste_materiels_gestionnaire_bureau')
+    else:
+        form = MaterielBureauForm(instance=materiel)
+    
+    context = {
+        'form': form,
+        'materiel': materiel,
+        'is_edit': True,
+    }
+    
+    return render(request, 'materiel_bureautique/modifier_materiel_gestionnaire_bureau.html', context)
+
+def confirmer_suppression_gestionnaire_bureau(request, pk):
+    """Vue gestionnaire bureau pour confirmer la suppression d'un équipement bureautique"""
+    if not (is_gestionnaire_bureau(request.user) or is_superadmin(request.user)):
+        raise PermissionDenied
+    
+    materiel = get_object_or_404(MaterielBureau, pk=pk)
+    
+    if request.method == 'POST':
+        materiel.delete()
+        return redirect('materiel_bureautique:liste_materiels_gestionnaire_bureau')
+    
+    context = {
+        'materiel': materiel,
+    }
+    
+    return render(request, 'materiel_bureautique/confirmer_suppression_gestionnaire_bureau.html', context)
+
+def ajouter_materiel_superadmin(request):
+    """Vue superadmin pour ajouter un équipement bureautique"""
+    if not is_superadmin(request.user):
+        raise PermissionDenied
+    
+    if request.method == 'POST':
+        form = MaterielBureauForm(request.POST)
+        if form.is_valid():
+            materiel = form.save()
+            return redirect('materiel_bureautique:liste_materiels_superadmin')
+    else:
+        form = MaterielBureauForm()
+    
+    context = {
+        'form': form,
+        'is_edit': False,
+    }
+    
+    return render(request, 'materiel_bureautique/ajouter_materiel_superadmin.html', context)
+
+def modifier_materiel_superadmin(request, pk):
+    """Vue superadmin pour modifier un équipement bureautique"""
+    if not is_superadmin(request.user):
+        raise PermissionDenied
+    
+    materiel = get_object_or_404(MaterielBureau, pk=pk)
+    
+    if request.method == 'POST':
+        form = MaterielBureauForm(request.POST, instance=materiel)
+        if form.is_valid():
+            materiel = form.save()
+            return redirect('materiel_bureautique:liste_materiels_superadmin')
+    else:
+        form = MaterielBureauForm(instance=materiel)
+    
+    context = {
+        'form': form,
+        'materiel': materiel,
+        'is_edit': True,
+    }
+    
+    return render(request, 'materiel_bureautique/modifier_materiel_superadmin.html', context)
+
+def confirmer_suppression_superadmin(request, pk):
+    """Vue superadmin pour confirmer la suppression d'un équipement bureautique"""
+    if not is_superadmin(request.user):
+        raise PermissionDenied
+    
+    materiel = get_object_or_404(MaterielBureau, pk=pk)
+    
+    if request.method == 'POST':
+        materiel.delete()
+        return redirect('materiel_bureautique:liste_materiels_superadmin')
+    
+    context = {
+        'materiel': materiel,
+    }
+    
+    return render(request, 'materiel_bureautique/confirmer_suppression_superadmin.html', context)
+
+def export_materiels_excel_superadmin(request):
+    """Vue superadmin pour exporter les équipements bureautiques en Excel"""
+    if not is_superadmin(request.user):
+        raise PermissionDenied
+    
+    materiels = MaterielBureau.objects.all().select_related(
+        'ligne_commande__designation',
+        'ligne_commande__description', 
+        'ligne_commande__commande__fournisseur',
+        'utilisateur'
+    ).order_by('-id')
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Équipements Bureautiques"
+
+    # En-tête
+    headers = [
+        "Commande", "Code inventaire", "Désignation", "Description", "Prix unitaire",
+        "Fournisseur", "N° Facture", "Date service", "Date fin garantie", "Statut", "Utilisateur",
+        "Lieu stockage", "Observation"
+    ]
+    ws.append(headers)
+
+    # Styles
+    header_fill = PatternFill(start_color="4F46E5", end_color="4F46E5", fill_type="solid")
+    header_font = Font(color="FFFFFF", bold=True)
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+    
+    for col_num, column_title in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+        cell.border = thin_border
+
+    # Lignes
+    for idx, materiel in enumerate(materiels, start=2):
+        ws.append([
+            getattr(materiel.ligne_commande.commande, 'numero_commande', ''),
+            materiel.code_inventaire,
+            getattr(materiel.ligne_commande.designation, 'nom', ''),
+            getattr(materiel.ligne_commande.description, 'nom', ''),
+            materiel.ligne_commande.prix_unitaire,
+            getattr(materiel.ligne_commande.commande.fournisseur, 'nom', ''),
+            getattr(materiel.ligne_commande.commande, 'numero_facture', ''),
+            materiel.date_service_calculee.strftime('%d/%m/%Y') if materiel.date_service_calculee else '',
+            materiel.date_fin_garantie_calculee.strftime('%d/%m/%Y') if materiel.date_fin_garantie_calculee else '',
+            dict(materiel._meta.get_field('statut').choices).get(materiel.statut, materiel.statut),
+            str(materiel.utilisateur) if materiel.utilisateur else '',
+            dict(materiel._meta.get_field('lieu_stockage').choices).get(materiel.lieu_stockage, materiel.lieu_stockage),
+            materiel.observation,
+        ])
+        
+        # Alternance de couleur de ligne
+        if idx % 2 == 0:
+            for col in range(1, len(headers) + 1):
+                cell = ws.cell(row=idx, column=col)
+                cell.fill = PatternFill(start_color="F8F9FA", end_color="F8F9FA", fill_type="solid")
+                cell.border = thin_border
+
+    # Ajuste la largeur des colonnes
+    for column in ws.columns:
+        max_length = 0
+        column_letter = get_column_letter(column[0].column)
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = min(max_length + 2, 50)
+        ws.column_dimensions[column_letter].width = adjusted_width
+
+    # Réponse HTTP
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="materiels_bureautiques_superadmin.xlsx"'
+    wb.save(response)
+    return response

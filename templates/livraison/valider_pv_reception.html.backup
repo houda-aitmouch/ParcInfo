@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valider PV réception - Gestion des Livraisons</title>  <link rel="stylesheet" href="{% static 'css/parcinfo-ui.css' %}">
+  <link rel="stylesheet" href="{% static 'react/assets/index.css' %}">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto">
+            <!-- Header -->
+            <div class="mb-8 text-center">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Valider PV réception</h1>
+                <p class="text-gray-600">Confirmer que le PV de réception a été validé et signé</p>
+            </div>
+
+            <!-- Informations de la livraison -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Numéro de commande:</span>
+                        <span class="font-semibold">{{ livraison.numero_commande }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Type:</span>
+                        <span class="font-semibold">{{ livraison.get_type_commande_display }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Statut:</span>
+                        <span class="font-semibold">{{ livraison.get_statut_livraison_display }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Conforme:</span>
+                        <span class="font-semibold">
+                            {% if livraison.conforme %}
+                                <span class="text-green-600">✓ Oui</span>
+                            {% else %}
+                                <span class="text-red-600">✗ Non</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">PV reçu:</span>
+                        <span class="font-semibold">
+                            {% if livraison.pv_reception_recu %}
+                                <span class="text-green-600">✓ Oui</span>
+                            {% else %}
+                                <span class="text-red-600">✗ Non</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boutons -->
+            <div class="flex gap-4">
+                <form method="post" class="flex-1">
+                    {% csrf_token %}
+                    <button type="submit" 
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Valider PV réception
+                    </button>
+                </form>
+                
+                <a href="{% url 'livraison:detail_livraison' livraison.pk %}" 
+                   class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-200 text-center">
+                    Annuler
+                </a>
+            </div>
+        </div>
+    </div></body>
+</html> 

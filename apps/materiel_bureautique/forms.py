@@ -13,14 +13,13 @@ class MaterielBureauForm(forms.ModelForm):
             'statut', 'lieu_stockage', 'observation'
         ]
         widgets = {
-            'code_inventaire': forms.TextInput(attrs={'class': 'w-full border rounded px-3 py-2'}),
-            'commande': forms.Select(attrs={'class': 'w-full border rounded px-3 py-2'}),
-            'ligne_commande': forms.Select(attrs={'class': 'w-full border rounded px-3 py-2'}),
-            'utilisateur': forms.Select(attrs={'class': 'w-full border rounded px-3 py-2'}),
-            'statut': forms.Select(attrs={'class': 'w-full border rounded px-3 py-2'}),
-            'lieu_stockage': forms.Select(attrs={'class': 'w-full border rounded px-3 py-2'}),
-            'observation': forms.
-            Textarea(attrs={'class': 'w-full border rounded px-3 py-2', 'rows': 3}),
+            'code_inventaire': forms.TextInput(attrs={'class': 'w-full border-2 border-gray-300 rounded-xl px-5 py-4 bg-white focus:outline-none focus:ring-3 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 text-gray-900 font-medium shadow-sm hover:shadow-md'}),
+            'commande': forms.Select(attrs={'class': 'w-full border-2 border-gray-300 rounded-xl px-5 py-4 bg-white focus:outline-none focus:ring-3 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 text-gray-900 font-medium shadow-sm hover:shadow-md'}),
+            'ligne_commande': forms.Select(attrs={'class': 'w-full border-2 border-gray-300 rounded-xl px-5 py-4 bg-white focus:outline-none focus:ring-3 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 text-gray-900 font-medium shadow-sm hover:shadow-md'}),
+            'utilisateur': forms.Select(attrs={'class': 'w-full border-2 border-gray-300 rounded-xl px-5 py-4 bg-white focus:outline-none focus:ring-3 focus:ring-green-500/30 focus:border-green-500 transition-all duration-300 text-gray-900 font-medium shadow-sm hover:shadow-md'}),
+            'statut': forms.Select(attrs={'class': 'w-full border-2 border-gray-300 rounded-xl px-5 py-4 bg-white focus:outline-none focus:ring-3 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all duration-300 text-gray-900 font-medium shadow-sm hover:shadow-md'}),
+            'lieu_stockage': forms.Select(attrs={'class': 'w-full border-2 border-gray-300 rounded-xl px-5 py-4 bg-white focus:outline-none focus:ring-3 focus:ring-purple-500/30 focus:border-purple-500 transition-all duration-300 text-gray-900 font-medium shadow-sm hover:shadow-md'}),
+            'observation': forms.Textarea(attrs={'class': 'w-full border-2 border-gray-300 rounded-xl px-5 py-4 bg-white focus:outline-none focus:ring-3 focus:ring-teal-500/30 focus:border-teal-500 transition-all duration-300 text-gray-900 font-medium shadow-sm hover:shadow-md min-h-[100px] resize-y', 'rows': 4}),
         }
 
     def __init__(self, *args, **kwargs):

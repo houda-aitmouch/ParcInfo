@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ page_title|default:'ParcInfo' }}{% endblock %}</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="{% static 'css/parcinfo-ui.css' %}">
+  <link rel="stylesheet" href="{% static 'react/assets/index.css' %}">
+</head>
+<body class="h-full pi-new bg-background text-foreground">
+  <div class="min-h-screen grid grid-cols-[240px_1fr] grid-rows-[56px_1fr]">
+    <aside class="col-start-1 row-span-2 bg-[var(--sidebar)] text-[var(--sidebar-foreground)] border-r border-[var(--sidebar-border)] p-4">
+      <div class="text-lg font-semibold mb-6">ParcInfo</div>
+      <nav class="space-y-2 text-sm">
+        <a href="/" class="block px-3 py-2 rounded hover:bg-[var(--sidebar-accent)]">Dashboard</a>
+        <a href="/commande-informatique/" class="block px-3 py-2 rounded hover:bg-[var(--sidebar-accent)]">Commandes IT</a>
+        <a href="/commande-bureau/" class="block px-3 py-2 rounded hover:bg-[var(--sidebar-accent)]">Commandes Bureau</a>
+        <a href="/materiels/" class="block px-3 py-2 rounded hover:bg-[var(--sidebar-accent)]">Matériels IT</a>
+        <a href="/materiels-bureau/" class="block px-3 py-2 rounded hover:bg-[var(--sidebar-accent)]">Matériels Bureau</a>
+        <a href="/livraisons/" class="block px-3 py-2 rounded hover:bg-[var(--sidebar-accent)]">Livraisons</a>
+        <a href="/demandes/" class="block px-3 py-2 rounded hover:bg-[var(--sidebar-accent)]">Demandes d'équipement</a>
+        <a href="/fournisseurs/" class="block px-3 py-2 rounded hover:bg-[var(--sidebar-accent)]">Fournisseurs</a>
+      </nav>
+    </aside>
+
+    <header class="col-start-2 row-start-1 flex items-center justify-between px-6 border-b border-[var(--border)] bg-[var(--card)]">
+      <div class="text-sm text-[var(--muted-foreground)]">Nouvelle interface (aperçu)</div>
+      <div class="flex items-center gap-3">
+        <a class="text-sm hover:underline" href="/accounts/login/">Se connecter</a>
+      </div>
+    </header>
+
+    <main class="col-start-2 row-start-2 p-6">
+      {% block content %}{% endblock %}
+    </main>
+  </div></body>
+</html>

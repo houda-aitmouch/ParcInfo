@@ -1,0 +1,298 @@
+/* ===================================
+   SYSTÈME D'ICÔNES MODERNE - PARCINFO
+   ===================================
+   
+   Système unifié basé sur Lucide Icons
+   Design moderne, cohérent et performant
+   
+   Auteur: Assistant IA
+   Date: 2025-08-21
+   ================================== */
+
+/* Import Lucide Icons */
+@import url('https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.css');
+
+/* Variables CSS pour les icônes */
+:root {
+  /* Tailles d'icônes */
+  --icon-xs: 12px;
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+  --icon-xl: 32px;
+  --icon-2xl: 48px;
+  
+  /* Couleurs d'icônes */
+  --icon-primary: #3b82f6;
+  --icon-secondary: #6b7280;
+  --icon-success: #10b981;
+  --icon-warning: #f59e0b;
+  --icon-danger: #ef4444;
+  --icon-info: #06b6d4;
+  --icon-light: #f8fafc;
+  --icon-dark: #1f2937;
+  
+  /* Couleurs contextuelles */
+  --icon-sidebar: #4b5563;
+  --icon-sidebar-active: #ffffff;
+  --icon-kpi: #3b82f6;
+  --icon-action: #6366f1;
+  --icon-status-online: #10b981;
+  --icon-status-offline: #6b7280;
+}
+
+/* Classes de base pour les icônes */
+.icon {
+  display: inline-block;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  vertical-align: middle;
+  transition: all 0.2s ease;
+}
+
+/* Tailles d'icônes */
+.icon-xs { width: var(--icon-xs); height: var(--icon-xs); }
+.icon-sm { width: var(--icon-sm); height: var(--icon-sm); }
+.icon-md { width: var(--icon-md); height: var(--icon-md); }
+.icon-lg { width: var(--icon-lg); height: var(--icon-lg); }
+.icon-xl { width: var(--icon-xl); height: var(--icon-xl); }
+.icon-2xl { width: var(--icon-2xl); height: var(--icon-2xl); }
+
+/* Couleurs d'icônes */
+.icon-primary { color: var(--icon-primary); }
+.icon-secondary { color: var(--icon-secondary); }
+.icon-success { color: var(--icon-success); }
+.icon-warning { color: var(--icon-warning); }
+.icon-danger { color: var(--icon-danger); }
+.icon-info { color: var(--icon-info); }
+.icon-light { color: var(--icon-light); }
+.icon-dark { color: var(--icon-dark); }
+
+/* Icônes avec fond coloré */
+.icon-bg {
+  padding: 8px;
+  border-radius: 8px;
+  background-color: var(--icon-primary);
+  color: white;
+}
+
+.icon-bg-rounded {
+  padding: 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--icon-primary) 0%, #8b5cf6 100%);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Icônes de navigation sidebar */
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--icon-sidebar);
+  transition: all 0.2s ease;
+}
+
+.nav-link-active .sidebar-icon {
+  color: var(--icon-sidebar-active);
+  transform: scale(1.1);
+}
+
+.nav-link:hover .sidebar-icon {
+  color: var(--icon-primary);
+  transform: scale(1.1);
+}
+
+/* Icônes KPI */
+.kpi-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #dbeafe 0%, #e9d5ff 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.kpi-icon .icon {
+  width: 24px;
+  height: 24px;
+  color: var(--icon-kpi);
+}
+
+/* Icônes d'action */
+.action-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--icon-action);
+  transition: all 0.2s ease;
+}
+
+.action-icon:hover {
+  color: var(--icon-primary);
+  transform: scale(1.1);
+}
+
+/* Icônes de statut */
+.status-icon-online {
+  color: var(--icon-status-online);
+  animation: pulse 2s infinite;
+}
+
+.status-icon-offline {
+  color: var(--icon-status-offline);
+}
+
+/* Icônes avec animations */
+.icon-spin {
+  animation: spin 1s linear infinite;
+}
+
+.icon-pulse {
+  animation: pulse 2s infinite;
+}
+
+.icon-bounce {
+  animation: bounce 1s infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
+  40%, 43% { transform: translateY(-8px); }
+  70% { transform: translateY(-4px); }
+  90% { transform: translateY(-2px); }
+}
+
+/* Icônes dans les boutons */
+.btn .icon {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+}
+
+.btn-sm .icon {
+  margin-right: 4px;
+  width: 14px;
+  height: 14px;
+}
+
+.btn-lg .icon {
+  margin-right: 12px;
+  width: 20px;
+  height: 20px;
+}
+
+/* Icônes dans les notifications */
+.notification-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.notification-success .notification-icon { color: var(--icon-success); }
+.notification-warning .notification-icon { color: var(--icon-warning); }
+.notification-danger .notification-icon { color: var(--icon-danger); }
+.notification-info .notification-icon { color: var(--icon-info); }
+
+/* Icônes dans les tableaux */
+.table-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--icon-secondary);
+}
+
+/* Icônes dans les formulaires */
+.form-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--icon-secondary);
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Icônes dans les cartes */
+.card-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--icon-primary);
+  margin-right: 8px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .icon-responsive {
+    width: var(--icon-sm);
+    height: var(--icon-sm);
+  }
+  
+  .kpi-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .kpi-icon .icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Mode sombre */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --icon-secondary: #9ca3af;
+    --icon-sidebar: #9ca3af;
+    --icon-dark: #f9fafb;
+  }
+}
+
+/* Utilitaires pour les développeurs */
+.icon-debug {
+  outline: 1px solid red;
+  background: rgba(255, 0, 0, 0.1);
+}
+
+/* Classes d'aide pour l'accessibilité */
+.icon[aria-hidden="true"] {
+  pointer-events: none;
+}
+
+.icon-clickable {
+  cursor: pointer;
+}
+
+.icon-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Optimisations de performance */
+.icon-container {
+  contain: layout style;
+  will-change: transform;
+}
+
+/* Préchargement des icônes critiques */
+.preload-icons {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  visibility: hidden;
+}

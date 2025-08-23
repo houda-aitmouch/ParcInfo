@@ -1,0 +1,306 @@
+{% extends 'dashboards/base_gestionnaire_info.html' %}
+{% load static %}
+
+{% block title %}Ajouter une commande IT - Gestionnaire Informatique{% endblock %}
+
+{% block content %}
+<div x-data="dataCommande()" x-cloak>
+    <!-- En-tête avec breadcrumb -->
+    <div class="mb-8">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="{% url 'users:gestionnaire_info_dashboard' %}" class="text-gray-500 hover:text-blue-600 transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                        </svg>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <a href="{% url 'commandes_informatique:liste_commandes_gestionnaire_bureau' %}" class="ml-1 text-gray-500 hover:text-blue-600 transition-colors md:ml-2">Commandes IT</a>
+                    </div>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="ml-1 text-gray-900 font-medium md:ml-2">Nouvelle commande</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+        
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Nouvelle commande Informatique</h1>
+                <p class="text-lg text-gray-600">Créez une nouvelle commande de matériel informatique</p>
+            </div>
+            <a href="{% url 'commandes_informatique:liste_commandes_gestionnaire_bureau' %}" 
+               class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-all duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Retour à la liste
+            </a>
+        </div>
+    </div>
+    <!-- Formulaire principal -->
+    <div class="max-w-4xl mx-auto">
+
+  <div class="chart-card">
+    <form method="post" @submit.prevent="$refs.formDjango.submit()" x-ref="formDjango" class="space-y-6">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-semibold mb-1">Mode de passation</label>
+          {{ form.mode_passation }}
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Numéro de commande</label>
+          {{ form.numero_commande }}
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Date de commande</label>
+          <input type="date" name="date_commande" class="w-full border rounded px-3 py-2" required>
+        </div>
+        <div class="relative">
+          <label class="block text-sm font-semibold mb-1">Fournisseur</label>
+          <select name="fournisseur" x-model="fournisseurId" class="w-full border rounded px-3 py-2" x-ref="fournisseurSelect" required>
+            <option value="">-- Choisir --</option>
+            {% for f in fournisseurs %}
+              <option value="{{ f.id }}">{{ f.nom }}</option>
+            {% endfor %}
+          </select>
+          <button type="button" @click="showFournisseurModal = true" class="absolute right-2 top-8 text-green-600 font-bold px-2 rounded hover:bg-green-100" title="Ajouter un fournisseur">+</button>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Date de réception</label>
+          <input type="date" name="date_reception" class="w-full border rounded px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Numéro de facture</label>
+          <input type="text" name="numero_facture" class="w-full border rounded px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Durée de garantie</label>
+          <div class="flex gap-2 items-end">
+            <div>{{ form.duree_garantie_valeur }}</div>
+            <div>{{ form.duree_garantie_unite }}</div>
+          </div>
+        </div>
+      </div>
+
+      <template x-for="(ligne, index) in lignesCommande" :key="index">
+        <div class="border rounded-lg p-4 bg-gray-50">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-lg font-semibold text-gray-900">Ligne <span x-text="index + 1"></span></h3>
+            <button type="button" @click="removeLigne(index)" class="text-red-600 hover:text-red-800">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold mb-1">Désignation</label>
+              <select :name="`lignes-${index}-designation`" x-model="ligne.designationId" @change="updateDescriptions(index)" class="w-full border rounded px-3 py-2" required>
+                <option value="">-- Choisir --</option>
+                <template x-for="designation in designations" :key="designation.id">
+                  <option :value="designation.id" x-text="designation.nom"></option>
+                </template>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-semibold mb-1">Description</label>
+              <select :name="`lignes-${index}-description`" x-model="ligne.descriptionId" class="w-full border rounded px-3 py-2" required>
+                <option value="">-- Choisir --</option>
+                <template x-for="description in ligne.descriptions" :key="description.id">
+                  <option :value="description.id" x-text="description.nom"></option>
+                </template>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-semibold mb-1">Quantité</label>
+              <input type="number" :name="`lignes-${index}-quantite`" x-model="ligne.quantite" min="1" class="w-full border rounded px-3 py-2" required>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-semibold mb-1">Prix unitaire (DH)</label>
+              <input type="number" :name="`lignes-${index}-prix_unitaire`" x-model="ligne.prix_unitaire" min="0" step="0.01" class="w-full border rounded px-3 py-2" required>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <div class="flex justify-center">
+        <button type="button" @click="addLigne" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Ajouter une ligne
+        </button>
+      </div>
+
+      <div class="flex justify-end space-x-3">
+        <a href="{% url 'commandes_informatique:liste_commandes_gestionnaire_bureau' %}" 
+           class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          Annuler
+        </a>
+        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+          Créer la commande
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal pour ajouter un fournisseur -->
+<div x-show="showFournisseurModal" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+    <h3 class="text-lg font-semibold mb-4">Ajouter un fournisseur</h3>
+    
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold mb-1">Nom</label>
+        <input type="text" x-model="newFournisseur.nom" class="w-full border rounded px-3 py-2" required>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-semibold mb-1">Identifiant Fiscal</label>
+        <input type="text" x-model="newFournisseur.if_fiscal" class="w-full border rounded px-3 py-2" required>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-semibold mb-1">ICE</label>
+        <input type="text" x-model="newFournisseur.ice" class="w-full border rounded px-3 py-2">
+      </div>
+      
+      <div>
+        <label class="block text-sm font-semibold mb-1">Registre de commerce</label>
+        <input type="text" x-model="newFournisseur.registre_commerce" class="w-full border rounded px-3 py-2">
+      </div>
+      
+      <div>
+        <label class="block text-sm font-semibold mb-1">Adresse</label>
+        <textarea x-model="newFournisseur.adresse" class="w-full border rounded px-3 py-2" rows="3"></textarea>
+      </div>
+    </div>
+    
+    <div class="flex justify-end space-x-3 mt-6">
+      <button type="button" @click="showFournisseurModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        Annuler
+      </button>
+      <button type="button" @click="addFournisseur" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors">
+        Ajouter
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function dataCommande() {
+  return {
+    fournisseurId: '',
+    lignesCommande: [],
+    designations: {{ designations_json|safe }},
+    showFournisseurModal: false,
+    newFournisseur: {
+      nom: '',
+      if_fiscal: '',
+      ice: '',
+      registre_commerce: '',
+      adresse: ''
+    },
+    
+    init() {
+      this.addLigne();
+    },
+    
+    addLigne() {
+      this.lignesCommande.push({
+        designationId: '',
+        descriptionId: '',
+        quantite: 1,
+        prix_unitaire: 0,
+        descriptions: []
+      });
+    },
+    
+    removeLigne(index) {
+      this.lignesCommande.splice(index, 1);
+    },
+    
+    updateDescriptions(index) {
+      const ligne = this.lignesCommande[index];
+      const designation = this.designations.find(d => d.id == ligne.designationId);
+      
+      if (designation) {
+        // Simuler la récupération des descriptions (à adapter selon votre modèle)
+        ligne.descriptions = [
+          { id: 1, nom: 'Description 1' },
+          { id: 2, nom: 'Description 2' }
+        ];
+      } else {
+        ligne.descriptions = [];
+      }
+      
+      ligne.descriptionId = '';
+    },
+    
+    async addFournisseur() {
+      try {
+        const response = await fetch('{% url "commandes_informatique:ajouter_fournisseur" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+          },
+          body: JSON.stringify(this.newFournisseur)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Ajouter le nouveau fournisseur à la liste
+          const option = document.createElement('option');
+          option.value = data.id;
+          option.textContent = data.nom;
+          this.$refs.fournisseurSelect.appendChild(option);
+          
+          // Sélectionner le nouveau fournisseur
+          this.fournisseurId = data.id;
+          
+          // Fermer le modal et réinitialiser le formulaire
+          this.showFournisseurModal = false;
+          this.newFournisseur = {
+            nom: '',
+            if_fiscal: '',
+            ice: '',
+            registre_commerce: '',
+            adresse: ''
+          };
+          
+          // Afficher un message de succès
+          alert('Fournisseur ajouté avec succès !');
+        } else {
+          alert('Erreur: ' + data.error);
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de l\'ajout du fournisseur');
+      }
+    }
+  }
+}
+</script>
+{% endblock %}

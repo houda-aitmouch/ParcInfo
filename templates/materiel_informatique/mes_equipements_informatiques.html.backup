@@ -1,0 +1,40 @@
+{% extends 'dashboards/base_superadmin.html' %}
+{% load static %}
+
+{% block title %}Mes équipements informatiques{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl">
+  <h1 class="text-2xl font-bold text-gray-900 mb-4">Mes équipements informatiques</h1>
+  {% if equipements and equipements|length > 0 %}
+  <div class="chart-card p-0">
+    <div class="overflow-x-auto">
+      <table class="min-w-full table-auto text-sm">
+        <thead class="bg-gradient-to-r from-gray-50 to-blue-50">
+          <tr>
+            <th class="px-4 py-3 text-left font-semibold text-gray-700">Désignation</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-700">Description</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-700">Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for eq in equipements %}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3 font-medium text-gray-900">{{ eq.ligne_commande.designation.nom|default:"-" }}</td>
+            <td class="px-4 py-3 text-gray-600">{{ eq.ligne_commande.description.nom|default:"-" }}</td>
+            <td class="px-4 py-3">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white">
+                {{ eq.get_statut_display|default:eq.statut }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="chart-card text-gray-500">Aucun équipement informatique affecté.</div>
+  {% endif %}
+</div>
+{% endblock %}

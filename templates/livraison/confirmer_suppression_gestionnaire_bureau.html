@@ -1,0 +1,165 @@
+{% extends 'dashboards/base_gestionnaire_bureau.html' %}
+{% load static %}
+
+{% block title %}Confirmer Suppression - Gestionnaire Bureau{% endblock %}
+{% block header_title %}Confirmer la Suppression{% endblock %}
+
+{% block content %}
+<!-- En-tête de la page -->
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Confirmer la Suppression</h1>
+    <p class="text-gray-600">Êtes-vous sûr de vouloir supprimer cette livraison ?</p>
+</div>
+
+<!-- Carte de confirmation -->
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <!-- Icône d'avertissement -->
+        <div class="flex justify-center mb-6">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+            </div>
+        </div>
+        
+        <!-- Message d'avertissement -->
+        <div class="text-center mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-2">Attention !</h2>
+            <p class="text-gray-600">Cette action est irréversible. La livraison sera définitivement supprimée.</p>
+        </div>
+        
+        <!-- Détails de la livraison -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">Détails de la livraison à supprimer :</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <span class="font-medium text-gray-700">Numéro de commande :</span>
+                    <p class="text-gray-900">{{ livraison.numero_commande }}</p>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Type de commande :</span>
+                    <p class="text-gray-900">{{ livraison.get_type_commande_display }}</p>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Statut :</span>
+                    <p class="text-gray-900">{{ livraison.get_statut_livraison_display }}</p>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Date de création :</span>
+                    <p class="text-gray-900">{{ livraison.date_creation|date:"d/m/Y" }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Formulaire de confirmation -->
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            
+            <!-- Champ de confirmation -->
+            <div>
+                <label for="confirmation" class="block text-sm font-medium text-gray-700 mb-2">
+                    Tapez "SUPPRIMER" pour confirmer
+                </label>
+                <input type="text" name="confirmation" id="confirmation" required 
+                       placeholder="SUPPRIMER"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                       pattern="SUPPRIMER"
+                       title="Tapez exactement 'SUPPRIMER' pour confirmer">
+                <p class="mt-1 text-sm text-gray-500">Cette mesure de sécurité empêche la suppression accidentelle</p>
+            </div>
+            
+            <!-- Boutons d'action -->
+            <div class="flex justify-end space-x-4 pt-4">
+                <a href="{% url 'livraison:detail_livraison_gestionnaire_bureau' livraison.id %}" 
+                   class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                    Annuler
+                </a>
+                <button type="submit" 
+                        class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                        onclick="return confirm('Êtes-vous absolument sûr de vouloir supprimer cette livraison ?')">
+                    Supprimer définitivement
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Messages d'erreur -->
+{% if form.errors %}
+    <div class="mt-6 max-w-2xl mx-auto bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">Erreurs dans le formulaire</h3>
+                <div class="mt-2 text-sm text-red-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Messages de succès/erreur Django -->
+{% if messages %}
+    <div class="mt-6 max-w-2xl mx-auto">
+        {% for message in messages %}
+            <div class="{% if message.tags == 'success' %}bg-green-50 border-green-200 text-green-800{% elif message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %} border rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        {% if message.tags == 'success' %}
+                            <svg class="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        {% elif message.tags == 'error' %}
+                            <svg class="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        {% else %}
+                            <svg class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        {% endif %}
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium">{{ message }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmationInput = document.getElementById('confirmation');
+    const submitButton = document.querySelector('button[type="submit"]');
+    
+    // Désactiver le bouton tant que la confirmation n'est pas correcte
+    submitButton.disabled = true;
+    submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+    
+    confirmationInput.addEventListener('input', function() {
+        if (this.value === 'SUPPRIMER') {
+            submitButton.disabled = false;
+            submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        } else {
+            submitButton.disabled = true;
+            submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,300 @@
+{% extends 'dashboards/base_gestionnaire_info.html' %}
+{% load static %}
+
+{% block title %}Nouvelle/Modifier Livraison - Gestionnaire Info{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <h1 class="text-3xl font-bold text-gray-900">
+        {% if is_edit %}
+          Modifier la livraison {{ livraison.numero_commande }}
+        {% else %}
+          Nouvelle livraison informatique
+        {% endif %}
+      </h1>
+      <a href="{% url 'livraison:liste_livraisons_gestionnaire_info' %}"
+         class="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-200">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Retour à la liste
+      </a>
+    </div>
+  </div>
+
+  <div class="chart-card" x-data="livraisonForm()" x-init="init()">
+    {% if messages %}
+      <div class="mb-6">
+        {% for message in messages %}
+          <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 border border-red-400 text-red-700{% else %}bg-green-100 border border-green-400 text-green-700{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="space-y-8">
+      {% csrf_token %}
+
+      <!-- Section 1: Sélection de la commande / Infos commande -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          {% if is_edit %}Informations de la commande{% else %}Sélection de la commande informatique{% endif %}
+        </h3>
+
+        {% if is_edit %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Type de commande</label>
+            <input type="text" value="{{ livraison.get_type_commande_display }}" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Commande</label>
+            <input type="text" value="{{ livraison.numero_commande }}" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">
+          </div>
+        </div>
+        <div class="mt-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Fournisseur</label>
+          <input type="text" value="{{ livraison.fournisseur.nom }}" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">
+        </div>
+        {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="{{ form.type_commande.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Type de commande *</label>
+            <input type="text" value="Commande Informatique" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">
+            {{ form.type_commande }}
+            {% if form.type_commande.errors %}<p class="text-red-600 text-sm mt-1">{{ form.type_commande.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label for="commande-select-display" class="block text-sm font-medium text-gray-700 mb-2">Commande *</label>
+            <select id="commande-select-display" class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+              <option value="">Sélectionner une commande informatique</option>
+            </select>
+            {{ form.commande_id }}
+            {% if form.commande_id.errors %}<p class="text-red-600 text-sm mt-1">{{ form.commande_id.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+        <div class="mt-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Fournisseur</label>
+          <input type="text" id="fournisseur-display" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700" placeholder="Sélectionnez une commande pour voir le fournisseur">
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Matériels de la commande (chargés dynamiquement) -->
+      <div id="materiels-section" class="hidden">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          Matériels de la commande
+        </h3>
+        <div id="materiels-list" class="space-y-3"></div>
+      </div>
+
+      <!-- Informations de livraison -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+          Informations de livraison
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="{{ form.date_livraison_prevue.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Date de livraison prévue *</label>
+            {{ form.date_livraison_prevue }}
+            {% if form.date_livraison_prevue.errors %}<p class="text-red-600 text-sm mt-1">{{ form.date_livraison_prevue.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label for="{{ form.date_livraison_effective.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Date de livraison effective</label>
+            {{ form.date_livraison_effective }}
+            {% if form.date_livraison_effective.errors %}<p class="text-red-600 text-sm mt-1">{{ form.date_livraison_effective.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="{{ form.statut_livraison.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Statut de livraison *</label>
+            {{ form.statut_livraison }}
+            {% if form.statut_livraison.errors %}<p class="text-red-600 text-sm mt-1">{{ form.statut_livraison.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label for="{{ form.conforme.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Conformité</label>
+            {{ form.conforme }}
+            {% if form.conforme.errors %}<p class="text-red-600 text-sm mt-1">{{ form.conforme.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+        <div>
+          <label for="{{ form.pv_reception_recu.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">PV de réception reçu</label>
+          {{ form.pv_reception_recu }}
+          {% if form.pv_reception_recu.errors %}<p class="text-red-600 text-sm mt-1">{{ form.pv_reception_recu.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+          {{ form.notes }}
+          {% if form.notes.errors %}<p class="text-red-600 text-sm mt-1">{{ form.notes.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="flex justify-end gap-4 pt-6 border-t border-gray-200">
+        <a href="{% url 'livraison:liste_livraisons_gestionnaire_info' %}" 
+           class="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors duration-200">
+          Annuler
+        </a>
+        <button type="submit" 
+                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200">
+          {% if is_edit %}Modifier la livraison{% else %}Créer la livraison{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function livraisonForm() {
+  return {
+    init() {
+      this.setupTypeCommandeListener();
+      this.setupCommandeListener();
+      
+      // Charger automatiquement les commandes si le type est déjà sélectionné
+      const typeSelect = document.getElementById('{{ form.type_commande.id_for_label }}');
+      if (typeSelect && typeSelect.value) {
+        this.loadCommandes(typeSelect.value);
+      }
+    },
+
+    setupTypeCommandeListener() {
+      const typeSelect = document.getElementById('{{ form.type_commande.id_for_label }}');
+      if (typeSelect) {
+        typeSelect.addEventListener('change', () => {
+          this.loadCommandes(typeSelect.value);
+        });
+      }
+    },
+
+    setupCommandeListener() {
+      const commandeSelect = document.getElementById('commande-select-display');
+      if (commandeSelect) {
+        commandeSelect.addEventListener('change', () => {
+          const commandeId = commandeSelect.value;
+          console.log('Commande sélectionnée:', commandeId);
+          if (commandeId) {
+            this.loadCommandeDetails(commandeId);
+          } else {
+            this.clearCommandeDetails();
+          }
+        });
+      }
+    },
+
+    async loadCommandes(typeCommande) {
+      if (!typeCommande) return;
+
+      console.log('Chargement des commandes pour le type:', typeCommande);
+
+      const commandeSelect = document.getElementById('commande-select-display');
+      const commandeIdInput = document.getElementById('{{ form.commande_id.id_for_label }}');
+      
+      commandeSelect.innerHTML = '<option value="">Chargement...</option>';
+      commandeIdInput.value = '';
+
+      try {
+        const url = `{% url 'livraison:api_commandes' %}?type_commande=${typeCommande}`;
+        console.log('URL de l\'API:', url);
+        
+        const response = await fetch(url);
+        console.log('Réponse reçue:', response.status);
+        
+        const data = await response.json();
+        console.log('Données reçues:', data);
+        
+        if (data.success) {
+          commandeSelect.innerHTML = '<option value="">Sélectionner une commande</option>';
+          data.commandes.forEach(commande => {
+            const option = document.createElement('option');
+            option.value = commande.id;
+            option.textContent = commande.numero_commande;
+            commandeSelect.appendChild(option);
+          });
+          console.log('Commandes chargées:', data.commandes.length);
+        } else {
+          commandeSelect.innerHTML = '<option value="">Aucune commande trouvée</option>';
+          console.log('Erreur API:', data.error);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des commandes:', error);
+        commandeSelect.innerHTML = '<option value="">Erreur de chargement</option>';
+      }
+    },
+
+    async loadCommandeDetails(commandeId) {
+      const typeCommande = document.getElementById('{{ form.type_commande.id_for_label }}').value;
+      const commandeIdInput = document.getElementById('{{ form.commande_id.id_for_label }}');
+      const fournisseurDisplay = document.getElementById('fournisseur-display');
+      const materielsSection = document.getElementById('materiels-section');
+      const materielsList = document.getElementById('materiels-list');
+
+      commandeIdInput.value = commandeId;
+      fournisseurDisplay.value = 'Chargement...';
+
+      try {
+        const url = `{% url 'livraison:api_commande_details' 0 %}?type_commande=${typeCommande}`.replace('0', commandeId);
+        console.log('URL détails commande:', url);
+        
+        const response = await fetch(url);
+        console.log('Réponse détails reçue:', response.status);
+        
+        const data = await response.json();
+        console.log('Données détails reçues:', data);
+        
+        if (data.success) {
+          fournisseurDisplay.value = data.commande.fournisseur || 'Non spécifié';
+          
+          // Afficher les matériels
+          if (data.materiels && data.materiels.length > 0) {
+            materielsList.innerHTML = '';
+            data.materiels.forEach(materiel => {
+              const materielDiv = document.createElement('div');
+              materielDiv.className = 'p-4 border border-gray-200 rounded-lg bg-gray-50';
+              materielDiv.innerHTML = `
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h4 class="font-medium text-gray-900">${materiel.designation || 'Matériel'}</h4>
+                    <p class="text-sm text-gray-600">${materiel.description || ''}</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-sm text-gray-600">Quantité: ${materiel.quantite}</p>
+                    <p class="text-sm text-gray-600">Prix: ${materiel.prix_unitaire} €</p>
+                  </div>
+                </div>
+              `;
+              materielsList.appendChild(materielDiv);
+            });
+            materielsSection.classList.remove('hidden');
+          } else {
+            materielsSection.classList.add('hidden');
+          }
+        } else {
+          fournisseurDisplay.value = 'Erreur de chargement';
+          materielsSection.classList.add('hidden');
+          console.log('Erreur API détails:', data.error);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des détails:', error);
+        fournisseurDisplay.value = 'Erreur de chargement';
+        materielsSection.classList.add('hidden');
+      }
+    },
+
+    clearCommandeDetails() {
+      const commandeIdInput = document.getElementById('{{ form.commande_id.id_for_label }}');
+      const fournisseurDisplay = document.getElementById('fournisseur-display');
+      const materielsSection = document.getElementById('materiels-section');
+
+      commandeIdInput.value = '';
+      fournisseurDisplay.value = '';
+      materielsSection.classList.add('hidden');
+    }
+  }
+}
+</script>
+{% endblock %}

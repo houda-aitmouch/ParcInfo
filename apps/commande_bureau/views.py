@@ -22,6 +22,12 @@ logger = logging.getLogger(__name__)
 def is_gestionnaire_ou_superadmin(user):
     return user.groups.filter(name__in=['Gestionnaire Bureau', 'Super Admin']).exists()
 
+def is_gestionnaire_bureau(user):
+    return user.groups.filter(name='Gestionnaire Bureau').exists()
+
+def is_superadmin(user):
+    return user.is_superuser
+
 def liste_commandes(request):
     if not is_gestionnaire_ou_superadmin(request.user):
         raise PermissionDenied
@@ -30,6 +36,155 @@ def liste_commandes(request):
         'commandes': commandes
     }
     return render(request, 'commande_bureau/liste_commandes.html', context)
+
+def liste_commandes_superadmin(request):
+    if not is_gestionnaire_ou_superadmin(request.user):
+        raise PermissionDenied
+    commandes = CommandeBureau.objects.prefetch_related('lignes__designation', 'lignes__description')
+    context = { 'commandes': commandes }
+    return render(request, 'commande_bureau/liste_commandes_superadmin.html', context)
+
+def liste_commandes_gestionnaire_info(request):
+    if not (is_gestionnaire_ou_superadmin(request.user) or is_superadmin(request.user)):
+        raise PermissionDenied
+    commandes = CommandeBureau.objects.prefetch_related('lignes__designation', 'lignes__description')
+    context = { 'commandes': commandes }
+    return render(request, 'commande_bureau/liste_commandes_gestionnaire_info.html', context)
+
+def liste_commandes_gestionnaire_bureau(request):
+    if not (is_gestionnaire_bureau(request.user) or is_superadmin(request.user)):
+        raise PermissionDenied
+    commandes = CommandeBureau.objects.prefetch_related('lignes__designation', 'lignes__description')
+    context = { 'commandes': commandes }
+    return render(request, 'commande_bureau/liste_commandes_gestionnaire_bureau.html', context)
+
+def ajouter_commande_gestionnaire_bureau(request):
+    if not (is_gestionnaire_bureau(request.user) or is_superadmin(request.user)):
+        raise PermissionDenied
+    if request.method == 'POST':
+        try:
+            # Traitement des données du formulaire principal
+            commande_data = {
+                'mode_passation': request.POST.get('mode_passation'),
+                'numero_commande': request.POST.get('numero_commande'),
+                'fournisseur': request.POST.get('fournisseur'),
+                'date_commande': request.POST.get('date_commande'),
+                'date_reception': request.POST.get('date_reception'),
+                'numero_facture': request.POST.get('numero_facture'),
+                'duree_garantie_valeur': request.POST.get('duree_garantie_valeur'),
+                'duree_garantie_unite': request.POST.get('duree_garantie_unite'),
+            }
+
+            commande_form = CommandeBureauForm(commande_data)
+
+            if commande_form.is_valid():
+                commande = commande_form.save()
+
+                # Traitement des lignes de commande
+                lignes_data = []
+                i = 0
+                while f'lignes-{i}-designation' in request.POST:
+                    ligne_data = {
+                        'designation_id': request.POST.get(f'lignes-{i}-designation'),
+                        'description_id': request.POST.get(f'lignes-{i}-description'),
+                        'quantite': request.POST.get(f'lignes-{i}-quantite'),
+                        'prix_unitaire': request.POST.get(f'lignes-{i}-prix_unitaire'),
+                    }
+
+                    # Validation des données de ligne
+                    if all([ligne_data['designation_id'], ligne_data['description_id'],
+                            ligne_data['quantite'], ligne_data['prix_unitaire']]):
+                        try:
+                            LigneCommandeBureau.objects.create(
+                                commande=commande,
+                                designation_id=ligne_data['designation_id'],
+                                description_id=ligne_data['description_id'],
+                                quantite=int(ligne_data['quantite']),
+                                prix_unitaire=float(ligne_data['prix_unitaire'])
+                            )
+                        except (ValueError, TypeError) as e:
+                            logger.error(f"Erreur lors de la création de la ligne {i}: {e}")
+                            messages.error(request, f"Erreur dans la ligne {i + 1}: données invalides")
+
+                    i += 1
+
+                if i > 0:  # Au moins une ligne créée
+                    messages.success(request, f'Commande {commande.numero_commande} créée avec succès!')
+                    return redirect('commandes_bureau:liste_commandes_gestionnaire_bureau')
+                else:
+                    commande.delete()  # Supprimer la commande si aucune ligne n'est valide
+                    messages.error(request, 'Aucune ligne de commande valide trouvée')
+            else:
+                messages.error(request, 'Erreur dans les données de la commande')
+
+        except Exception as e:
+            logger.error(f"Erreur lors de la création de la commande: {e}")
+            messages.error(request, 'Erreur lors de la création de la commande')
+
+    # GET request ou erreur dans POST
+    designations = DesignationBureau.objects.all().order_by('nom')
+    fournisseurs = Fournisseur.objects.all().order_by('nom')
+
+    # Sérialiser les désignations pour JavaScript
+    designations_json = json.dumps([
+        {'id': d.id, 'nom': d.nom} for d in designations
+    ])
+
+    return render(request, 'commande_bureau/commande_form_gestionnaire_bureau.html', {
+        'form': CommandeBureauForm(),
+        'designations': designations,
+        'designations_json': designations_json,
+        'fournisseurs': fournisseurs,
+    })
+
+def modifier_commande_gestionnaire_bureau(request, pk):
+    if not is_gestionnaire_bureau(request.user):
+        raise PermissionDenied
+    commande = get_object_or_404(CommandeBureau, pk=pk)
+    
+    if request.method == 'POST':
+        try:
+            commande_data = {
+                'mode_passation': request.POST.get('mode_passation'),
+                'numero_commande': request.POST.get('numero_commande'),
+                'fournisseur': request.POST.get('fournisseur'),
+                'date_commande': request.POST.get('date_commande'),
+                'date_reception': request.POST.get('date_reception'),
+                'numero_facture': request.POST.get('numero_facture'),
+                'duree_garantie_valeur': request.POST.get('duree_garantie_valeur'),
+                'duree_garantie_unite': request.POST.get('duree_garantie_unite'),
+            }
+
+            commande_form = CommandeBureauForm(commande_data, instance=commande)
+
+            if commande_form.is_valid():
+                commande = commande_form.save()
+                messages.success(request, f'Commande {commande.numero_commande} modifiée avec succès!')
+                return redirect('commandes_bureau:liste_commandes_gestionnaire_bureau')
+            else:
+                messages.error(request, 'Erreur dans les données de la commande')
+
+        except Exception as e:
+            logger.error(f"Erreur lors de la modification de la commande: {e}")
+            messages.error(request, 'Erreur lors de la modification de la commande')
+
+    # GET request ou erreur dans POST
+    designations = DesignationBureau.objects.all().order_by('nom')
+    fournisseurs = Fournisseur.objects.all().order_by('nom')
+
+    # Sérialiser les désignations pour JavaScript
+    designations_json = json.dumps([
+        {'id': d.id, 'nom': d.nom} for d in designations
+    ])
+
+    return render(request, 'commande_bureau/commande_form_gestionnaire_bureau.html', {
+        'form': CommandeBureauForm(instance=commande),
+        'designations': designations,
+        'designations_json': designations_json,
+        'fournisseurs': fournisseurs,
+        'commande': commande,
+        'is_edit': True,
+    })
 
 def ajouter_commande(request):
     if not is_gestionnaire_ou_superadmin(request.user):
@@ -104,6 +259,61 @@ def ajouter_commande(request):
     ])
 
     return render(request, 'commande_bureau/commande_form.html', {
+        'form': CommandeBureauForm(),
+        'designations': designations,
+        'designations_json': designations_json,
+        'fournisseurs': fournisseurs,
+    })
+
+def ajouter_commande_superadmin(request):
+    if not is_gestionnaire_ou_superadmin(request.user):
+        raise PermissionDenied
+    if request.method == 'POST':
+        try:
+            commande_data = {
+                'mode_passation': request.POST.get('mode_passation'),
+                'numero_commande': request.POST.get('numero_commande'),
+                'fournisseur': request.POST.get('fournisseur'),
+                'date_commande': request.POST.get('date_commande'),
+                'date_reception': request.POST.get('date_reception'),
+                'numero_facture': request.POST.get('numero_facture'),
+                'duree_garantie_valeur': request.POST.get('duree_garantie_valeur'),
+                'duree_garantie_unite': request.POST.get('duree_garantie_unite'),
+            }
+            commande_form = CommandeBureauForm(commande_data)
+            if commande_form.is_valid():
+                commande = commande_form.save()
+                i = 0
+                while f'lignes-{i}-designation' in request.POST:
+                    designation_id = request.POST.get(f'lignes-{i}-designation')
+                    description_id = request.POST.get(f'lignes-{i}-description')
+                    quantite = request.POST.get(f'lignes-{i}-quantite')
+                    prix_unitaire = request.POST.get(f'lignes-{i}-prix_unitaire')
+                    if all([designation_id, description_id, quantite, prix_unitaire]):
+                        LigneCommandeBureau.objects.create(
+                            commande=commande,
+                            designation_id=designation_id,
+                            description_id=description_id,
+                            quantite=int(quantite),
+                            prix_unitaire=float(prix_unitaire)
+                        )
+                    i += 1
+                if i > 0:
+                    messages.success(request, f'Commande {commande.numero_commande} créée avec succès!')
+                    return redirect('commandes_bureau:liste_commandes_superadmin')
+                else:
+                    commande.delete()
+                    messages.error(request, 'Aucune ligne de commande valide trouvée')
+            else:
+                messages.error(request, 'Erreur dans les données de la commande')
+        except Exception as e:
+            logger.error(f"Erreur lors de la création de la commande: {e}")
+            messages.error(request, 'Erreur lors de la création de la commande')
+
+    designations = DesignationBureau.objects.all().order_by('nom')
+    fournisseurs = Fournisseur.objects.all().order_by('nom')
+    designations_json = json.dumps([ { 'id': d.id, 'nom': d.nom } for d in designations ])
+    return render(request, 'commande_bureau/commande_form_superadmin.html', {
         'form': CommandeBureauForm(),
         'designations': designations,
         'designations_json': designations_json,
@@ -353,6 +563,97 @@ def modifier_commande(request, pk):
     ], ensure_ascii=False)
 
     return render(request, 'commande_bureau/modifier_commande.html', {
+        'form': CommandeBureauForm(instance=commande),
+        'commande': commande,
+        'fournisseurs': fournisseurs,
+        'designations': designations,
+        'designations_json': designations_json,
+        'lignes_commande_json': lignes_commande_json,
+        'is_edit': True,
+    })
+
+def modifier_commande_superadmin(request, pk):
+    if not is_gestionnaire_ou_superadmin(request.user):
+        raise PermissionDenied
+    commande = get_object_or_404(CommandeBureau, pk=pk)
+    if request.method == 'POST':
+        try:
+            commande_data = {
+                'mode_passation': request.POST.get('mode_passation'),
+                'numero_commande': request.POST.get('numero_commande'),
+                'fournisseur': request.POST.get('fournisseur'),
+                'date_commande': request.POST.get('date_commande'),
+                'date_reception': request.POST.get('date_reception'),
+                'numero_facture': request.POST.get('numero_facture'),
+                'duree_garantie_valeur': request.POST.get('duree_garantie_valeur'),
+                'duree_garantie_unite': request.POST.get('duree_garantie_unite'),
+            }
+            commande_form = CommandeBureauForm(commande_data, instance=commande)
+            if commande_form.is_valid():
+                commande = commande_form.save()
+                ids_post = set()
+                i = 0
+                while f'lignes-{i}-designation' in request.POST:
+                    ligne_id = request.POST.get(f'lignes-{i}-id')
+                    if ligne_id:
+                        ids_post.add(int(ligne_id))
+                    i += 1
+                for ligne in commande.lignes.all():
+                    if ligne.id not in ids_post:
+                        ligne.delete()
+                i = 0
+                while f'lignes-{i}-designation' in request.POST:
+                    ligne_id = request.POST.get(f'lignes-{i}-id')
+                    designation_id = request.POST.get(f'lignes-{i}-designation')
+                    description_id = request.POST.get(f'lignes-{i}-description')
+                    quantite = request.POST.get(f'lignes-{i}-quantite')
+                    prix_unitaire = request.POST.get(f'lignes-{i}-prix_unitaire')
+                    if all([designation_id, description_id, quantite, prix_unitaire]):
+                        if ligne_id:
+                            try:
+                                ligne = commande.lignes.get(id=ligne_id)
+                                ligne.designation_id = designation_id
+                                ligne.description_id = description_id
+                                ligne.quantite = int(quantite)
+                                ligne.prix_unitaire = float(prix_unitaire)
+                                ligne.save()
+                            except LigneCommandeBureau.DoesNotExist:
+                                pass
+                        else:
+                            LigneCommandeBureau.objects.create(
+                                commande=commande,
+                                designation_id=designation_id,
+                                description_id=description_id,
+                                quantite=int(quantite),
+                                prix_unitaire=float(prix_unitaire)
+                            )
+                    i += 1
+                if i > 0:
+                    messages.success(request, f'Commande {commande.numero_commande} modifiée avec succès!')
+                    return redirect('commandes_bureau:liste_commandes_superadmin')
+                else:
+                    messages.error(request, 'Aucune ligne de commande valide trouvée')
+            else:
+                messages.error(request, 'Erreur dans les données de la commande')
+        except Exception as e:
+            logger.error(f"Erreur lors de la modification de la commande: {e}")
+            messages.error(request, f'Erreur lors de la modification de la commande')
+
+    designations = DesignationBureau.objects.all().order_by('nom')
+    fournisseurs = Fournisseur.objects.all().order_by('nom')
+    designations_json = json.dumps([ { 'id': d.id, 'nom': d.nom } for d in designations ], ensure_ascii=False)
+    lignes_commande_json = json.dumps([
+        (lambda descriptions: {
+            'id': ligne.id,
+            'designationId': ligne.designation_id,
+            'descriptionId': ligne.description_id,
+            'quantite': ligne.quantite,
+            'prix_unitaire': float(ligne.prix_unitaire),
+            'descriptions': [ { 'id': desc.id, 'nom': desc.nom } for desc in descriptions ]
+        })( (lambda descs: descs + ([ligne.description] if ligne.description not in descs else [])) ( list(ligne.designation.descriptions.all()) ) )
+        for ligne in commande.lignes.all()
+    ], ensure_ascii=False)
+    return render(request, 'commande_bureau/modifier_commande_superadmin.html', {
         'form': CommandeBureauForm(instance=commande),
         'commande': commande,
         'fournisseurs': fournisseurs,

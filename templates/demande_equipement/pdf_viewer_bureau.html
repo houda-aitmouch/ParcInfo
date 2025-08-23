@@ -1,0 +1,127 @@
+{% extends 'dashboards/base_gestionnaire_bureau.html' %}
+{% load static %}
+
+{% block title %}Visualiseur PDF - Demande {{ demande.id }}{% endblock %}
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    #pdfContainer { width: 100%; height: 100vh; }
+    .pdf-page { margin: 10px auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+</style>
+<link rel="stylesheet" href="{% static 'css/parcinfo-ui.css' %}">
+<link rel="stylesheet" href="{% static 'react/assets/index.css' %}">
+{% endblock %}
+{% block content %}
+<div class="bg-gray-100">
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-lg font-semibold text-gray-900">Décharge - Demande #{{ demande.id }}</h1>
+                    <p class="text-sm text-gray-600">{{ demande.demandeur.get_full_name }} - {{ demande.get_categorie_display }}</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="prevPage" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Précédent</button>
+                    <span id="pageInfo" class="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm">Page 1 sur 1</span>
+                    <button id="nextPage" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Suivant</button>
+                    <button id="downloadBtn" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Télécharger</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="pdfContainer" class="bg-gray-200 p-4">
+        <div id="loading" class="text-center py-20">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p class="mt-2 text-gray-600">Chargement du PDF...</p>
+        </div>
+        <div id="pdfContent" class="hidden"></div>
+    </div>
+    <script>
+        // Configuration PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        let pdfDoc = null;
+        let pageNum = 1;
+        let pageRendering = false;
+        let pageNumPending = null;
+        const scale = 1.5;
+        // URL du PDF
+        const pdfUrl = "{% url 'demande_equipement:telecharger_decharge' demande.pk %}?inline=1";
+        // Charger le PDF
+        pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+            pdfDoc = pdf;
+            document.getElementById('pageInfo').textContent = `Page 1 sur ${pdf.numPages}`;
+            renderPage(pageNum);
+        }).catch(function(error) {
+            console.error('Erreur lors du chargement du PDF:', error);
+            document.getElementById('loading').innerHTML = `
+                <div class="text-center py-20">
+                    <div class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="text-lg font-medium text-gray-900 mb-2">Erreur de chargement</h4>
+                    <p class="text-gray-600 mb-4">Impossible de charger le PDF.</p>
+                    <a href="${pdfUrl}" target="_blank" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        👁️ Ouvrir dans un nouvel onglet
+                    </a>
+                </div>
+            `;
+        });
+        // Rendre une page
+        function renderPage(num) {
+            pageRendering = true;
+            pdfDoc.getPage(num).then(function(page) {
+                const viewport = page.getViewport({scale: scale});
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                canvas.className = 'pdf-page';
+                const renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                const renderTask = page.render(renderContext);
+                renderTask.promise.then(function() {
+                    pageRendering = false;
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('pdfContent').classList.remove('hidden');
+                    document.getElementById('pdfContent').appendChild(canvas);
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                });
+            });
+        }
+        // Page précédente
+        document.getElementById('prevPage').addEventListener('click', function() {
+            if (pageNum <= 1) return;
+            pageNum--;
+            queueRenderPage(pageNum);
+        });
+        // Page suivante
+        document.getElementById('nextPage').addEventListener('click', function() {
+            if (pageNum >= pdfDoc.numPages) return;
+            pageNum++;
+            queueRenderPage(pageNum);
+        });
+        // Mettre en file d'attente le rendu d'une page
+        function queueRenderPage(num) {
+            if (pageRendering) {
+                pageNumPending = num;
+            } else {
+                renderPage(num);
+            }
+            document.getElementById('pageInfo').textContent = `Page ${num} sur ${pdfDoc.numPages}`;
+        }
+        // Télécharger
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            window.open(pdfUrl, '_blank');
+        });
+    </script>
+</div>
+{% endblock %}
+{% endblock %}
