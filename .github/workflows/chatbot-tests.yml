@@ -75,8 +75,12 @@ jobs:
       run: |
         python test_rag_chatbot.py
 
-    - name: Display test results
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
       if: always()
-      run: |
-        echo "Test completed successfully"
-        ls -la test_report_*.json 2>/dev/null || echo "No test reports found"
+      with:
+        name: chatbot-test-results
+        path: |
+          test_report_*.json
+          *.log
+        retention-days: 1
