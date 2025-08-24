@@ -240,6 +240,8 @@ def get_user_dashboard_url(user):
         return 'users:gestionnaire_info_dashboard'
     elif user.groups.filter(name='Gestionnaire Bureau').exists():
         return 'users:gestionnaire_bureau_dashboard'
+    elif user.groups.filter(name__in=['Employé', 'Employe']).exists():
+        return 'users:employe_dashboard'
     else:
         return 'users:employe_dashboard'
 
@@ -254,6 +256,8 @@ def redirect_user(request):
         return redirect('users:gestionnaire_info_dashboard')
     elif user.groups.filter(name='Gestionnaire Bureau').exists():
         return redirect('users:gestionnaire_bureau_dashboard')
+    elif user.groups.filter(name__in=['Employé', 'Employe']).exists():
+        return redirect('users:employe_dashboard')
     else:
         return redirect('users:employe_dashboard')
 
