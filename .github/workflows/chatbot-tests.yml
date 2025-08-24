@@ -30,10 +30,11 @@ jobs:
     
     services:
       postgres:
-        image: postgres:13
+        image: pgvector/pgvector:pg13
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: parcinfo_test
+          POSTGRES_USER: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -70,6 +71,10 @@ jobs:
     - name: Run database migrations
       run: |
         python manage.py migrate
+
+    - name: Setup pgvector extension
+      run: |
+        PGPASSWORD=postgres psql -h localhost -U postgres -d parcinfo_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
     - name: Create test data
       run: |
