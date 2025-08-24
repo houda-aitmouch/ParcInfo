@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import GroupAdmin, UserAdmin
-from .models import CustomUser
+from .models import CustomUser, NotificationDemande
 
 # Désenregistrer le modèle Group de l'admin par défaut
 admin.site.unregister(Group)
@@ -95,4 +95,38 @@ class CustomUserAdmin(UserAdmin):
 # Personnaliser l'affichage de l'admin
 admin.site.site_header = "Administration ParcInfo"
 admin.site.site_title = "ParcInfo Admin"
-admin.site.index_title = "Gestion du parc informatique" 
+admin.site.index_title = "Gestion du parc informatique"
+
+@admin.register(NotificationDemande)
+class NotificationDemandeAdmin(admin.ModelAdmin):
+    """Administration des notifications de demandes"""
+    
+    list_display = ['utilisateur', 'type_notification', 'titre', 'statut_demande', 'lu', 'date_creation']
+    list_filter = ['type_notification', 'statut_demande', 'lu', 'date_creation']
+    search_fields = ['utilisateur__username', 'utilisateur__email', 'titre', 'message']
+    ordering = ['-date_creation']
+    
+    fieldsets = (
+        ('Informations générales', {
+            'fields': ('utilisateur', 'type_notification', 'titre', 'message')
+        }),
+        ('Statut de la demande', {
+            'fields': ('statut_demande', 'demande_id')
+        }),
+        ('État de la notification', {
+            'fields': ('lu', 'date_lecture')
+        }),
+    )
+    
+    readonly_fields = ['date_creation']
+    
+    def get_queryset(self, request):
+        """Optimiser les requêtes"""
+        return super().get_queryset(request).select_related('utilisateur')
+    
+    def save_model(self, request, obj, form, change):
+        """Logique personnalisée lors de la sauvegarde"""
+        if change and 'lu' in form.changed_data and obj.lu:
+            from django.utils import timezone
+            obj.date_lecture = timezone.now()
+        super().save_model(request, obj, form, change) 

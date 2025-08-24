@@ -19,4 +19,6 @@ urlpatterns = [
     path('search/', views.global_search, name='global_search'),
     path('notifications/garanties/', views.warranty_notifications_json, name='warranty_notifications_json'),
     path('notifications-garantie/', views.notifications_garantie, name='notifications_garantie'),
+    path('notifications-demandes/', views.notifications_demandes_employe, name='notifications_demandes_employe'),
+    path('notifications/<int:notification_id>/marquer-lue/', views.marquer_notification_lue, name='marquer_notification_lue'),
 ]

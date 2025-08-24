@@ -50,6 +50,7 @@ except ImportError:
     DemandeEquipement = None
 
 from apps.livraison.models import Livraison
+from .models import NotificationDemande
 
 logger = logging.getLogger(__name__)
 
@@ -1265,6 +1266,55 @@ def notifications_garantie(request):
         notifications.extend(get_notifications_materiel_bureau(date_limite))
     
     return JsonResponse({'notifications': notifications})
+
+@login_required
+def notifications_demandes_employe(request):
+    """Récupère les notifications de demandes pour un employé"""
+    user = request.user
+    
+    # Vérifier que l'utilisateur est un employé
+    if user.is_superuser or user.groups.filter(name__in=['Super Admin', 'Gestionnaire Informatique', 'Gestionnaire Bureau']).exists():
+        return JsonResponse({'error': 'Accès non autorisé'}, status=403)
+    
+    # Récupérer les notifications non lues de l'employé
+    notifications = NotificationDemande.objects.filter(
+        utilisateur=user,
+        lu=False
+    ).order_by('-date_creation')
+    
+    # Formater les notifications pour l'affichage
+    notifications_formatees = []
+    for notif in notifications:
+        notifications_formatees.append({
+            'id': notif.id,
+            'titre': notif.titre,
+            'message': notif.message,
+            'statut': notif.statut_demande,
+            'type': notif.type_notification,
+            'demande_id': notif.demande_id,
+            'date_creation': notif.date_creation.strftime('%d/%m/%Y %H:%M'),
+            'est_recente': notif.est_recente,
+            'badge_couleur': notif.badge_couleur,
+            'statut_display': dict(NotificationDemande.STATUT_CHOICES)[notif.statut_demande]
+        })
+    
+    return JsonResponse({
+        'notifications': notifications_formatees,
+        'count': len(notifications_formatees)
+    })
+
+@login_required
+def marquer_notification_lue(request, notification_id):
+    """Marque une notification comme lue"""
+    try:
+        notification = NotificationDemande.objects.get(
+            id=notification_id,
+            utilisateur=request.user
+        )
+        notification.marquer_comme_lu()
+        return JsonResponse({'success': True})
+    except NotificationDemande.DoesNotExist:
+        return JsonResponse({'error': 'Notification non trouvée'}, status=404)
 
 def get_notifications_materiel_info(date_limite):
     """Récupère les notifications pour le matériel informatique"""
