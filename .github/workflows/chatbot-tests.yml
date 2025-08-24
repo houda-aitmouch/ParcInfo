@@ -20,7 +20,11 @@ jobs:
     
     env:
       DJANGO_SETTINGS_MODULE: ParcInfo.settings
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/parcinfo_test
+      DB_NAME: parcinfo_test
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: localhost
+      DB_PORT: 5432
       SECRET_KEY: test-secret-key-for-ci
       DEBUG: True
     
