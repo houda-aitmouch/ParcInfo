@@ -18,6 +18,12 @@ jobs:
   test-chatbot:
     runs-on: ubuntu-latest
     
+    env:
+      DJANGO_SETTINGS_MODULE: ParcInfo.settings
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/parcinfo_test
+      SECRET_KEY: test-secret-key-for-ci
+      DEBUG: True
+    
     services:
       postgres:
         image: postgres:13
@@ -51,27 +57,23 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements_unified.txt
+        pip install -r requirements_chatbot.txt
 
     - name: Set up Django environment
       run: |
-        export DJANGO_SETTINGS_MODULE=ParcInfo.settings
-        export DATABASE_URL=postgres://postgres:postgres@localhost:5432/parcinfo_test
         python manage.py check
 
     - name: Run database migrations
       run: |
-        export DJANGO_SETTINGS_MODULE=ParcInfo.settings
-        export DATABASE_URL=postgres://postgres:postgres@localhost:5432/parcinfo_test
         python manage.py migrate
+
+    - name: Create test data
+      run: |
+        python manage.py setup_permissions
 
     - name: Run chatbot tests
       run: |
-        export DJANGO_SETTINGS_MODULE=ParcInfo.settings
-        export DATABASE_URL=postgres://postgres:postgres@localhost:5432/parcinfo_test
         python test_rag_chatbot.py
-      env:
-        DJANGO_SETTINGS_MODULE: ParcInfo.settings
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/parcinfo_test
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
