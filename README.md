@@ -1,369 +1,420 @@
-# 🚀 ParcInfo - Gestion Intelligente de Parc Informatique
+# 🏢 ParcInfo - Gestion de Parc Informatique
 
-## 🎯 **Description**
+## 📋 Vue d'Ensemble
 
-ParcInfo est une application web Django moderne et intelligente pour la gestion complète du parc informatique d'une entreprise. Elle intègre un **chatbot IA avancé**, des **dashboards interactifs**, et une **gestion automatisée** des équipements, demandes et livraisons.
+**ParcInfo** est une application web complète de gestion de parc informatique développée avec Django et React. Elle permet la gestion des équipements informatiques et de bureau, des demandes d'équipement, des commandes, des fournisseurs et des livraisons.
 
-**✨ Nouvelles fonctionnalités : Assistant IA avec RAG, Dashboard Streamlit, et interface moderne !**
+## ✨ Fonctionnalités Principales
 
-## 🌟 **Fonctionnalités Principales**
+### 🔧 Gestion des Équipements
+- **Matériel Informatique** : Ordinateurs, serveurs, périphériques
+- **Matériel de Bureau** : Mobilier, accessoires
+- **Fournitures** : Consommables, accessoires
+- **Suivi d'Inventaire** : Codes d'inventaire, statuts, affectations
 
-### 🤖 **Assistant IA Intelligent (RAG)**
-- ✅ **Chatbot IA avancé** avec recherche sémantique
-- ✅ **Système RAG** (Retrieval-Augmented Generation) intégré
-- ✅ **Vectorisation automatique** des modèles et documents
-- ✅ **Réponses contextuelles** basées sur les données système
-- ✅ **Support multilingue** et traitement naturel du langage
-- ✅ **Historique des conversations** et apprentissage continu
-- ✅ **Interface moderne** avec design responsive
+### 📝 Gestion des Demandes
+- **Demandes d'Équipement** : Création, suivi, approbation
+- **Workflow d'Approbation** : Hiérarchie des validations
+- **Signatures Électroniques** : Décharges numériques
+- **Notifications Automatiques** : Système de notifications en temps réel
 
-### 📊 **Dashboards Interactifs**
-- ✅ **Dashboard principal** avec métriques en temps réel
-- ✅ **Dashboard de garantie** pour suivi des équipements
-- ✅ **Interface Streamlit** pour analyses avancées
-- ✅ **Graphiques interactifs** et visualisations
-- ✅ **Filtres dynamiques** et export de données
+### 🛒 Gestion des Commandes
+- **Commandes Informatiques** : Matériel informatique
+- **Commandes Bureau** : Matériel de bureau
+- **Gestion des Fournisseurs** : Catalogue, contacts, devis
+- **Suivi des Livraisons** : Statuts, dates, réceptions
 
-### 🔧 **Gestion des Demandes & Équipements**
-- ✅ **Demandes d'équipement** (Informatique/Bureau)
-- ✅ **Système d'approbation** par gestionnaires
-- ✅ **Suivi des statuts** en temps réel
-- ✅ **Gestion des matériels** avec codes d'inventaire
-- ✅ **Fournitures et consommables** intégrés
+### 👥 Gestion des Utilisateurs
+- **Rôles et Permissions** : Employé, Gestionnaire, Super Admin
+- **Profils Personnalisés** : Informations, équipements affectés
+- **Authentification Sécurisée** : Login/logout, sessions
 
-### 📄 **Décharges & Archives**
-- ✅ **Génération automatique de PDFs**
-- ✅ **Signature électronique** par canvas HTML5
-- ✅ **Archivage automatique** des documents signés
-- ✅ **Interface unifiée** de consultation des archives
-- ✅ **Export Excel** et filtrage avancé
+### 🤖 Chatbot Intelligent
+- **Assistant IA** : Réponses automatiques aux questions
+- **Base de Connaissances** : Documentation intégrée
+- **Recherche Sémantique** : RAG (Retrieval-Augmented Generation)
 
-### 👥 **Gestion des Utilisateurs & Permissions**
-- ✅ **Authentification sécurisée** avec sessions
-- ✅ **Rôles personnalisés** : Employé, Gestionnaire, Super Admin
-- ✅ **Système de permissions** granulaire
-- ✅ **Profils utilisateurs** avec équipements assignés
+## 🏗️ Architecture Technique
 
-### 🚚 **Logistique & Livraisons**
-- ✅ **Gestion des fournisseurs** et commandes
-- ✅ **Suivi des livraisons** avec validation
-- ✅ **Processus de réception** automatisé
-- ✅ **Rapports de livraison** et statistiques
+### Backend (Django)
+```
+ParcInfo/
+├── apps/
+│   ├── users/                 # Gestion des utilisateurs
+│   ├── demande_equipement/    # Demandes d'équipement
+│   ├── materiel_informatique/ # Matériel informatique
+│   ├── materiel_bureautique/  # Matériel de bureau
+│   ├── commande_informatique/ # Commandes informatiques
+│   ├── commande_bureau/       # Commandes bureau
+│   ├── fournisseurs/          # Gestion des fournisseurs
+│   ├── livraison/             # Suivi des livraisons
+│   └── chatbot/               # Assistant IA
+├── ParcInfo/                  # Configuration Django
+├── templates/                 # Templates HTML
+├── static/                    # Fichiers statiques
+└── media/                     # Fichiers uploadés
+```
 
-## 🚀 **Installation Rapide**
+### Frontend (React + TypeScript)
+```
+frontend/
+├── components/                # Composants React
+│   ├── ui/                    # Composants UI réutilisables
+│   ├── Dashboard.tsx          # Tableau de bord
+│   ├── Demandes.tsx           # Gestion des demandes
+│   ├── CommandesIT.tsx        # Commandes informatiques
+│   ├── CommandesBureau.tsx    # Commandes bureau
+│   ├── MaterielsIT.tsx        # Matériel informatique
+│   ├── MaterielsBureau.tsx    # Matériel de bureau
+│   ├── Fournisseurs.tsx       # Gestion fournisseurs
+│   ├── Livraisons.tsx         # Suivi livraisons
+│   └── Chatbot.tsx            # Assistant IA
+├── contexts/                  # Contextes React
+├── styles/                    # Styles CSS
+└── assets/                    # Ressources
+```
 
-### **Prérequis**
+## 🚀 Installation et Configuration
+
+### Prérequis
 - Python 3.8+
-- PostgreSQL ou SQLite
-- pip
-- Node.js (pour Tailwind CSS)
+- Node.js 16+
+- PostgreSQL (recommandé) ou SQLite
+- Git
 
-### **Installation Automatique**
+### Installation Backend
+
+1. **Cloner le projet**
 ```bash
-# 1. Cloner le projet
-git clone https://github.com/houda-aitmouch/ParcInfo.git
-cd ParcInfo
+git clone https://github.com/votre-repo/parcinfo.git
+cd parcinfo
+```
 
-# 2. Script de démarrage automatique
-chmod +x startup_parcinfo.sh
-./startup_parcinfo.sh
+2. **Créer l'environnement virtuel**
+```bash
+python -m venv rag_env
+source rag_env/bin/activate  # Linux/Mac
+# ou
+rag_env\Scripts\activate     # Windows
+```
 
-# 3. Ou installation manuelle :
-python -m venv env
-source env/bin/activate  # Linux/Mac
-# env\Scripts\activate  # Windows
-
+3. **Installer les dépendances**
+```bash
 pip install -r requirements.txt
-pip install -r requirements_chatbot.txt
-pip install -r requirements_dashboard.txt
+```
 
-# 4. Configuration
-cp .env.example .env
-# Modifiez .env avec vos paramètres
-
-# 5. Base de données
+4. **Configuration de la base de données**
+```bash
 python manage.py makemigrations
 python manage.py migrate
-python manage.py setup_permissions
+```
 
-# 6. Super utilisateur
+5. **Créer un super utilisateur**
+```bash
 python manage.py createsuperuser
+```
 
-# 7. Lancer l'application
+6. **Lancer le serveur de développement**
+```bash
 python manage.py runserver
 ```
 
-## 🎨 **Interface & Design**
+### Installation Frontend
 
-### **Technologies Frontend**
-- **Tailwind CSS** pour un design moderne et responsive
-- **Alpine.js** pour l'interactivité
-- **Templates Django** optimisés
-- **Interface mobile-first** et accessible
-
-### **Thèmes & Personnalisation**
-- **Thème sombre/clair** automatique
-- **Couleurs personnalisables** par application
-- **Composants réutilisables** et modulaires
-- **Animations fluides** et transitions
-
-## 🤖 **Assistant IA RAG**
-
-### **Fonctionnalités Avancées**
-- **Recherche sémantique** dans les modèles et documents
-- **Vectorisation automatique** des données
-- **Réponses contextuelles** basées sur l'historique
-- **Apprentissage continu** des interactions
-- **Support multilingue** (français, anglais, etc.)
-
-### **Commandes de Gestion**
+1. **Installer les dépendances**
 ```bash
-# Vectoriser tous les modèles
-python manage.py vectorize_all_models
-
-# Peupler l'index RAG
-python manage.py populate_rag_index
-
-# Tester la connexion Ollama
-python manage.py test_ollama
+cd frontend
+npm install
 ```
 
-### **Exemples d'Utilisation**
-```
-"Comment créer une demande d'équipement informatique ?"
-"Quel est le statut de mes demandes en cours ?"
-"Comment gérer le matériel de bureau ?"
-"Quels sont les processus de livraison ?"
-"Comment optimiser la gestion du parc ?"
-```
-
-## 📊 **Dashboards & Analytics**
-
-### **Dashboard Principal**
-- **Métriques en temps réel** des demandes
-- **Statistiques des équipements** par catégorie
-- **Graphiques interactifs** des tendances
-- **Alertes et notifications** automatiques
-
-### **Dashboard de Garantie**
-- **Suivi des garanties** des équipements
-- **Alertes d'expiration** proche
-- **Historique des maintenances**
-- **Coûts et budgets** de remplacement
-
-### **Lancement des Dashboards**
+2. **Lancer le serveur de développement**
 ```bash
-# Dashboard principal
-python dashboard_garantie/dashboard_garantie.py
-
-# Dashboard simple
-python dashboard_garantie/dashboard_simple.py
-
-# Dashboard amélioré
-python dashboard_garantie/launch_improved_dashboard.py
+npm run dev
 ```
 
-## 📁 **Structure du Projet**
+## 🔧 Configuration
 
-```
-ParcInfo/
-├── apps/                          # Applications Django
-│   ├── chatbot/                   # Assistant IA RAG
-│   │   ├── core_chatbot.py       # Logique principale
-│   │   ├── rag_manager.py        # Gestion RAG
-│   │   ├── structured_search.py  # Recherche structurée
-│   │   └── management/           # Commandes de gestion
-│   ├── demande_equipement/       # Gestion des demandes
-│   ├── users/                    # Gestion des utilisateurs
-│   ├── fournisseurs/             # Gestion des fournisseurs
-│   ├── materiel_informatique/    # Matériel informatique
-│   ├── materiel_bureautique/     # Matériel de bureau
-│   ├── commande_informatique/    # Commandes informatique
-│   ├── commande_bureau/          # Commandes bureau
-│   └── livraison/                # Gestion des livraisons
-├── dashboard_garantie/           # Dashboards Streamlit
-├── templates/                    # Templates HTML
-├── static/                       # Fichiers statiques
-│   ├── css/                      # Styles Tailwind
-│   ├── js/                       # JavaScript
-│   └── images/                   # Images et icônes
-├── docs/                         # Documentation
-├── scripts/                      # Scripts utilitaires
-├── storage/                      # Stockage RAG (exclu de Git)
-├── models_cache/                 # Cache des modèles IA (exclu)
-└── logs/                         # Fichiers de logs (exclu)
-```
+### Variables d'Environnement
 
-## ⚙️ **Configuration Avancée**
+Créer un fichier `.env` à la racine du projet :
 
-### **Variables d'Environnement**
-```bash
-# .env
-DEBUG=False
-SECRET_KEY=votre_clé_secrète
-ALLOWED_HOSTS=votre-domaine.com
-
-# Configuration Chatbot IA
-OLLAMA_HOST=http://localhost:11434
-OLLAMA_MODEL=llama3.1:8b
-EMBEDDING_MODEL=paraphrase-multilingual-MiniLM-L12-v2
+```env
+# Django
+SECRET_KEY=votre-secret-key
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
 
 # Base de données
-DATABASE_URL=postgresql://user:pass@localhost/parcinfo
+DATABASE_URL=postgresql://user:password@localhost/parcinfo
+
+# Email
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=votre-email@gmail.com
+EMAIL_HOST_PASSWORD=votre-mot-de-passe
+
+# Chatbot IA
+OPENAI_API_KEY=votre-clé-api-openai
 ```
 
-### **Configuration RAG**
-```python
-# settings.py
-RAG_SETTINGS = {
-    'vector_store_path': 'storage/',
-    'embedding_model': 'paraphrase-multilingual-MiniLM-L12-v2',
-    'chunk_size': 1000,
-    'chunk_overlap': 200,
-    'similarity_threshold': 0.7,
-}
-```
+### Configuration du Chatbot
 
-## 🔧 **Commandes Utiles**
-
-### **Gestion du Chatbot IA**
+1. **Installer les dépendances RAG**
 ```bash
-# Vectoriser les modèles
-python manage.py vectorize_all_models
+pip install -r requirements_chatbot.txt
+```
 
-# Peupler l'index RAG
+2. **Configurer l'index vectoriel**
+```bash
+python manage.py populate_rag_index
+```
+
+## 📊 Structure des Données
+
+### Modèles Principaux
+
+#### Utilisateurs
+- **CustomUser** : Utilisateurs avec rôles et permissions
+- **NotificationDemande** : Notifications pour les demandes
+
+#### Équipements
+- **MaterielInformatique** : Matériel informatique
+- **MaterielBureau** : Matériel de bureau
+- **Fourniture** : Fournitures et consommables
+
+#### Demandes et Commandes
+- **DemandeEquipement** : Demandes d'équipement
+- **CommandeInformatique** : Commandes informatiques
+- **CommandeBureau** : Commandes bureau
+- **LigneCommande** : Lignes de commande
+
+#### Fournisseurs et Livraisons
+- **Fournisseur** : Fournisseurs
+- **Livraison** : Livraisons
+- **LigneLivraison** : Lignes de livraison
+
+## 🔐 Système de Permissions
+
+### Rôles Utilisateurs
+
+1. **Employé**
+   - Créer des demandes d'équipement
+   - Consulter ses équipements affectés
+   - Signer des décharges
+   - Recevoir des notifications
+
+2. **Gestionnaire Informatique**
+   - Gérer les demandes informatiques
+   - Approuver/rejeter les demandes
+   - Gérer le matériel informatique
+   - Suivre les commandes informatiques
+
+3. **Gestionnaire Bureau**
+   - Gérer les demandes bureau
+   - Approuver/rejeter les demandes
+   - Gérer le matériel de bureau
+   - Suivre les commandes bureau
+
+4. **Super Admin**
+   - Accès complet à toutes les fonctionnalités
+   - Gestion des utilisateurs
+   - Configuration système
+
+## 🔔 Système de Notifications
+
+### Fonctionnalités
+- **Notifications Automatiques** : Créées lors des changements de statut
+- **Messages Contextuels** : Détails spécifiques selon le type de demande
+- **Interface Optimisée** : Affichage propre sans duplication
+- **Filtrage par Rôle** : Seuls les employés reçoivent des notifications
+
+### Exemples de Messages
+- **Approbation** : "🎉 Votre demande de matériel informatique (Ordinateur portable) a été approuvée ! Veuillez signer la décharge pour recevoir l'équipement."
+- **Rejet** : "❌ Votre demande de matériel informatique a été rejetée. Contactez votre responsable pour plus de détails."
+
+## 🤖 Chatbot IA
+
+### Fonctionnalités
+- **Assistant Intelligent** : Réponses automatiques aux questions
+- **Base de Connaissances** : Documentation intégrée
+- **Recherche Sémantique** : RAG pour des réponses précises
+- **Interface Chat** : Interface utilisateur intuitive
+
+### Configuration
+```bash
+# Installer les dépendances IA
+pip install -r requirements_chatbot.txt
+
+# Configurer l'index vectoriel
 python manage.py populate_rag_index
 
-# Tester la connexion Ollama
-python manage.py test_ollama
-
-# Analyser les performances
-python scripts/analyse_performances_chatbot.py
+# Lancer le chatbot
+python manage.py runserver
 ```
 
-### **Maintenance & Sauvegarde**
+## 📱 Interface Utilisateur
+
+### Technologies Frontend
+- **React 18** : Interface utilisateur moderne
+- **TypeScript** : Typage statique
+- **Tailwind CSS** : Styles utilitaires
+- **Alpine.js** : Interactivité légère
+- **Vite** : Build tool rapide
+
+### Composants Principaux
+- **Dashboard** : Vue d'ensemble personnalisée
+- **Demandes** : Gestion des demandes d'équipement
+- **Commandes** : Suivi des commandes
+- **Matériels** : Gestion des équipements
+- **Fournisseurs** : Catalogue des fournisseurs
+- **Chatbot** : Assistant IA intégré
+
+## 🧪 Tests
+
+### Tests Backend
 ```bash
-# Sauvegarde complète
-python manage.py backup_simple
+# Tests unitaires
+python manage.py test
 
-# Archivage automatique
-python manage.py archiver_demandes_signees
-
-# Nettoyage des fournitures orphelines
-python manage.py nettoyer_fournitures_orphelines
+# Tests spécifiques
+python manage.py test apps.demande_equipement
+python manage.py test apps.users
 ```
 
-### **Développement**
+### Tests Frontend
 ```bash
-# Vérification du système
-python manage.py check
-
-# Collecter les fichiers statiques
-python manage.py collectstatic
-
-# Compiler Tailwind CSS
-npx tailwindcss -i ./src/input.css -o ./static/css/tailwind.css --watch
+cd frontend
+npm test
 ```
 
-## 🚀 **Déploiement Production**
+## 📈 Déploiement
 
-### **Serveur Web (Gunicorn)**
+### Production avec Docker
+
+1. **Créer Dockerfile**
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["gunicorn", "ParcInfo.wsgi:application"]
+```
+
+2. **Docker Compose**
+```yaml
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db/parcinfo
+    depends_on:
+      - db
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=parcinfo
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+```
+
+### Déploiement Cloud
+
+#### Heroku
 ```bash
-# Installation
-pip install gunicorn
-
-# Configuration
-gunicorn --bind 0.0.0.0:8000 --workers 4 --timeout 120 ParcInfo.wsgi:application
-
-# Service systemd
-sudo systemctl enable parcinfo
-sudo systemctl start parcinfo
+# Installer Heroku CLI
+heroku create parcinfo-app
+heroku config:set SECRET_KEY=votre-secret-key
+git push heroku main
 ```
 
-### **Nginx Configuration**
-```nginx
-server {
-    listen 80;
-    server_name votre-domaine.com;
-    
-    # Fichiers statiques
-    location /static/ {
-        alias /chemin/vers/static/;
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-    
-    # Fichiers media
-    location /media/ {
-        alias /chemin/vers/media/;
-        expires 1d;
-    }
-    
-    # Proxy vers Django
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
+#### AWS
+- **EC2** : Serveur d'application
+- **RDS** : Base de données PostgreSQL
+- **S3** : Stockage des fichiers
+- **CloudFront** : CDN pour les assets
 
-### **SSL avec Let's Encrypt**
+## 🔧 Maintenance
+
+### Sauvegarde
 ```bash
-# Installation Certbot
-sudo apt install certbot python3-certbot-nginx
+# Sauvegarde de la base de données
+python manage.py dumpdata > backup.json
 
-# Obtention du certificat
-sudo certbot --nginx -d votre-domaine.com
-
-# Renouvellement automatique
-sudo crontab -e
-# Ajouter : 0 12 * * * /usr/bin/certbot renew --quiet
+# Restauration
+python manage.py loaddata backup.json
 ```
 
-## 📊 **Monitoring & Performance**
+### Mise à Jour
+```bash
+# Mettre à jour les dépendances
+pip install -r requirements.txt --upgrade
 
-### **Métriques Disponibles**
-- **Demandes** : total, en attente, approuvées, refusées
-- **Équipements** : par catégorie, statut, garantie
-- **Chatbot IA** : interactions, temps de réponse, satisfaction
-- **Performance** : temps de chargement, utilisation mémoire
+# Appliquer les migrations
+python manage.py migrate
 
-### **Logs & Debugging**
-- **Logs d'application** : `logs/parcinfo.log`
-- **Logs d'erreur** : `logs/error.log`
-- **Logs du chatbot** : `logs/query_analysis_*.jsonl`
-- **Monitoring temps réel** avec `monitor_dashboard.py`
+# Redémarrer les services
+sudo systemctl restart parcinfo
+```
 
-## 🛠️ **Maintenance & Support**
+### Monitoring
+- **Logs** : Django logging configuré
+- **Métriques** : Performance monitoring
+- **Alertes** : Notifications d'erreurs
 
-### **Tâches Automatisées**
-- **Sauvegarde quotidienne** de la base de données
-- **Archivage automatique** des demandes signées
-- **Nettoyage des logs** et fichiers temporaires
-- **Vérification d'intégrité** des données
+## 📚 Documentation
 
-### **Support Technique**
-- **Documentation complète** dans le dossier `docs/`
-- **Guides d'installation** et de configuration
-- **Scripts de diagnostic** et de réparation
-- **Support communautaire** via GitHub Issues
+### Guides Utilisateur
+- [Guide d'Utilisation](docs/GUIDE_UTILISATEUR.md)
+- [Guide Administrateur](docs/GUIDE_ADMINISTRATEUR.md)
+- [Guide Technique](docs/GUIDE_TECHNIQUE.md)
 
-## 📄 **Licence & Contribution**
+### API Documentation
+- [API REST](docs/API.md)
+- [Endpoints](docs/ENDPOINTS.md)
+- [Authentification](docs/AUTH.md)
 
-© 2025 ParcInfo. Tous droits réservés.
+### Développement
+- [Architecture](docs/ARCHITECTURE.md)
+- [Contributing](docs/CONTRIBUTING.md)
+- [Changelog](docs/CHANGELOG.md)
 
-**Contributions bienvenues !** 🚀
-- Signaler des bugs via GitHub Issues
-- Proposer des améliorations via Pull Requests
-- Partager des idées et suggestions
+## 🤝 Contribution
+
+### Comment Contribuer
+1. Fork le projet
+2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
+3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrir une Pull Request
+
+### Standards de Code
+- **Python** : PEP 8, Black, Flake8
+- **JavaScript** : ESLint, Prettier
+- **Tests** : Coverage > 80%
+- **Documentation** : Docstrings, README
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+## 👥 Équipe
+
+- **Développeur Principal** : [Votre Nom]
+- **Designer UI/UX** : [Nom du Designer]
+- **DevOps** : [Nom DevOps]
+
+## 📞 Support
+
+- **Email** : support@parcinfo.com
+- **Documentation** : [docs.parcinfo.com](https://docs.parcinfo.com)
+- **Issues** : [GitHub Issues](https://github.com/votre-repo/parcinfo/issues)
 
 ---
 
-**Version :** 2.0.0  
-**Dernière mise à jour :** 15/08/2025  
-**Développé avec ❤️ et IA 🤖**
-
-**✨ Nouveau : Assistant IA RAG, Dashboards Streamlit, et interface moderne !**
+**ParcInfo** - Gestion intelligente de votre parc informatique 🚀
