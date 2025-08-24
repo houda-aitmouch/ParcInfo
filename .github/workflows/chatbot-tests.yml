@@ -4,13 +4,15 @@ on:
   push:
     paths:
       - 'apps/chatbot/**'
-      - 'test_questions_complementaires_final.py'
+      - 'test_rag_chatbot.py'
       - 'scripts/test_chatbot_*.py'
+      - '.github/workflows/chatbot-tests.yml'
   pull_request:
     paths:
       - 'apps/chatbot/**'
-      - 'test_questions_complementaires_final.py'
+      - 'test_rag_chatbot.py'
       - 'scripts/test_chatbot_*.py'
+      - '.github/workflows/chatbot-tests.yml'
 
 jobs:
   test-chatbot:
@@ -66,7 +68,7 @@ jobs:
       run: |
         export DJANGO_SETTINGS_MODULE=ParcInfo.settings
         export DATABASE_URL=postgres://postgres:postgres@localhost:5432/parcinfo_test
-        python test_questions_complementaires_final.py
+        python test_rag_chatbot.py
       env:
         DJANGO_SETTINGS_MODULE: ParcInfo.settings
         DATABASE_URL: postgres://postgres:postgres@localhost:5432/parcinfo_test
