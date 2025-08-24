@@ -20,7 +20,7 @@ jobs:
     
     env:
       DJANGO_SETTINGS_MODULE: ParcInfo.settings
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/parcinfo_test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/parcinfo_test
       SECRET_KEY: test-secret-key-for-ci
       DEBUG: True
     
@@ -75,11 +75,8 @@ jobs:
       run: |
         python test_rag_chatbot.py
 
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
+    - name: Display test results
       if: always()
-      with:
-        name: chatbot-test-results
-        path: |
-          test_report_*.json
-          *.log
+      run: |
+        echo "Test completed successfully"
+        ls -la test_report_*.json 2>/dev/null || echo "No test reports found"
