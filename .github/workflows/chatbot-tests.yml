@@ -68,13 +68,13 @@ jobs:
       run: |
         python manage.py check
 
-    - name: Run database migrations
-      run: |
-        python manage.py migrate
-
     - name: Setup pgvector extension
       run: |
         PGPASSWORD=postgres psql -h localhost -U postgres -d parcinfo_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+    - name: Run database migrations
+      run: |
+        python manage.py migrate
 
     - name: Create test data
       run: |
