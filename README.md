@@ -384,14 +384,6 @@ sudo systemctl restart parcinfo
 - [Contributing](docs/CONTRIBUTING.md)
 - [Changelog](docs/CHANGELOG.md)
 
-## 🤝 Contribution
-
-### Comment Contribuer
-1. Fork le projet
-2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
 
 ### Standards de Code
 - **Python** : PEP 8, Black, Flake8
@@ -399,22 +391,5 @@ sudo systemctl restart parcinfo
 - **Tests** : Coverage > 80%
 - **Documentation** : Docstrings, README
 
-## 📄 Licence
-
-Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
-## 👥 Équipe
-
-- **Développeur Principal** : [Votre Nom]
-- **Designer UI/UX** : [Nom du Designer]
-- **DevOps** : [Nom DevOps]
-
-## 📞 Support
-
-- **Email** : support@parcinfo.com
-- **Documentation** : [docs.parcinfo.com](https://docs.parcinfo.com)
-- **Issues** : [GitHub Issues](https://github.com/votre-repo/parcinfo/issues)
-
----
 
 **ParcInfo** - Gestion intelligente de votre parc informatique 🚀
