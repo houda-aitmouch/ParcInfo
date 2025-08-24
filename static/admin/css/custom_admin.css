@@ -1,0 +1,486 @@
+/* ========================================
+   ADMIN DJANGO PERSONNALISÉ - @ADD
+   ======================================== */
+
+/* Variables de couleurs personnalisées */
+:root {
+    --primary-color: #8b5cf6;      /* Violet principal */
+    --primary-dark: #7c3aed;       /* Violet foncé */
+    --primary-light: #a78bfa;      /* Violet clair */
+    --secondary-color: #06b6d4;    /* Cyan secondaire */
+    --success-color: #10b981;      /* Vert succès */
+    --warning-color: #f59e0b;      /* Orange avertissement */
+    --danger-color: #ef4444;       /* Rouge danger */
+    --info-color: #3b82f6;         /* Bleu info */
+    --light-color: #f8fafc;        /* Gris très clair */
+    --dark-color: #1e293b;         /* Gris très foncé */
+    --text-primary: #1e293b;       /* Texte principal */
+    --text-secondary: #64748b;     /* Texte secondaire */
+    --border-color: #e2e8f0;       /* Couleur des bordures */
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* ========================================
+   HEADER ET NAVIGATION
+   ======================================== */
+
+#header {
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    color: #000000;
+    box-shadow: var(--shadow);
+    border-bottom: 1px solid #e2e8f0;
+}
+
+#header a:link, #header a:visited {
+    color: #000000 !important;
+}
+
+#header a:hover {
+    color: var(--primary-color) !important;
+}
+
+#branding h1 {
+    color: #000000;
+    font-weight: 600;
+    text-shadow: none;
+}
+
+#branding h1 img {
+    height: 40px;
+    width: auto;
+    margin-right: 10px;
+    vertical-align: middle;
+    filter: none;
+}
+
+#user-tools {
+    color: #000000 !important;
+}
+
+#user-tools a:focus, #user-tools a:hover {
+    border-bottom-color: var(--primary-color);
+    color: var(--primary-color) !important;
+}
+
+#user-tools a:link, #user-tools a:visited {
+    color: #000000 !important;
+}
+
+#user-tools a:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Correction spécifique pour tous les liens du header */
+#header * {
+    color: #000000 !important;
+}
+
+#header a {
+    color: #000000 !important;
+}
+
+#header a:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Correction pour les liens de déconnexion et navigation */
+#user-tools a,
+#user-tools a:link,
+#user-tools a:visited,
+#user-tools a:active {
+    color: #000000 !important;
+    text-decoration: none !important;
+}
+
+#user-tools a:hover {
+    color: var(--primary-color) !important;
+    text-decoration: underline !important;
+}
+
+/* ========================================
+   SIDEBAR ET MENU
+   ======================================== */
+
+.module h2, .module caption, .inline-group h2 {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.module {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+/* ========================================
+   BOUTONS ET ACTIONS
+   ======================================== */
+
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px -1px rgba(0, 0, 0, 0.15);
+}
+
+.button.default, input[type=submit].default, .submit-row input.default {
+    background: var(--success-color);
+}
+
+.button.default:hover, input[type=submit].default:hover, .submit-row input.default:hover {
+    background: #059669;
+}
+
+.button.delete, input[type=submit].delete, .submit-row input.delete {
+    background: var(--danger-color);
+}
+
+.button.delete:hover, input[type=submit].delete:hover, .submit-row input.delete:hover {
+    background: #dc2626;
+}
+
+/* ========================================
+   FORMULAIRES ET CHAMPS
+   ======================================== */
+
+.form-row {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.form-row:last-child {
+    border-bottom: none;
+}
+
+.form-row label {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.form-row input, .form-row textarea, .form-row select {
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.form-row input:focus, .form-row textarea:focus, .form-row select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* ========================================
+   TABLEAUX ET LISTES
+   ======================================== */
+
+#result_list {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+#result_list thead th {
+    background: linear-gradient(135deg, var(--light-color), #f1f5f9);
+    color: var(--text-primary);
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
+    padding: 12px 16px;
+}
+
+#result_list tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+#result_list tbody tr:hover {
+    background-color: #f0f9ff;
+}
+
+#result_list tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* ========================================
+   PAGINATION
+   ======================================== */
+
+.paginator {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.paginator a:link, .paginator a:visited {
+    background: var(--light-color);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    margin: 0 2px;
+    border-radius: 4px;
+    text-decoration: none;
+    border: 1px solid var(--border-color);
+}
+
+.paginator a:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.paginator .this-page {
+    background: var(--primary-color);
+    color: white;
+    padding: 8px 12px;
+    margin: 0 2px;
+    border-radius: 4px;
+    border: 1px solid var(--primary-color);
+}
+
+/* ========================================
+   MESSAGES ET ALERTES
+   ======================================== */
+
+.messagelist {
+    margin: 20px 0;
+}
+
+.messagelist li {
+    padding: 12px 16px;
+    margin: 8px 0;
+    border-radius: 6px;
+    border-left: 4px solid;
+    font-weight: 500;
+}
+
+.messagelist li.success {
+    background-color: #ecfdf5;
+    border-left-color: var(--success-color);
+    color: #065f46;
+}
+
+.messagelist li.warning {
+    background-color: #fffbeb;
+    border-left-color: var(--warning-color);
+    color: #92400e;
+}
+
+.messagelist li.error {
+    background-color: #fef2f2;
+    border-left-color: var(--danger-color);
+    color: #991b1b;
+}
+
+.messagelist li.info {
+    background-color: #eff6ff;
+    border-left-color: var(--info-color);
+    color: #1e40af;
+}
+
+/* ========================================
+   OBJECT TOOLS
+   ======================================== */
+
+.object-tools {
+    margin: 20px 0;
+}
+
+.object-tools a:link, .object-tools a:visited {
+    background: var(--success-color);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 8px;
+    transition: all 0.2s ease;
+}
+
+.object-tools a:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+/* ========================================
+   FILTRES ET RECHERCHE
+   ======================================== */
+
+#changelist-filter {
+    background: var(--light-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 20px;
+}
+
+#changelist-filter h2 {
+    background: var(--primary-color);
+    color: white;
+    margin: -16px -16px 16px -16px;
+    padding: 12px 16px;
+    border-radius: 8px 8px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#changelist-filter li.selected a {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 767px) {
+    #header {
+        padding: 10px;
+    }
+    
+    #branding h1 {
+        font-size: 18px;
+    }
+    
+    #branding h1 img {
+        height: 30px;
+    }
+    
+    .module h2, .module caption, .inline-group h2 {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+    
+    .form-row input, .form-row textarea, .form-row select {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .button, input[type=submit], input[type=button], .submit-row input, a.button {
+        width: 100%;
+        margin: 5px 0;
+        text-align: center;
+    }
+}
+
+/* ========================================
+   ANIMATIONS ET TRANSITIONS
+   ======================================== */
+
+.module, .form-row, .button, #result_list {
+    transition: all 0.2s ease;
+}
+
+/* ========================================
+   PERSONNALISATIONS SPÉCIFIQUES
+   ======================================== */
+
+/* Style pour les modèles spécifiques */
+.model-users .field-username,
+.model-users .field-email,
+.model-users .field-first_name,
+.model-users .field-last_name {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* Style pour les notifications */
+.model-notificationdemande .field-statut_demande {
+    font-weight: 600;
+}
+
+.model-notificationdemande .field-statut_demande .en_attente {
+    color: var(--warning-color);
+}
+
+.model-notificationdemande .field-statut_demande .approuvee {
+    color: var(--success-color);
+}
+
+.model-notificationdemande .field-statut_demande .rejetee {
+    color: var(--danger-color);
+}
+
+/* ========================================
+   PERSONNALISATION DE LA BARRE DE NAVIGATION (BREADCRUMB)
+   ======================================== */
+
+/* Changer uniquement la couleur de fond de la barre de navigation */
+.breadcrumbs {
+    background: var(--primary-light) !important;
+}
+
+/* Alternative pour les breadcrumbs */
+#breadcrumbs {
+    background: var(--primary-light) !important;
+}
+
+/* Style pour tous les liens de navigation */
+.nav-breadcrumbs {
+    background: var(--primary-light) !important;
+}
+
+/* ========================================
+   PERSONNALISATION DES COULEURS D'ABRÉVIATIONS
+   ======================================== */
+
+/* Changer la couleur de l'abréviation "vert" */
+.field-is_active .boolean-true,
+.field-is_staff .boolean-true,
+.field-is_superuser .boolean-true,
+.field-lu .boolean-true,
+.field-actif .boolean-true {
+    color: #10b981 !important; /* Vert moderne */
+    font-weight: 600;
+}
+
+.field-is_active .boolean-false,
+.field-is_staff .boolean-false,
+.field-is_superuser .boolean-false,
+.field-lu .boolean-false,
+.field-actif .boolean-false {
+    color: #ef4444 !important; /* Rouge pour false */
+    font-weight: 600;
+}
+
+/* Personnalisation spécifique pour les champs booléens */
+.boolean-true {
+    color: #10b981 !important;
+    font-weight: 600;
+}
+
+.boolean-false {
+    color: #ef4444 !important;
+    font-weight: 600;
+}
+
+/* Changer la couleur du texte "vert" littéral */
+td:contains("vert"),
+span:contains("vert"),
+div:contains("vert") {
+    color: #10b981 !important;
+    font-weight: 600;
+}
+
+/* ========================================
+   FIN DU FICHIER
+   ======================================== */

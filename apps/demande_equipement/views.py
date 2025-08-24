@@ -46,9 +46,11 @@ def liste_demandes(request):
         base_template = 'dashboards/base_gestionnaire_info.html'
     elif request.user.groups.filter(name='Gestionnaire Bureau').exists():
         base_template = 'dashboards/base_gestionnaire_bureau.html'
+    elif request.user.groups.filter(name='Employé').exists():
+        base_template = 'dashboards/base_employe.html'
     else:
         # Fallback pour les autres utilisateurs (employés, etc.)
-        base_template = 'dashboards/base_superadmin.html'
+        base_template = 'dashboards/base_employe.html'
     
     dashboard_url = get_user_dashboard_url(request.user)
     return render(request, template_name, {
@@ -92,9 +94,11 @@ def nouvelle_demande(request):
         base_template = 'dashboards/base_gestionnaire_info.html'
     elif request.user.groups.filter(name='Gestionnaire Bureau').exists():
         base_template = 'dashboards/base_gestionnaire_bureau.html'
+    elif request.user.groups.filter(name='Employé').exists():
+        base_template = 'dashboards/base_employe.html'
     else:
         # Fallback pour les autres utilisateurs (employés, etc.)
-        base_template = 'dashboards/base_superadmin.html'
+        base_template = 'dashboards/base_employe.html'
     
     dashboard_url = get_user_dashboard_url(request.user)
     return render(request, template_name, {
@@ -141,9 +145,11 @@ def modifier_demande(request, pk):
             base_template = 'dashboards/base_gestionnaire_info.html'
         elif request.user.groups.filter(name='Gestionnaire Bureau').exists():
             base_template = 'dashboards/base_gestionnaire_bureau.html'
+        elif request.user.groups.filter(name='Employé').exists():
+            base_template = 'dashboards/base_employe.html'
         else:
             # Fallback pour les autres utilisateurs (employés, etc.)
-            base_template = 'dashboards/base_superadmin.html'
+            base_template = 'dashboards/base_employe.html'
         
         context = {
             'form': form,
@@ -402,6 +408,7 @@ def approuver_demande(request, pk):
         if action == 'approuver':
             demande.statut = 'approuvee'
             demande.date_approbation = timezone.now()
+            demande.approuve_par = request.user
             # Affecter un matériel si c'est une demande de matériel
             if demande.type_article == 'materiel' and demande.designation:
                 if demande.categorie == 'informatique':

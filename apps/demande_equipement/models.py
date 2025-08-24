@@ -82,6 +82,16 @@ class DemandeEquipement(models.Model):
     date_approbation = models.DateTimeField(null=True, blank=True)
     date_affectation = models.DateTimeField(null=True, blank=True)
     
+    # Approbation
+    approuve_par = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='demandes_approuvees',
+        verbose_name="Approuvé par"
+    )
+    
     # Matériel sélectionné pour l'affectation
     materiel_selectionne_id = models.IntegerField(null=True, blank=True)
     
@@ -89,6 +99,20 @@ class DemandeEquipement(models.Model):
     decharge_signee = models.BooleanField(default=False)
     date_signature = models.DateTimeField(null=True, blank=True)
     signature_image = models.CharField(max_length=255, null=True, blank=True, help_text="Chemin vers l'image de signature électronique")
+    
+    def save(self, *args, **kwargs):
+        """Override save pour détecter les changements de statut"""
+        if self.pk:  # Si c'est une mise à jour
+            try:
+                old_instance = DemandeEquipement.objects.get(pk=self.pk)
+                if old_instance.statut != self.statut:
+                    # Le statut a changé, on va créer une notification
+                    self._statut_changed = True
+                    self._old_statut = old_instance.statut
+            except DemandeEquipement.DoesNotExist:
+                pass
+        
+        super().save(*args, **kwargs)
     
     class Meta:
         verbose_name = "Demande d'équipement"

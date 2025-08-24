@@ -1,8 +1,33 @@
 from django.contrib import admin
-# from .models import Fourniture
+from .models import DemandeEquipement, Fourniture, ArchiveDecharge
 
-# Tous les modèles de demande_equipement supprimés de l'administration
-# Modèle Fourniture commenté également
+# Suppression de tous les enregistrements admin pour masquer l'app de l'interface
+# @admin.register(DemandeEquipement)
+# class DemandeEquipementAdmin(admin.ModelAdmin):
+#     list_display = ['id', 'demandeur', 'categorie', 'type_article', 'statut', 'date_demande']
+#     list_filter = ['categorie', 'type_article', 'statut', 'date_demande', 'decharge_signee']
+#     search_fields = ['id', 'demandeur__username', 'demandeur__first_name', 'demandeur__last_name']
+#     readonly_fields = ['id', 'date_demande', 'date_approbation', 'date_affectation']
+#     ordering = ['-date_demande']
+#     
+#     fieldsets = (
+#         ('Informations de base', {
+#             'fields': ('id', 'demandeur', 'categorie', 'type_article', 'type_demande')
+#         }),
+#         ('Détails de la demande', {
+#             'fields': ('designation_info', 'description_info', 'designation_bureau', 'description_bureau', 'fourniture')
+#         }),
+#         ('Statut et approbation', {
+#             'fields': ('statut', 'approuve_par', 'decharge_signee', 'date_signature', 'signature_image')
+#         }),
+#         ('Affectation', {
+#             'fields': ('date_affectation', 'materiel_selectionne_id')
+#         }),
+#         ('Dates', {
+#             'fields': ('date_demande', 'date_approbation'),
+#             'classes': ('collapse',)
+#         }),
+#     )
 
 # @admin.register(Fourniture)
 # class FournitureAdmin(admin.ModelAdmin):
@@ -11,7 +36,7 @@ from django.contrib import admin
 #     search_fields = ['nom', 'numero_serie']
 #     readonly_fields = ['date_creation', 'date_modification']
 #     ordering = ['nom']
-    
+#     
 #     fieldsets = (
 #         ('Informations de base', {
 #             'fields': ('nom', 'numero_serie', 'type')
@@ -24,14 +49,6 @@ from django.contrib import admin
 #             'classes': ('collapse',)
 #         }),
 #     )
-
-# @admin.register(DemandeEquipement)
-# class DemandeEquipementAdmin(admin.ModelAdmin):
-#     list_display = ['id', 'demandeur', 'categorie', 'type_article', 'statut', 'date_demande']
-#     list_filter = ['categorie', 'type_article', 'statut', 'date_demande']
-#     search_fields = ['demandeur__username', 'demandeur__first_name', 'demandeur__last_name']
-#     readonly_fields = ['date_demande', 'date_approbation', 'date_affectation']
-#     ordering = ['-date_demande']
 
 # @admin.register(ArchiveDecharge)
 # class ArchiveDechargeAdmin(admin.ModelAdmin):

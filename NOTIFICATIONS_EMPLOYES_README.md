@@ -57,6 +57,8 @@ Les employés **NE RECOIVENT PAS** de notifications pour :
 - ❌ Processus administratifs internes
 - ❌ Autres actions non liées à leurs demandes
 
+**IMPORTANT** : Les **administrateurs et gestionnaires** ne reçoivent **AUCUNE notification** du système de demandes. Seuls les employés reçoivent des notifications pour leurs propres demandes.
+
 ## 🔧 Architecture Technique
 
 ### Modèle de Données
@@ -76,6 +78,11 @@ class NotificationDemande(models.Model):
 ### Signals Automatiques
 - **Signal principal** : `creer_notification_demande()` - Notifications de changement de statut
 - **Signal spécial** : `creer_notification_signature()` - Notifications de signature requise
+
+### Logique de Filtrage
+- **Vérification automatique** : Seuls les utilisateurs du groupe "Employé" reçoivent des notifications
+- **Exclusion des admins** : Super Admin, Gestionnaire Informatique, Gestionnaire Bureau sont automatiquement exclus
+- **Sécurité** : Impossible pour un administrateur de recevoir des notifications de demandes
 
 ### Vues API
 - `notifications_demandes_employe()` : Récupération des notifications

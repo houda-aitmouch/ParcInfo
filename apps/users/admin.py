@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import GroupAdmin, UserAdmin
-from .models import CustomUser, NotificationDemande
+from .models import CustomUser
 
 # Désenregistrer le modèle Group de l'admin par défaut
 admin.site.unregister(Group)
@@ -13,7 +13,7 @@ class CustomGroupAdmin(GroupAdmin):
     
     # Personnaliser l'affichage de la liste
     list_display = ['name', 'get_user_count', 'get_permissions_count']
-    list_filter = ['name']
+    list_filter = []  # Suppression de tous les filtres
     search_fields = ['name']
     ordering = ['name']
     
@@ -59,8 +59,8 @@ class CustomUserAdmin(UserAdmin):
     # Champs à afficher dans la liste des utilisateurs
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined', 'get_groups')
     
-    # Filtres disponibles
-    list_filter = ('is_staff', 'is_active', 'is_superuser', 'date_joined', 'groups')
+    # Suppression de tous les filtres
+    list_filter = []
     
     # Champs de recherche
     search_fields = ('username', 'email', 'first_name', 'last_name')
@@ -95,54 +95,4 @@ class CustomUserAdmin(UserAdmin):
 # Personnaliser l'affichage de l'admin
 admin.site.site_header = "Administration ParcInfo"
 admin.site.site_title = "ParcInfo Admin"
-admin.site.index_title = "Gestion du parc informatique"
-
-@admin.register(NotificationDemande)
-class NotificationDemandeAdmin(admin.ModelAdmin):
-    """Administration des notifications de demandes"""
-    
-    list_display = ['utilisateur', 'type_notification', 'titre', 'get_statut_display', 'lu', 'date_creation']
-    list_filter = ['type_notification', 'statut_demande', 'lu', 'date_creation']
-    
-    # Personnaliser l'affichage des statuts
-    def get_statut_display(self, obj):
-        """Affiche le statut avec une couleur appropriée"""
-        statut_colors = {
-            'en_attente': '🟡',
-            'approuvee': '🟢',
-            'rejetee': '🔴',
-            'en_cours': '🔵',
-            'terminee': '⚫',
-            'en_attente_signature': '🟠',
-            'signature_requise': '🟣',
-        }
-        color = statut_colors.get(obj.statut_demande, '⚪')
-        return f"{color} {obj.get_statut_demande_display()}"
-    get_statut_display.short_description = 'Statut'
-    search_fields = ['utilisateur__username', 'utilisateur__email', 'titre', 'message']
-    ordering = ['-date_creation']
-    
-    fieldsets = (
-        ('Informations générales', {
-            'fields': ('utilisateur', 'type_notification', 'titre', 'message')
-        }),
-        ('Statut de la demande', {
-            'fields': ('statut_demande', 'demande_id')
-        }),
-        ('État de la notification', {
-            'fields': ('lu', 'date_lecture')
-        }),
-    )
-    
-    readonly_fields = ['date_creation']
-    
-    def get_queryset(self, request):
-        """Optimiser les requêtes"""
-        return super().get_queryset(request).select_related('utilisateur')
-    
-    def save_model(self, request, obj, form, change):
-        """Logique personnalisée lors de la sauvegarde"""
-        if change and 'lu' in form.changed_data and obj.lu:
-            from django.utils import timezone
-            obj.date_lecture = timezone.now()
-        super().save_model(request, obj, form, change) 
+admin.site.index_title = "Gestion du parc informatique" 

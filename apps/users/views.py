@@ -1308,9 +1308,14 @@ def notifications_demandes_employe(request):
     # Formater les notifications pour l'affichage
     notifications_formatees = []
     for notif in notifications:
+        # Extraire le numéro de demande du titre pour éviter la duplication
+        titre_clean = notif.titre
+        if " - " in notif.titre:
+            titre_clean = notif.titre.split(" - ")[0]  # Garder seulement "Demande D041"
+        
         notifications_formatees.append({
             'id': notif.id,
-            'titre': notif.titre,
+            'titre': titre_clean,  # Titre sans le statut
             'message': notif.message,
             'statut': notif.statut_demande,
             'type': notif.type_notification,

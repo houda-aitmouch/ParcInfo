@@ -1,0 +1,16 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | Administration @ADD{% endblock %}
+
+{% block extrastyle %}
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom_admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <img src="{% static 'images/ADD.png' %}" alt="@ADD Logo" />
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
