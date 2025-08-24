@@ -101,8 +101,24 @@ admin.site.index_title = "Gestion du parc informatique"
 class NotificationDemandeAdmin(admin.ModelAdmin):
     """Administration des notifications de demandes"""
     
-    list_display = ['utilisateur', 'type_notification', 'titre', 'statut_demande', 'lu', 'date_creation']
+    list_display = ['utilisateur', 'type_notification', 'titre', 'get_statut_display', 'lu', 'date_creation']
     list_filter = ['type_notification', 'statut_demande', 'lu', 'date_creation']
+    
+    # Personnaliser l'affichage des statuts
+    def get_statut_display(self, obj):
+        """Affiche le statut avec une couleur appropriée"""
+        statut_colors = {
+            'en_attente': '🟡',
+            'approuvee': '🟢',
+            'rejetee': '🔴',
+            'en_cours': '🔵',
+            'terminee': '⚫',
+            'en_attente_signature': '🟠',
+            'signature_requise': '🟣',
+        }
+        color = statut_colors.get(obj.statut_demande, '⚪')
+        return f"{color} {obj.get_statut_demande_display()}"
+    get_statut_display.short_description = 'Statut'
     search_fields = ['utilisateur__username', 'utilisateur__email', 'titre', 'message']
     ordering = ['-date_creation']
     

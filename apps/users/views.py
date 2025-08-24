@@ -965,10 +965,33 @@ def profil(request):
             stats['commandes_traitees'] = 0
             stats['livraisons_suivies'] = 0
     else:
-        # Statistiques par défaut
-        stats['equipements_geres'] = 0
-        stats['commandes_traitees'] = 0
-        stats['livraisons_suivies'] = 0
+        # Statistiques pour les employés
+        try:
+            from apps.materiel_informatique.models import MaterielInformatique
+            from apps.materiel_bureautique.models import MaterielBureau
+            from apps.demande_equipement.models import DemandeEquipement
+            
+            # Compter les équipements attribués à cet employé
+            stats['equipements_info'] = MaterielInformatique.objects.filter(
+                utilisateur=user, 
+                statut='affecte'
+            ).count()
+            
+            stats['equipements_bureau'] = MaterielBureau.objects.filter(
+                utilisateur=user, 
+                statut='affecte'
+            ).count()
+            
+            # Compter les demandes en cours de cet employé
+            stats['demandes_attente'] = DemandeEquipement.objects.filter(
+                demandeur=user,
+                statut__in=['en_attente', 'en_cours', 'approuvee']
+            ).count()
+            
+        except ImportError:
+            stats['equipements_info'] = 0
+            stats['equipements_bureau'] = 0
+            stats['demandes_attente'] = 0
     
     context = {
         'user': user,
@@ -982,7 +1005,7 @@ def profil(request):
     elif user.groups.filter(name='Gestionnaire Bureau').exists():
         return render(request, 'users/profile_gestionnaire_bureau.html', context)
     else:
-        return render(request, 'users/profile.html', context)
+        return render(request, 'users/profile_employe.html', context)
 
 @login_required
 def dashboard_garantie(request):

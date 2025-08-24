@@ -30,6 +30,8 @@ class NotificationDemande(models.Model):
         ('rejetee', 'Rejetée'),
         ('en_cours', 'En cours de traitement'),
         ('terminee', 'Terminée'),
+        ('en_attente_signature', 'En attente de signature'),
+        ('signature_requise', 'Signature requise'),
     ]
     
     TYPE_CHOICES = [
@@ -78,5 +80,7 @@ class NotificationDemande(models.Model):
             'rejetee': 'bg-red-100 text-red-800',
             'en_cours': 'bg-blue-100 text-blue-800',
             'terminee': 'bg-gray-100 text-gray-800',
+            'en_attente_signature': 'bg-orange-100 text-orange-800',
+            'signature_requise': 'bg-purple-100 text-purple-800',
         }
         return couleurs.get(self.statut_demande, 'bg-gray-100 text-gray-800')

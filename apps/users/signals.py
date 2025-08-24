@@ -6,22 +6,24 @@ from .models import NotificationDemande
 @receiver(post_save, sender='demande_equipement.DemandeEquipement')
 def creer_notification_demande(sender, instance, created, **kwargs):
     """
-    Crée une notification automatique quand le statut d'une demande change
+    Crée une notification automatique pour les employés quand le statut d'une demande change
     """
     if not created:  # Seulement si c'est une mise à jour
         try:
             # Vérifier si le statut a changé
-            if instance.tracker.has_changed('statut'):
+            if hasattr(instance, 'tracker') and instance.tracker.has_changed('statut'):
                 # Créer la notification
                 titre = f"Demande {instance.numero_demande} - {instance.get_statut_display()}"
                 
-                # Message personnalisé selon le statut
+                # Messages personnalisés selon le statut - plus détaillés pour les employés
                 messages = {
-                    'en_attente': f"Votre demande {instance.numero_demande} est en attente de traitement.",
-                    'approuvee': f"Votre demande {instance.numero_demande} a été approuvée !",
-                    'rejetee': f"Votre demande {instance.numero_demande} a été rejetée.",
-                    'en_cours': f"Votre demande {instance.numero_demande} est en cours de traitement.",
-                    'terminee': f"Votre demande {instance.numero_demande} a été traitée avec succès.",
+                    'en_attente': f"Votre demande {instance.numero_demande} est en attente de validation par la hiérarchie.",
+                    'approuvee': f"🎉 Votre demande {instance.numero_demande} a été approuvée ! L'équipement sera commandé prochainement.",
+                    'rejetee': f"❌ Votre demande {instance.numero_demande} a été rejetée. Contactez votre responsable pour plus de détails.",
+                    'en_cours': f"🔄 Votre demande {instance.numero_demande} est en cours de traitement. Nous vous tiendrons informé.",
+                    'terminee': f"✅ Votre demande {instance.numero_demande} a été traitée avec succès. L'équipement est disponible.",
+                    'en_attente_signature': f"✍️ Votre demande {instance.numero_demande} nécessite votre signature pour validation.",
+                    'signature_requise': f"✍️ Signature requise pour votre demande {instance.numero_demande}. Veuillez la signer rapidement.",
                 }
                 
                 message = messages.get(instance.statut, f"Le statut de votre demande {instance.numero_demande} a changé.")
@@ -42,54 +44,38 @@ def creer_notification_demande(sender, instance, created, **kwargs):
             logger = logging.getLogger(__name__)
             logger.error(f"Erreur lors de la création de la notification: {e}")
 
-@receiver(post_save, sender='commande_bureau.CommandeBureau')
-def creer_notification_commande_bureau(sender, instance, created, **kwargs):
+# Signal pour les demandes nécessitant une signature
+@receiver(post_save, sender='demande_equipement.DemandeEquipement')
+def creer_notification_signature(sender, instance, created, **kwargs):
     """
-    Crée une notification pour les commandes bureautiques
+    Crée une notification spéciale quand une demande nécessite une signature
     """
-    if not created and hasattr(instance, 'tracker') and instance.tracker.has_changed('statut'):
+    if not created:
         try:
-            # Créer la notification pour l'utilisateur concerné
-            if instance.utilisateur:
-                titre = f"Commande Bureau {instance.numero_commande} - {instance.get_statut_display()}"
-                message = f"Le statut de votre commande bureautique {instance.numero_commande} a changé."
-                
-                NotificationDemande.objects.create(
-                    utilisateur=instance.utilisateur,
-                    type_notification='demande_bureau',
-                    titre=titre,
-                    message=message,
-                    statut_demande=instance.statut,
-                    demande_id=instance.id
-                )
-                
+            # Vérifier si la demande nécessite une signature
+            if hasattr(instance, 'signature_requise') and instance.signature_requise:
+                # Vérifier si on n'a pas déjà créé une notification pour ce statut
+                if not NotificationDemande.objects.filter(
+                    utilisateur=instance.demandeur,
+                    demande_id=instance.id,
+                    statut_demande='signature_requise'
+                ).exists():
+                    
+                    titre = f"✍️ Signature requise - Demande {instance.numero_demande}"
+                    message = f"Votre demande {instance.numero_demande} nécessite votre signature pour être traitée. Veuillez la signer rapidement."
+                    
+                    NotificationDemande.objects.create(
+                        utilisateur=instance.demandeur,
+                        type_notification='demande_equipement',
+                        titre=titre,
+                        message=message,
+                        statut_demande='signature_requise',
+                        demande_id=instance.id
+                    )
+                    
         except Exception as e:
             import logging
             logger = logging.getLogger(__name__)
-            logger.error(f"Erreur lors de la création de la notification commande bureau: {e}")
+            logger.error(f"Erreur lors de la création de la notification de signature: {e}")
 
-@receiver(post_save, sender='commande_informatique.Commande')
-def creer_notification_commande_info(sender, instance, created, **kwargs):
-    """
-    Crée une notification pour les commandes informatiques
-    """
-    if not created and hasattr(instance, 'tracker') and instance.tracker.has_changed('statut'):
-        try:
-            # Créer la notification pour l'utilisateur concerné
-            if instance.utilisateur:
-                titre = f"Commande IT {instance.numero_commande} - {instance.get_statut_display()}"
-                message = f"Le statut de votre commande informatique {instance.numero_commande} a changé."
-                
-                NotificationDemande.objects.create(
-                    utilisateur=instance.utilisateur,
-                    type_notification='demande_equipement',
-                    titre=titre,
-                    message=message,
-                    statut_demande=instance.statut,
-                    demande_id=instance.id
-                )
-                
-        except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.error(f"Erreur lors de la création de la notification commande info: {e}")
+# Suppression des notifications pour les commandes - les employés ne doivent recevoir que des notifications pour leurs demandes
