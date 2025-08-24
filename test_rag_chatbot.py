@@ -9,7 +9,7 @@ from datetime import datetime
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ParcInfo.settings')
 django.setup()
 
-from apps.chatbot.core_chatbot import ChatbotCore
+from apps.chatbot.core_chatbot import ParcInfoChatbot
 from apps.users.models import CustomUser
 from apps.demande_equipement.models import DemandeEquipement
 from apps.materiel_informatique.models import MaterielInformatique
@@ -23,7 +23,7 @@ def test_rag_chatbot():
     
     # Initialiser le chatbot
     try:
-        chatbot = ChatbotCore()
+        chatbot = ParcInfoChatbot()
         print("✅ Chatbot initialisé avec succès")
     except Exception as e:
         print(f"❌ Erreur d'initialisation du chatbot: {e}")
@@ -45,7 +45,7 @@ def test_rag_chatbot():
         
         try:
             # Traiter la requête
-            response = chatbot.process_query(question, user_id='test_user')
+            response = chatbot.process_query(question)
             
             if response:
                 print(f"✅ Réponse générée ({len(response.get('response', ''))} caractères)")
