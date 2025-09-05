@@ -113,8 +113,14 @@
                             Commande <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
-                            <select class="w-full border-2 border-gray-300 rounded-xl px-5 py-4 bg-white focus:outline-none focus:ring-3 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 text-gray-900 font-medium shadow-sm hover:shadow-md appearance-none">
+                            <select name="{{ form.commande.name }}" id="id_commande"
+                                    class="w-full border-2 border-gray-300 rounded-xl px-5 py-4 bg-white focus:outline-none focus:ring-3 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 text-gray-900 font-medium shadow-sm hover:shadow-md appearance-none">
                                 <option value="">Sélectionnez une commande...</option>
+                                {% for choice in form.fields.commande.queryset %}
+                                    <option value="{{ choice.pk }}" {% if form.commande.value == choice.pk %}selected{% endif %}>
+                                        {{ choice }}
+                                    </option>
+                                {% endfor %}
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -300,9 +306,11 @@
                         <select name="{{ form.statut.name }}" id="{{ form.statut.id_for_label }}" 
                                 class="w-full border-2 border-gray-300 rounded-xl px-5 py-4 focus:ring-3 focus:ring-orange-200 focus:border-orange-500 shadow-sm hover:shadow-md transition-all duration-200" required>
                             {% for value, label in form.statut.field.choices %}
-                                <option value="{{ value }}" {% if form.statut.value == value %}selected{% endif %}>
-                                    {{ label }}
-                                </option>
+                                {% if value == 'nouveau' %}
+                                    <option value="{{ value }}" {% if form.statut.value %}{% if form.statut.value == value %}selected{% endif %}{% else %}selected{% endif %}>En stock</option>
+                                {% else %}
+                                    <option value="{{ value }}" {% if form.statut.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endif %}
                             {% endfor %}
                         </select>
                         {% if form.statut.errors %}
@@ -322,6 +330,7 @@
                         </label>
                         <input type="checkbox" name="{{ form.public.name }}" id="{{ form.public.id_for_label }}" 
                                class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" 
+                               x-ref="publicCheckbox"
                                {% if form.public.value %}checked{% endif %}>
                         {% if form.public.errors %}
                             <p class="mt-3 text-sm text-red-600 flex items-center bg-red-50 px-3 py-2 rounded-lg">
@@ -430,7 +439,7 @@ function materielForm() {
                 this.descriptionsPourDesignation = [];
                 return;
             }
-            fetch(`/materiel-informatique/api/lignes_commande_par_commande/${this.commandeId}/`)
+            fetch(`/materiels/api/lignes_commande_par_commande/${this.commandeId}/`)
                 .then(r => r.json())
                 .then(data => {
                     this.lignesCommande = data;
@@ -468,6 +477,14 @@ function materielForm() {
                 l => l.designation_id == this.designationId && l.description_id == this.descriptionId
             );
             this.ligneChoisie = ligne || {};
+            // Suggérer automatiquement la valeur de public depuis la description (modifiable par l'utilisateur)
+            try {
+                const isPublic = !!(ligne && ligne.description_public);
+                const checkbox = this.$refs.publicCheckbox;
+                if (checkbox) {
+                    checkbox.checked = isPublic;
+                }
+            } catch (e) {}
             // Calcul automatique de la date de service : date_reception + 1 jour
             if (ligne && ligne.date_reception) {
                 const d = new Date(ligne.date_reception);

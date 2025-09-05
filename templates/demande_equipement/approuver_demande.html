@@ -98,6 +98,11 @@
                         {% endif %}">
                         {{ demande.get_statut_display }}
                     </span>
+                    {% if demande.statut == 'refusee' %}
+                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-red-50 text-red-700 border border-red-200">
+                            Rupture de stock
+                        </span>
+                    {% endif %}
                 </div>
             </div>
             
@@ -108,6 +113,44 @@
                     {% if demande.description %}
                         <h3 class="text-sm font-medium text-gray-500 mb-2 mt-4">Description</h3>
                         <p class="text-gray-900">{{ demande.description.nom }}</p>
+                    {% endif %}
+                    
+                    <!-- Matériel sélectionné si la demande est approuvée -->
+                    {% if demande.statut == 'approuvee' and demande.materiel_selectionne_id %}
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <h3 class="text-sm font-medium text-gray-500 mb-2">Matériel sélectionné</h3>
+                            <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                <p class="text-blue-800 font-medium">
+                                    Code inventaire: {{ demande.code_inventaire_exemple|default:"N/A" }}
+                                </p>
+                                {% if demande.date_affectation %}
+                                    <p class="text-sm text-green-600">
+                                        ✅ Statut: Affecté à {{ demande.demandeur.get_full_name }}
+                                    </p>
+                                    <p class="text-sm text-green-600">
+                                        📅 Date d'affectation: {{ demande.date_affectation|date:"d/m/Y à H:i" }}
+                                    </p>
+                                {% else %}
+                                    <p class="text-sm text-orange-600">
+                                        ⏳ Statut: Réservé (en attente d'affectation)
+                                    </p>
+                                    <p class="text-sm text-orange-600">
+                                        👤 Utilisateur: Aucun (pas encore assigné)
+                                    </p>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Information sur les matériels non disponibles -->
+                            {% if total_materiels_categorie > materiels_disponibles|length %}
+                                <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                                    <p class="text-sm text-yellow-700">
+                                        <strong>ℹ️ Information :</strong> 
+                                        Il y a {{ total_materiels_categorie }} matériels au total avec cette désignation et description, 
+                                        mais {{ total_materiels_affectes }} sont déjà affectés à d'autres utilisateurs.
+                                    </p>
+                                </div>
+                            {% endif %}
+                        </div>
                     {% endif %}
                 </div>
             {% endif %}
@@ -121,6 +164,157 @@
                 {% csrf_token %}
                 
                 {% if demande.statut == 'en_attente' %}
+                    <!-- Sélection du matériel si c'est une demande de matériel -->
+                    {% if demande.type_article == 'materiel' and materiels_disponibles %}
+                        <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <h3 class="text-lg font-medium text-blue-900 mb-3">🎯 Sélection du matériel à affecter</h3>
+                            <div class="text-sm text-blue-700 mb-4 space-y-2">
+                                <div class="flex items-start space-x-2">
+                                    <span class="text-blue-600 font-bold">📋</span>
+                                    <div>
+                                        <strong>Sélectionnez le matériel spécifique à affecter pour cette demande.</strong>
+                                        <p class="text-blue-600 mt-1">Chaque matériel a un numéro de série unique - choisissez celui qui convient le mieux.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start space-x-2">
+                                    <span class="text-green-600 font-bold">✅</span>
+                                    <div>
+                                        <strong>Processus automatique :</strong>
+                                        <p class="text-green-600 mt-1">Après approbation, le matériel sélectionné sera automatiquement affecté à l'utilisateur demandeur.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start space-x-2">
+                                    <span class="text-emerald-600 font-bold">📦</span>
+                                    <div>
+                                        <strong>Stock disponible :</strong>
+                                        {% if materiels_disponibles|length > 1 %}
+                                            <p class="text-emerald-600 mt-1">{{ materiels_disponibles|length }} matériels identiques disponibles (même désignation et description) - tous en stock et non affectés.</p>
+                                        {% else %}
+                                            <p class="text-emerald-600 mt-1">1 matériel disponible avec cette désignation et description - en stock et non affecté.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Informations sur la demande -->
+                            <div class="mb-4 p-4 bg-white rounded-lg border border-blue-200 shadow-sm">
+                                <h4 class="font-medium text-gray-900 mb-3 flex items-center">
+                                    <span class="mr-2">📋</span>
+                                    Détails de la demande
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-blue-600 font-bold">🏷️</span>
+                                        <div>
+                                            <span class="font-medium text-gray-700">Désignation :</span>
+                                            <p class="text-gray-900 font-medium">{{ demande.designation.nom }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-blue-600 font-bold">📝</span>
+                                        <div>
+                                            <span class="font-medium text-gray-700">Description :</span>
+                                            <p class="text-gray-900 font-medium">{{ demande.description.nom }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Section de sélection des matériels -->
+                            <div class="mb-4">
+                                <h4 class="font-medium text-gray-900 mb-3 flex items-center">
+                                    <span class="mr-2">🎯</span>
+                                    Sélectionnez un matériel
+                                </h4>
+                                <p class="text-sm text-gray-600 mb-4">Cliquez sur le matériel que vous souhaitez affecter à cette demande :</p>
+                            </div>
+                            
+                            <div class="space-y-3 max-h-96 overflow-y-auto">
+                                {% for materiel in materiels_disponibles %}
+                                    <label class="flex items-center space-x-4 p-4 bg-white rounded-lg border border-blue-200 hover:border-blue-400 hover:shadow-md cursor-pointer transition-all duration-200 group">
+                                        <input type="radio" 
+                                               name="materiel_selectionne" 
+                                               value="{{ materiel.id }}"
+                                               class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 group-hover:border-blue-400"
+                                               {% if forloop.first %}checked{% endif %}>
+                                        <div class="flex-1">
+                                            <div class="flex items-center justify-between">
+                                                <div class="font-medium text-gray-900 text-lg">
+                                                    🏷️ {{ materiel.code_inventaire }}
+                                                </div>
+                                                {% if forloop.first %}
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        ⭐ Sélectionné par défaut
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-sm text-gray-600 mt-1">
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                                    {% if demande.categorie == 'informatique' %}
+                                                        {% if materiel.statut == 'nouveau' %}
+                                                            bg-green-100 text-green-800
+                                                        {% else %}
+                                                            bg-gray-100 text-gray-800
+                                                        {% endif %}
+                                                    {% else %}
+                                                        {% if materiel.statut == 'operationnel' %}
+                                                            bg-green-100 text-green-800
+                                                        {% else %}
+                                                            bg-gray-100 text-gray-800
+                                                        {% endif %}
+                                                    {% endif %}">
+                                                    {% if demande.categorie == 'informatique' %}
+                                                        {{ materiel.get_statut_display }}
+                                                    {% else %}
+                                                        {{ materiel.statut }}
+                                                    {% endif %}
+                                                </span>
+                                                <span class="ml-2 text-gray-500">
+                                                    📦 En stock • Non affecté
+                                                </span>
+                                            </div>
+                                            {% if materiel.numero_serie %}
+                                                <div class="text-xs text-gray-500 mt-1">
+                                                    Série: {{ materiel.numero_serie }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                            
+                            {% if materiels_disponibles|length > 5 %}
+                                <div class="mt-3 text-xs text-blue-600 text-center">
+                                    📜 {{ materiels_disponibles|length }} matériels au total - Faites défiler pour voir tous
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Section d'aide -->
+                            <div class="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                                <div class="flex items-start space-x-2">
+                                    <span class="text-amber-600 font-bold">💡</span>
+                                    <div class="text-sm text-amber-700">
+                                        <strong>Conseil :</strong>
+                                        <p class="mt-1">Tous les matériels affichés correspondent exactement à la demande. Vous pouvez choisir n'importe lequel - ils ont tous les mêmes caractéristiques techniques.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif demande.type_article == 'materiel' and not materiels_disponibles %}
+                        <div class="mb-6 p-4 bg-red-50 rounded-lg border border-red-200">
+                            <h3 class="text-lg font-medium text-red-900 mb-3">⚠️ Aucun matériel disponible</h3>
+                            <p class="text-sm text-red-700">
+                                Aucun matériel n'est actuellement disponible en stock pour cette demande :
+                                <strong>{{ demande.designation.nom }} - {{ demande.description.nom }}</strong>
+                            </p>
+                            <p class="text-sm text-red-600 mt-2">
+                                Tous les matériels avec cette désignation et description sont soit déjà affectés, soit en panne/maintenance.
+                            </p>
+                        </div>
+                    {% endif %}
+                    
                     <div class="flex space-x-4">
                         <button type="submit" name="action" value="approuver" 
                                 class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">

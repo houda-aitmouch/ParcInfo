@@ -1,40 +1,198 @@
-/* Variables CSS personnalisées - Thème ADD */
+/* Variables CSS personnalisées - Thème ADD Moderne avec couleurs de l'image */
 :root {
-    --add-blue: #3399FF;
-    --add-purple: #8B5CF6;
-    --add-blue-light: #60a5fa;
-    --add-purple-light: #c084fc;
-    --gray-50: #F9FAFB;
-    --gray-100: #F3F4F6;
-    --gray-200: #E5E7EB;
-    --gray-300: #D1D5DB;
-    --gray-400: #9CA3AF;
-    --gray-500: #6B7280;
-    --gray-600: #4B5563;
-    --gray-700: #374151;
-    --gray-800: #1F2937;
-    --gray-900: #111827;
+    /* Couleurs principales de l'image ADD */
+    --add-primary: #1E40AF;      /* Bleu principal ADD */
+    --add-secondary: #7C3AED;    /* Violet secondaire ADD */
+    --add-accent: #0EA5E9;       /* Bleu accent ADD */
+    --add-success: #059669;      /* Vert succès ADD */
+    --add-warning: #D97706;      /* Orange avertissement ADD */
+    --add-error: #DC2626;        /* Rouge erreur ADD */
+    
+    /* Couleurs de base modernes */
+    --slate-50: #F8FAFC;
+    --slate-100: #F1F5F9;
+    --slate-200: #E2E8F0;
+    --slate-300: #CBD5E1;
+    --slate-400: #94A3B8;
+    --slate-500: #64748B;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1E293B;
+    --slate-900: #0F172A;
+    
+    /* Couleurs d'accent basées sur ADD */
+    --blue-50: #EFF6FF;
+    --blue-100: #DBEAFE;
+    --blue-200: #BFDBFE;
+    --blue-300: #93C5FD;
+    --blue-400: #60A5FA;
+    --blue-500: #3B82F6;
+    --blue-600: #2563EB;
+    --blue-700: #1D4ED8;
+    --blue-800: #1E40AF;
+    --blue-900: #1E3A8A;
+    
+    --purple-50: #FAF5FF;
+    --purple-100: #F3E8FF;
+    --purple-200: #E9D5FF;
+    --purple-300: #D8B4FE;
+    --purple-400: #C084FC;
+    --purple-500: #A855F7;
+    --purple-600: #9333EA;
+    --purple-700: #7C3AED;
+    --purple-800: #6B21A8;
+    --purple-900: #581C87;
+    
+    --indigo-50: #EEF2FF;
+    --indigo-100: #E0E7FF;
+    --indigo-200: #C7D2FE;
+    --indigo-300: #A5B4FC;
+    --indigo-400: #818CF8;
+    --indigo-500: #6366F1;
+    --indigo-600: #4F46E5;
+    --indigo-700: #4338CA;
+    --indigo-800: #3730A3;
+    --indigo-900: #312E81;
+    
+    /* Couleurs de feedback */
+    --red-50: #FEF2F2;
+    --red-100: #FEE2E2;
     --red-400: #F87171;
     --red-500: #EF4444;
-    --red-700: #B91C1C;
-    --green-400: #34D399;
-    --green-500: #10B981;
-    --green-700: #047857;
-    --blue-50: #EFF6FF;
-    --red-50: #FEF2F2;
-    --green-50: #ECFDF5;
-    --purple-50: #FAF5FF;
+    --red-600: #DC2626;
+    
+    --green-50: #F0FDF4;
+    --green-100: #DCFCE7;
+    --green-400: #4ADE80;
+    --green-500: #22C55E;
+    --green-600: #16A34A;
+    
+    /* Ombres et effets professionnels */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    --shadow-3xl: 0 35px 60px -15px rgb(0 0 0 / 0.3);
+    
+    /* Transitions professionnelles */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* Animations */
-@keyframes fade-in {
+/* Reset et base */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: var(--slate-900);
+    background: linear-gradient(135deg, var(--slate-50) 0%, var(--blue-50) 30%, var(--indigo-100) 70%, var(--purple-50) 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Typographie moderne et professionnelle */
+.font-display {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+/* Animations avancées et professionnelles */
+@keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
     }
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) rotate(-5deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05) rotate(2deg);
+    }
+    70% {
+        transform: scale(0.95) rotate(-1deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    33% {
+        transform: translateY(-15px) rotate(1deg);
+    }
+    66% {
+        transform: translateY(-8px) rotate(-0.5deg);
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 25px rgba(30, 64, 175, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 35px rgba(30, 64, 175, 0.7), 0 0 45px rgba(124, 58, 237, 0.5);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%) skewX(-15deg);
+    }
+    100% {
+        transform: translateX(200%) skewX(-15deg);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
     }
 }
 
@@ -44,198 +202,99 @@
     }
 }
 
-@keyframes shimmer {
-    0% {
-        transform: translateX(-100%);
-    }
-    100% {
-        transform: translateX(100%);
-    }
+/* Classes d'animation professionnelles */
+.animate-fade-in-up {
+    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-@keyframes fadeInError {
-    from {
-        opacity: 0;
-        transform: translateX(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+.animate-fade-in-down {
+    animation: fadeInDown 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-@keyframes spin-slow {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+.animate-slide-up {
+    animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-@keyframes bounceIn {
-    0% {
-        transform: scale(0.3);
-        opacity: 0;
-    }
-    50% {
-        transform: scale(1.05);
-    }
-    70% {
-        transform: scale(0.9);
-    }
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
+.animate-bounce-in {
+    animation: bounceIn 0.8s var(--transition-bounce) forwards;
 }
 
-@keyframes glow {
-    0%, 100% {
-        box-shadow: 0 0 20px rgba(51, 153, 255, 0.3);
-    }
-    50% {
-        box-shadow: 0 0 30px rgba(51, 153, 255, 0.6);
-    }
+.animate-float {
+    animation: float 8s ease-in-out infinite;
 }
 
-/* Classes d'animation */
-.animate-fade-in {
-    animation: fade-in 0.6s ease-out;
+.animate-glow {
+    animation: glow 3s ease-in-out infinite alternate;
+}
+
+.animate-shimmer {
+    animation: shimmer 2.5s linear infinite;
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .animate-spin {
     animation: spin 1s linear infinite;
 }
 
-.animate-spin-slow {
-    animation: spin-slow 2s linear infinite;
+/* Effets de glassmorphism professionnels */
+.glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
-.animate-bounce-in {
-    animation: bounceIn 0.6s ease-out;
+.glass-dark {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.animate-glow {
-    animation: glow 2s ease-in-out infinite;
-}
-
-.error-fade-in {
-    animation: fadeInError 0.3s ease-in;
-}
-
-/* Overlay de focus */
-.focus-overlay {
-    position: absolute;
-    inset: 0;
-    border-radius: 0.75rem; /* rounded-xl */
-    background-color: var(--blue-50);
-    opacity: 0.1;
-    pointer-events: none;
-    transition: opacity 0.2s ease-in-out;
-}
-
-/* Messages d'erreur */
-.error-message {
-    margin-top: 0.25rem;
-    color: var(--red-500);
-    font-size: 0.875rem;
-}
-
-/* Bouton toggle mot de passe */
-.password-toggle {
-    position: absolute;
-    right: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--gray-400);
-    transition: color 0.2s ease-in-out;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.25rem;
-}
-
-.password-toggle:hover {
-    color: var(--gray-600);
-}
-
-/* Lien mot de passe oublié */
-.forgot-password-link {
-    color: var(--add-blue);
-    font-weight: 500;
-    transition: color 0.2s ease-in-out;
-    text-decoration: none;
-}
-
-.forgot-password-link:hover {
-    color: var(--add-purple);
-}
-
-/* Alertes */
-.alert {
-    border-left: 4px solid;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.alert-error {
-    background-color: var(--red-50);
-    border-color: var(--red-400);
-    color: var(--red-700);
-}
-
-.alert-success {
-    background-color: var(--green-50);
-    border-color: var(--green-400);
-    color: var(--green-700);
-}
-
-.alert-info {
-    background-color: var(--blue-50);
-    border-color: var(--add-blue);
-    color: var(--gray-700);
-}
-
-/* Bouton de connexion */
-.login-button {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    font-weight: 600;
-    border-radius: 0.75rem;
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    border: none;
-    cursor: pointer;
+/* Boutons modernes et professionnels */
+.btn-modern {
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    border-radius: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-normal);
     overflow: hidden;
+    text-decoration: none;
+    white-space: nowrap;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--add-blue), var(--add-purple));
+    background: linear-gradient(135deg, var(--add-primary), var(--add-secondary), var(--add-accent));
     color: white;
-    position: relative;
-    overflow: hidden;
+    box-shadow: var(--shadow-xl);
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #2563EB, #7C3AED);
-    box-shadow: 0 20px 25px -5px rgba(51, 153, 255, 0.3), 0 10px 10px -5px rgba(139, 92, 246, 0.2);
-    transform: scale(1.02);
-}
-
-.btn-primary:focus {
-    box-shadow: 0 0 0 3px rgba(51, 153, 255, 0.3);
+    background: linear-gradient(135deg, var(--blue-800), var(--purple-700), var(--indigo-700));
+    box-shadow: var(--shadow-2xl);
+    transform: translateY(-3px);
 }
 
 .btn-primary:active {
-    transform: scale(0.98);
+    transform: translateY(-1px);
 }
 
-.btn-disabled {
-    background-color: var(--gray-400);
-    color: white;
-    cursor: not-allowed;
+.btn-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.3), var(--shadow-xl);
 }
 
-/* Animation de shimmer pour le bouton */
+/* Effet de shimmer professionnel pour les boutons */
 .btn-primary::before {
     content: '';
     position: absolute;
@@ -243,137 +302,145 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    transition: left 0.6s;
 }
 
 .btn-primary:hover::before {
     left: 100%;
 }
 
-/* Effet de survol pour les boutons */
-.btn-hover-effect {
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-hover-effect::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
+/* Champs de formulaire professionnels */
+.input-modern {
     width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s;
-}
-
-.btn-hover-effect:hover::before {
-    left: 100%;
-}
-
-/* Spinner de chargement */
-.loading-spinner {
-    animation: spin 1s linear infinite;
-    margin-left: -0.25rem;
-    margin-right: 0.75rem;
-    height: 1.25rem;
-    width: 1.25rem;
-    color: white;
-}
-
-/* Lien d'inscription */
-.register-link {
-    color: var(--brand-blue);
-    font-weight: 500;
-    transition: color 0.2s ease-in-out;
-    text-decoration: none;
-}
-
-.register-link:hover {
-    color: var(--brand-purple);
-}
-
-/* Footer */
-.footer {
-    text-align: center;
-    margin-top: 2rem;
-    color: var(--gray-500);
+    padding: 1.125rem 1.375rem;
     font-size: 0.875rem;
+    line-height: 1.25rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    border-radius: 0.875rem;
+    transition: all var(--transition-normal);
+    color: var(--slate-900);
 }
 
-.social-links {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 0.75rem;
+.input-modern::placeholder {
+    color: var(--slate-400);
 }
 
-.social-links a {
-    color: var(--gray-400);
-    transition: color 0.2s ease-in-out;
-    text-decoration: none;
-    padding: 0.5rem;
-}
-
-.social-links a:hover {
-    color: var(--brand-blue);
+.input-modern:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(203, 213, 225, 0.8);
     transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
-/* Animation de focus pour les champs */
-.input-focus-ring {
+.input-modern:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 1);
+    border-color: var(--add-primary);
+    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.15), var(--shadow-lg);
+    transform: translateY(-3px);
+}
+
+/* Labels professionnels */
+.label-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--slate-700);
+    margin-bottom: 0.625rem;
+}
+
+.label-modern i {
+    color: var(--add-primary);
+    font-size: 1.125rem;
+}
+
+/* Messages d'erreur professionnels */
+.error-message-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1.125rem;
+    background: linear-gradient(135deg, var(--red-50), var(--red-100));
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    border-radius: 0.875rem;
+    color: var(--red-700);
+    font-weight: 500;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.error-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.375rem;
+    height: 1.375rem;
+    background: var(--add-error);
+    border-radius: 50%;
+    color: white;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* Card professionnelle */
+.card-modern {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 1.75rem;
+    box-shadow: var(--shadow-3xl);
+    overflow: hidden;
     position: relative;
 }
 
-.input-focus-ring::after {
+.card-modern::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    border-radius: 0.75rem;
-    pointer-events: none;
-    transition: all 0.2s ease-in-out;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
 }
 
-/* États de focus améliorés */
-input:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+/* Effets de survol professionnels */
+.hover-lift {
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
-input:focus + .focus-overlay {
-    opacity: 0.2;
+.hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-3xl);
 }
 
-/* Animation au survol des champs */
-input {
-    transition: all 0.2s ease-in-out;
-}
-
-input:hover {
-    border-color: var(--gray-400);
-}
-
-/* Animation d'entrée pour le formulaire */
-.bg-white {
-    transition: all 0.3s ease-in-out;
-}
-
-/* Responsive design */
+/* Responsive design professionnel */
 @media (max-width: 640px) {
-    body {
-        padding: 1rem;
+    .card-modern {
+        margin: 1rem;
+        padding: 1.75rem;
     }
+    
+    .btn-modern {
+        padding: 1.125rem 1.375rem;
+        font-size: 1rem;
+    }
+    
+    .input-modern {
+        padding: 1rem 1.125rem;
+    }
+}
 
-    .bg-white {
+@media (max-width: 480px) {
+    .card-modern {
+        margin: 0.75rem;
         padding: 1.5rem;
-    }
-
-    .login-button {
-        padding: 1rem;
     }
 }
 
@@ -388,23 +455,218 @@ input:hover {
     }
 }
 
-/* Mode sombre (optionnel) */
+/* Mode sombre automatique professionnel */
 @media (prefers-color-scheme: dark) {
-    .dark-mode {
-        --gray-50: #18181B;
-        --gray-100: #27272A;
-        --gray-300: #52525B;
-        --gray-400: #A1A1AA;
-        --gray-500: #71717A;
-        --gray-600: #52525B;
-        --gray-700: #3F3F46;
-        --gray-900: #FAFAFA;
+    :root {
+        --slate-50: #0F172A;
+        --slate-100: #1E293B;
+        --slate-200: #334155;
+        --slate-300: #475569;
+        --slate-400: #64748B;
+        --slate-500: #94A3B8;
+        --slate-600: #CBD5E1;
+        --slate-700: #E2E8F0;
+        --slate-800: #F1F5F9;
+        --slate-900: #F8FAFC;
+    }
+    
+    body {
+        background: linear-gradient(135deg, var(--slate-50) 0%, var(--slate-100) 30%, var(--slate-200) 70%, var(--slate-300) 100%);
+    }
+    
+    .card-modern {
+        background: rgba(15, 23, 42, 0.85);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    .input-modern {
+        background: rgba(30, 41, 59, 0.8);
+        color: var(--slate-100);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    .input-modern::placeholder {
+        color: var(--slate-500);
     }
 }
 
 /* Améliorations pour les écrans haute résolution */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .login-button {
-        border-radius: 0.75rem;
+    .card-modern {
+        border-width: 0.5px;
     }
+    
+    .input-modern {
+        border-width: 0.5px;
+    }
+}
+
+/* Animations d'entrée personnalisées professionnelles */
+.stagger-animation > * {
+    opacity: 0;
+    animation: fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.stagger-animation > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-animation > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-animation > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-animation > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-animation > *:nth-child(5) { animation-delay: 0.5s; }
+
+/* Effets de particules flottantes professionnelles */
+.floating-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue-200), var(--purple-200));
+    opacity: 0.25;
+    filter: blur(1.5px);
+    animation: float 10s ease-in-out infinite;
+}
+
+.floating-particle:nth-child(1) {
+    width: 10rem;
+    height: 10rem;
+    top: 15%;
+    left: 8%;
+    animation-delay: 0s;
+}
+
+.floating-particle:nth-child(2) {
+    width: 7rem;
+    height: 7rem;
+    top: 35%;
+    right: 15%;
+    animation-delay: -3s;
+}
+
+.floating-particle:nth-child(3) {
+    width: 6rem;
+    height: 6rem;
+    bottom: 25%;
+    left: 20%;
+    animation-delay: -6s;
+}
+
+/* Grille de fond subtile et professionnelle */
+.grid-pattern {
+    background-image: 
+        radial-gradient(circle at 1px 1px, var(--slate-200) 1px, transparent 0);
+    background-size: 80px 80px;
+    opacity: 0.08;
+}
+
+/* Effets de focus améliorés et professionnels */
+.focus-ring {
+    position: relative;
+}
+
+.focus-ring::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, var(--add-primary), var(--add-secondary));
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    z-index: -1;
+}
+
+.focus-ring:focus-within::after {
+    opacity: 0.25;
+}
+
+/* Transitions fluides pour tous les éléments */
+* {
+    transition: color var(--transition-fast), 
+                background-color var(--transition-fast), 
+                border-color var(--transition-fast), 
+                box-shadow var(--transition-fast);
+}
+
+/* Effets de survol pour les icônes professionnels */
+.icon-hover {
+    transition: all var(--transition-fast);
+}
+
+.icon-hover:hover {
+    transform: scale(1.15) rotate(3deg);
+    color: var(--add-primary);
+}
+
+/* Bouton toggle mot de passe professionnel */
+.password-toggle {
+    position: absolute;
+    right: 1.125rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--slate-400);
+    cursor: pointer;
+    padding: 0.375rem;
+    border-radius: 0.5rem;
+    transition: all var(--transition-fast);
+}
+
+.password-toggle:hover {
+    color: var(--slate-600);
+    background: rgba(203, 213, 225, 0.25);
+    transform: scale(1.1);
+}
+
+.password-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.3);
+}
+
+/* Effets spéciaux pour le logo */
+.logo-container {
+    position: relative;
+    transition: all var(--transition-slow);
+}
+
+.logo-container::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    background: radial-gradient(circle, rgba(30, 64, 175, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity var(--transition-slow);
+}
+
+.logo-container:hover::before {
+    opacity: 1;
+}
+
+/* Footer professionnel */
+.footer-modern {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-xl);
+}
+
+/* Indicateurs de statut animés */
+.status-indicator {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.status-indicator.blue {
+    background: var(--add-primary);
+}
+
+.status-indicator.purple {
+    background: var(--add-secondary);
+    animation-delay: 0.3s;
+}
+
+.status-indicator.indigo {
+    background: var(--add-accent);
+    animation-delay: 0.6s;
 }

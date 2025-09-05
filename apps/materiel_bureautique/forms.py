@@ -1,6 +1,7 @@
 from django import forms
 from .models import MaterielBureau
 from apps.commande_bureau.models import CommandeBureau, LigneCommandeBureau
+from apps.materiel_informatique.models import MaterielInformatique
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -30,6 +31,29 @@ class MaterielBureauForm(forms.ModelForm):
         
         # Charger toutes les lignes de commande pour la validation
         self.fields['ligne_commande'].queryset = LigneCommandeBureau.objects.all().select_related('designation', 'description', 'commande')
+
+    def clean_code_inventaire(self):
+        """Valider l'unicité globale du code d'inventaire"""
+        code_inventaire = self.cleaned_data.get('code_inventaire')
+        
+        if code_inventaire:
+            # Vérifier l'unicité dans MaterielBureau
+            queryset_bureau = MaterielBureau.objects.filter(code_inventaire=code_inventaire)
+            if self.instance.pk:
+                queryset_bureau = queryset_bureau.exclude(pk=self.instance.pk)
+            
+            if queryset_bureau.exists():
+                raise forms.ValidationError(
+                    f"Le code d'inventaire '{code_inventaire}' existe déjà dans les matériels de bureau."
+                )
+            
+            # Vérifier l'unicité dans MaterielInformatique
+            if MaterielInformatique.objects.filter(code_inventaire=code_inventaire).exists():
+                raise forms.ValidationError(
+                    f"Le code d'inventaire '{code_inventaire}' existe déjà dans les matériels informatiques."
+                )
+        
+        return code_inventaire
 
     def clean(self):
         cleaned_data = super().clean()

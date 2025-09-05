@@ -1,0 +1,32 @@
+# Configuration pour servir les fichiers statiques
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Servir les fichiers CSS
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} \.css$
+    RewriteRule ^(.*)$ /static/css/$1 [L]
+    
+    # Servir les fichiers JavaScript
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} \.js$
+    RewriteRule ^(.*)$ /static/js/$1 [L]
+    
+    # Servir les images
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} \.(png|jpg|jpeg|gif|ico|svg)$
+    RewriteRule ^(.*)$ /static/images/$1 [L]
+</IfModule>
+
+# Headers pour les fichiers statiques
+<IfModule mod_headers.c>
+    # Cache pour les fichiers CSS et JS
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+    
+    # Cache pour les images
+    <FilesMatch "\.(png|jpg|jpeg|gif|ico|svg)$">
+        Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+</IfModule>

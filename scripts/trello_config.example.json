@@ -1,0 +1,12 @@
+{
+  "api_key": "YOUR_TRELLO_API_KEY",
+  "token": "YOUR_TRELLO_TOKEN",
+  "board_id": "YOUR_BOARD_ID",
+  "status_to_list": {
+    "todo": "LIST_ID_TODO",
+    "doing": "LIST_ID_DOING",
+    "done": "LIST_ID_DONE"
+  }
+}
+
+

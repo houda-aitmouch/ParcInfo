@@ -1,0 +1,69 @@
+designation,description,public,materiels_count
+"Baie","bqie test",true,1
+"Baie","Lenovo ThinkSystem DE2000H",false,3
+"Call Server","OmniPCX Entreprise Large",false,2
+"Caméra","Caméra dôme intérieure",false,0
+"Casque sans fil","Casque Bluetooth marque JABRA Evolve2 65",true,0
+"Casque sans fil","Casque Bluetooth marque JABRA Evolve2 85",true,0
+"Ecran","Dell 19 Monitor E1916H",true,0
+"Ecran","Dell 24 Monitor - P2419H - 60.5cm (23.8'') Black",true,0
+"Ecran","Ecran Lenovo ThinkVision T24-10",true,0
+"Ecran","HP EliteDisplay E243",true,0
+"Ecran","Lenovo ThinkVision T24-10",true,0
+"Ecran","Lenovo ThinkVision X24-20",true,0
+"Ecran de réservation sans-fil","ROOMZ Display",false,0
+"Encodeur de badge","RIFL réf LK2-ENC/USB",false,0
+"Enrôleur d'empreintes digitales","HIKVISION réf DSK1F820-F",false,0
+"Imprimante","HP Color LaserJet M283fdn",true,0
+"Imprimante","HP Color LaserJet Pro MFP M281fdn",true,0
+"Imprimante","HP Color LaserJet Pro MFP M477fdw",true,0
+"Imprimante","Imprimante HP M377dw",true,0
+"Imprimante","Imprimante HP M570dn",true,0
+"Imprimante","Imprimante HP M681Z",true,0
+"Imprimante à badges en couleur","EVOLIS réf PRIMACY 2",false,0
+"Kit de projection audiovisuel sans fil","Barco ClickShare C-10",false,0
+"Kit de visioconférence","POLY - STUDIO X50",true,0
+"Kit de visioconférence","POLYCOM - G7500 STUDIO E70",false,0
+"Ordinateur bureau","Dell Optiplex 7070 MT",true,0
+"Ordinateur portable","Dell Latitude 5520",true,0
+"Pare feu","Forcepoint NGFW 2201 Appliance",true,0
+"Pare feu","FortiGate-100E",false,0
+"PC portable","Dell Latitude 5411 MLK XCTO",true,0
+"PC portable","HP Dragonfly 13,5 pouces G4",true,0
+"PC portable","HP EliteBook X360",true,0
+"PC portable","Lenovo ThinkPad E490",true,0
+"PC portable","Lenovo ThinkPad E590",true,0
+"PC portable","Lenovo ThinkPad L380 Yoga",true,0
+"PC portable","Lenovo ThinkPad L480",true,0
+"PC portable","MacBook Pro",true,0
+"PC portable","ThinkPad T14 G5 1 To",true,0
+"PC portable","ThinkPad T14 G5 512 Go",true,0
+"PC portable","ThinkPad X1 Carbon Gen 12",true,0
+"Point d'accès","Indoor Wireless AP FortiAP-221E",false,0
+"Poste téléphonique","8028s Premium Deskphone",true,0
+"Poste téléphonique","8058s Premium Deskphone",true,0
+"Poste téléphonique","8068s Premium Deskphone",true,0
+"Poste téléphonique","8088s Premium Deskphone",true,0
+"Scanner","ScanJet Pro 2600 f1",true,0
+"Serveur","Lenovo ThinkSystem SR530",true,0
+"Serveur","Nutanix NX-8035-G7",true,0
+"Serveur","NVR 32 Channels",false,0
+"Station d'accueil","Belkin Thunderbolt 3 Express Dock HD F4U095",true,0
+"Station d'accueil","Dell Station d'accueil WD19",true,0
+"Station d'accueil","HP Thunderbolt Dock",true,0
+"Station d'accueil","Station d'accueil Lenovo ThinkPad 40A9",true,0
+"Switch","Alcatel-Lucent Enterprise OS6860-P48",true,0
+"Switch","Alcatel-Lucent Enterprise OS6900-X20",true,0
+"Switch","Cisco C8S350 Managed 24-port GE",true,0
+"Switch","Cisco Nexus 3524X 24 10G Ports",true,0
+"Switch","L2+ managed POE FortiSwitch with 24 GE",true,0
+"Switch","L2+managed POE FortiSwitch with 24 GE",false,0
+"Tablette","Apple iPad Pro",true,0
+"Tablette","Samsung TAB A SM-595",false,0
+"Téléviseur","Samsung 55 Série R",true,0
+"Téléviseur","Samsung55 Série R",false,0
+"Téléviseur","Téléviseur PHILIPS 55''",true,0
+"Terminaux biométriques multi technologies de type réseaux","HIKVISION réf DS-K1T804AMF",false,0
+"WAF","Web Application Firewall FWB-100D",false,0
+"WORKSTATION","Dell Precision 5820 Tower XCTO Base",true,0
+"WORKSTATION","Workstation Lenovo P520",true,0

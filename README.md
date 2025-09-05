@@ -384,6 +384,23 @@ sudo systemctl restart parcinfo
 - [Contributing](docs/CONTRIBUTING.md)
 - [Changelog](docs/CHANGELOG.md)
 
+### Diagrammes Gantt (Mermaid)
+
+Les plans Gantt du projet se trouvent dans `gantt_parcinfo.mmd` (version courte) et `gantt_parcinfo_detailed.mmd` (version détaillée inspirée de votre exemple).
+
+Visualisation rapide:
+
+```bash
+# Option 1: Extension VS Code/Cursor "Markdown Preview Mermaid Support"
+# Ouvrir le fichier .mmd et afficher l'aperçu
+
+# Option 2: Exporter en PNG/SVG via mermaid-cli
+npm i -g @mermaid-js/mermaid-cli
+mmdc -i gantt_parcinfo_detailed.mmd -o gantt_parcinfo_detailed.png -t default
+```
+
+Astuce: modifiez les dates/durées directement dans le fichier `.mmd` (format `YYYY-MM-DD`, durées `Xd` ou `Xw`).
+
 ## 🤝 Contribution
 
 ### Comment Contribuer

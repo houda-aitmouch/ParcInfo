@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="{% static 'react/assets/index.css' %}">
 {% endblock %}
 {% block content %}
-    <div class="max-w-6xl mx-auto py-6 px-2">
+    <div class="max-w-8xl mx-auto py-6 px-2">
         <!-- En-tête -->
         <div class="flex justify-between items-center mb-8">
             <div>
@@ -40,47 +40,36 @@
                     <p class="text-sm text-yellow-700 mt-1">Vous avez des demandes approuvées qui nécessitent votre signature</p>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-yellow-200">
+                    <table class="min-w-full divide-y divide-yellow-200 table-fixed">
                         <thead class="bg-yellow-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Catégorie</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Type</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Désignation</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Actions</th>
+                                <th class="w-20 px-3 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Date</th>
+                                <th class="w-24 px-3 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Catégorie</th>
+                                <th class="w-32 px-3 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Type</th>
+                                <th class="w-40 px-3 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Désignation</th>
+                                <th class="w-40 px-3 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-yellow-200">
                             {% for demande in demandes_a_signer %}
                                 <tr class="hover:bg-yellow-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ demande.date_demande|date:"d/m/Y" }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                            {{ demande.get_categorie_display }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <div>
-                                            <div class="font-medium">{{ demande.get_type_article_display }}</div>
-                                            <div class="text-gray-500">{{ demande.get_type_demande_display }}</div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="w-20 px-3 py-4 text-sm text-gray-900 text-center">{{ demande.date_demande|date:"d/m/Y" }}</td>
+                                    <td class="w-24 px-3 py-4 text-center"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">{{ demande.get_categorie_display }}</span></td>
+                                    <td class="w-32 px-3 py-4 text-sm text-gray-900"><div><div class="font-medium truncate" title="{{ demande.get_type_article_display }}">{{ demande.get_type_article_display }}</div><div class="text-gray-500 truncate" title="{{ demande.get_type_demande_display }}">{{ demande.get_type_demande_display }}</div></div></td>
+                                    <td class="w-40 px-3 py-4 text-sm text-gray-900">
                                         {% if demande.type_article == 'materiel' %}
                                             {% if demande.designation %}
-                                                <div class="font-medium">{{ demande.designation.nom }}</div>
+                                                <div class="font-medium truncate" title="{{ demande.designation.nom }}">{{ demande.designation.nom }}</div>
                                                 {% if demande.description %}
-                                                    <div class="text-gray-500">{{ demande.description.nom }}</div>
+                                                    <div class="text-gray-500 truncate" title="{{ demande.description.nom }}">{{ demande.description.nom }}</div>
                                                 {% endif %}
                                             {% else %}
                                                 <span class="text-gray-400">-</span>
                                             {% endif %}
                                         {% elif demande.type_article == 'fourniture' %}
                                             {% if demande.fourniture %}
-                                                <div class="font-medium">{{ demande.fourniture.nom }}</div>
-                                                <div class="text-gray-500">{{ demande.fourniture.numero_serie }}</div>
+                                                <div class="font-medium truncate" title="{{ demande.fourniture.nom }}">{{ demande.fourniture.nom }}</div>
+                                                <div class="text-gray-500 truncate" title="{{ demande.fourniture.numero_serie }}">{{ demande.fourniture.numero_serie }}</div>
                                             {% else %}
                                                 <span class="text-red-400">Fourniture non sélectionnée</span>
                                             {% endif %}
@@ -88,8 +77,8 @@
                                             <span class="text-gray-400">-</span>
                                         {% endif %}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
+                                    <td class="w-40 px-3 py-4 text-sm font-medium">
+                                        <div class="flex flex-col space-y-1">
                                             <a href="{% url 'demande_equipement:signer_decharge' demande.pk %}" 
                                                class="text-yellow-600 hover:text-yellow-900 bg-yellow-100 hover:bg-yellow-200 px-3 py-1 rounded-md text-xs font-medium transition-colors">
                                                 ✍️ Signer décharge
@@ -112,65 +101,42 @@
         {% if autres_demandes %}
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200 table-fixed">
                         <thead class="bg-indigo-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                                    Date
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                                    Catégorie
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                                    Type
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                                    Désignation
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                                    Statut
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                                    Actions
-                                </th>
+                                <th class="w-20 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Date</th>
+                                <th class="w-24 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Catégorie</th>
+                                <th class="w-32 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Type</th>
+                                <th class="w-40 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Désignation</th>
+                                <th class="w-32 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Statut</th>
+                                <th class="w-40 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             {% for demande in autres_demandes %}
                                 <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ demande.date_demande|date:"d/m/Y" }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    <td class="w-20 px-3 py-4 text-sm text-gray-900 text-center">{{ demande.date_demande|date:"d/m/Y" }}</td>
+                                    <td class="w-24 px-3 py-4 text-center"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                             {% if demande.categorie == 'bureau' %}
                                                 bg-blue-100 text-blue-800
                                             {% else %}
                                                 bg-green-100 text-green-800
-                                            {% endif %}">
-                                            {{ demande.get_categorie_display }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <div>
-                                            <div class="font-medium">{{ demande.get_type_article_display }}</div>
-                                            <div class="text-gray-500">{{ demande.get_type_demande_display }}</div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {% endif %}">{{ demande.get_categorie_display }}</span></td>
+                                    <td class="w-32 px-3 py-4 text-sm text-gray-900"><div><div class="font-medium truncate" title="{{ demande.get_type_article_display }}">{{ demande.get_type_article_display }}</div><div class="text-gray-500 truncate" title="{{ demande.get_type_demande_display }}">{{ demande.get_type_demande_display }}</div></div></td>
+                                    <td class="w-40 px-3 py-4 text-sm text-gray-900">
                                         {% if demande.type_article == 'materiel' %}
                                             {% if demande.designation %}
-                                                <div class="font-medium">{{ demande.designation.nom }}</div>
+                                                <div class="font-medium truncate" title="{{ demande.designation.nom }}">{{ demande.designation.nom }}</div>
                                                 {% if demande.description %}
-                                                    <div class="text-gray-500">{{ demande.description.nom }}</div>
+                                                    <div class="text-gray-500 truncate" title="{{ demande.description.nom }}">{{ demande.description.nom }}</div>
                                                 {% endif %}
                                             {% else %}
                                                 <span class="text-gray-400">-</span>
                                             {% endif %}
                                         {% elif demande.type_article == 'fourniture' %}
                                             {% if demande.fourniture %}
-                                                <div class="font-medium">{{ demande.fourniture.nom }}</div>
-                                                <div class="text-gray-500">{{ demande.fourniture.numero_serie }}</div>
+                                                <div class="font-medium truncate" title="{{ demande.fourniture.nom }}">{{ demande.fourniture.nom }}</div>
+                                                <div class="text-gray-500 truncate" title="{{ demande.fourniture.numero_serie }}">{{ demande.fourniture.numero_serie }}</div>
                                             {% else %}
                                                 <span class="text-red-400">Fourniture non sélectionnée</span>
                                             {% endif %}
@@ -178,7 +144,7 @@
                                             <span class="text-gray-400">-</span>
                                         {% endif %}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="w-32 px-3 py-4 text-center">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                             {% if demande.statut == 'en_attente' %}
                                                 bg-yellow-100 text-yellow-800
@@ -200,8 +166,8 @@
                                             {% endif %}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
+                                    <td class="w-40 px-3 py-4 text-sm font-medium">
+                                        <div class="flex flex-col space-y-1">
                                             {% if demande.statut == 'en_attente' %}
                                                 <a href="{% url 'demande_equipement:modifier_demande' demande.pk %}" 
                                                    class="text-indigo-600 hover:text-indigo-900 transition-colors">
@@ -215,7 +181,7 @@
                                                 <div class="flex flex-col space-y-1">
                                                     <span class="text-green-600 font-medium text-xs">Décharge signée</span>
                                                     <span class="text-xs text-gray-500">{{ demande.date_signature_formatted }}</span>
-                                                    <div class="flex space-x-2">
+                                                    <div class="flex flex-col space-y-1">
                                                         <a href="{% url 'demande_equipement:telecharger_decharge' demande.pk %}?inline=1" 
                                                            target="_blank"
                                                            class="text-green-600 hover:text-green-900 text-xs transition-colors">

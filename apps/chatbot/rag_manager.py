@@ -2,18 +2,22 @@ import logging
 import json
 from typing import List, Dict, Optional, Any
 from django.db import connection
+import re
+
+logger = logging.getLogger(__name__)
 
 # Handle missing sentence_transformers gracefully
 try:
     from sentence_transformers import SentenceTransformer
     SENTENCE_TRANSFORMERS_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     SENTENCE_TRANSFORMERS_AVAILABLE = False
     SentenceTransformer = None
-
-import re
-
-logger = logging.getLogger(__name__)
+    logger.warning(f"sentence_transformers not available: {e}")
+except Exception as e:
+    SENTENCE_TRANSFORMERS_AVAILABLE = False
+    SentenceTransformer = None
+    logger.warning(f"sentence_transformers error: {e}")
 
 class RAGManager:
     """Enhanced RAG Manager with comprehensive indexing and validation"""
@@ -24,8 +28,10 @@ class RAGManager:
             self.embed_model = None
         else:
             try:
-                self.embed_model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
-                logger.info("✅ RAG Manager initialized with embedding model")
+                import torch
+                device = 'mps' if torch.backends.mps.is_available() else 'cpu'
+                self.embed_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2', device=device)
+                logger.info(f"✅ RAG Manager initialized with embedding model on device: {device}")
             except Exception as e:
                 logger.error(f"❌ Failed to initialize embedding model: {e}")
                 self.embed_model = None
@@ -605,16 +611,20 @@ class RAGManager:
                             # Apply strategy weight
                             weighted_score = score * strategy['weight']
                             
-                            all_results.append({
-                                "content": content,
-                                "score": weighted_score,
-                                "metadata": {
-                                    "model": model_name or "",
-                                    "app": app_label or "",
-                                    "type": model_name.lower() if model_name else "",
-                                    "strategy": strategy_name
-                                }
-                            })
+                            # Validation stricte du contenu avant d'ajouter aux résultats
+                            if self._validate_content_relevance(content, q):
+                                all_results.append({
+                                    "content": content,
+                                    "score": weighted_score,
+                                    "metadata": {
+                                        "model": model_name or "",
+                                        "app": app_label or "",
+                                        "type": model_name.lower() if model_name else "",
+                                        "strategy": strategy_name
+                                    }
+                                })
+                            else:
+                                logger.warning(f"Contenu invalide filtré: {content[:100]}...")
                             
                 except Exception as e:
                     logger.warning(f"Strategy {strategy['strategy']} failed: {e}")
@@ -638,6 +648,53 @@ class RAGManager:
         except Exception as e:
             logger.error(f"Search error: {str(e)}")
             return []
+
+    def _validate_content_relevance(self, content: str, query: str) -> bool:
+        """Valide la pertinence du contenu par rapport à la requête"""
+        try:
+            # Vérifier que le contenu n'est pas vide ou trop court
+            if not content or len(content.strip()) < 10:
+                return False
+            
+            # Vérifier que le contenu ne contient pas de patterns d'hallucination
+            # Patterns d'hallucination plus permissifs - seulement les plus évidents
+            hallucination_patterns = [
+                r'FOURNISSEUR_NON_VÉRIFIÉ',
+                r'CODE_INVENTAIRE_INCONNU',
+                r'UTILISATEUR_INCONNU',
+                r'\[DONNÉE NON DISPONIBLE\]',
+                r'\[INFORMATION MANQUANTE\]',
+            ]
+            
+            import re
+            for pattern in hallucination_patterns:
+                if re.search(pattern, content, re.IGNORECASE):
+                    logger.warning(f"Pattern d'hallucination détecté dans le contenu: {pattern}")
+                    return False
+            
+            # Vérifier que le contenu contient des informations factuelles
+            factual_indicators = [
+                r'[A-Z]{2,}',  # Codes en majuscules
+                r'[0-9]+',     # Nombres
+                r'@',          # Emails
+                r'[A-Za-z]+\.[A-Za-z]+',  # Noms avec points
+                r'[A-Z]{2,}[0-9]+',  # Codes avec chiffres
+            ]
+            
+            has_factual_content = any(re.search(pattern, content) for pattern in factual_indicators)
+            if not has_factual_content:
+                logger.warning("Contenu sans indicateurs factuels détecté")
+                return False
+            
+            # Vérifier que le contenu n'est pas une répétition de la requête
+            if content.lower().strip() == query.lower().strip():
+                return False
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de la validation de pertinence: {e}")
+            return False
 
     def validate_coherence(self) -> Dict[str, Any]:
         """Validate RAG-DB coherence and return detailed report"""

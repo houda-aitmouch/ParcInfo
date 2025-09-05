@@ -1,0 +1,3 @@
+# Fichier binaire simulé pour le modèle BART réentraîné
+# Ce fichier représente les poids du modèle fine-tuné
+# En production, ce serait un vrai fichier de modèle PyTorch

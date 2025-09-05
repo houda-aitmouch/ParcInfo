@@ -1,0 +1,23 @@
+STATISTIQUES DÉTAILLÉES - BASE DE DONNÉES CHATBOT
+============================================================
+Date d'export : 2025-09-04 20:05:09
+
+STATISTIQUES PAR MODÈLE :
+------------------------------
+Utilisateurs              :      4 enregistrements
+Fournisseurs              :     42 enregistrements
+Matériels Informatique    :      8 enregistrements
+Matériels Bureautique     :      3 enregistrements
+Commandes Informatique    :      2 enregistrements
+Commandes Bureautique     :      3 enregistrements
+Livraisons                :      4 enregistrements
+Demandes d'équipement     :      3 enregistrements
+Interactions Chatbot      :   2904 enregistrements
+Feedback Chatbot          :      7 enregistrements
+------------------------------
+TOTAL                     :   2980 enregistrements
+
+STATISTIQUES INTERACTIONS CHATBOT :
+-----------------------------------
+Total interactions : 2904
+Erreur lors des statistiques : Cannot resolve keyword 'intent' into field. Choices are: detected_intent, final_response, id, rag_results, session_id, sql_attempted, sql_results, timestamp, user_query

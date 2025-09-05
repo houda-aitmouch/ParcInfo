@@ -476,7 +476,9 @@ class Command(BaseCommand):
         # Vérifier la taille des embeddings
         try:
             from sentence_transformers import SentenceTransformer
-            model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+            import torch
+            device = 'mps' if torch.backends.mps.is_available() else 'cpu'
+            model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2", device=device)
             embedding_size = len(model.encode("test"))
             self.stdout.write(
                 self.style.SUCCESS(

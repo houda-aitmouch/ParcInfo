@@ -3,8 +3,12 @@
 
 {% block title %}Toutes les demandes d'équipement - ADD{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/table-optimizations.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="max-w-7xl mx-auto py-10 px-4">
+<div class="max-w-9xl mx-auto py-10 px-4">
         <!-- En-tête -->
         <div class="flex justify-between items-center mb-8">
             <div>
@@ -38,46 +42,46 @@
         {% if demandes %}
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200 table-fixed demande-table">
                         <thead class="bg-indigo-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th class="w-20 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Date
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th class="w-48 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Demandeur
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th class="w-24 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Catégorie
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th class="w-32 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Type
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th class="w-32 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Désignation
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th class="w-36 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Description
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th class="w-32 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Code inventaire
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th class="w-20 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Effectif
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th class="w-20 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Stock
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th class="w-32 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Date d'affectation
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th class="w-32 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Statut
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th class="w-32 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Décharge
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th class="w-40 px-3 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Actions
                                 </th>
                             </tr>
@@ -85,10 +89,10 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             {% for demande in demandes %}
                                 <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="w-20 px-3 py-4 text-sm text-gray-900 text-center">
                                         {{ demande.date_demande|date:"d/m/Y" }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="w-48 px-3 py-4 text-sm text-gray-900">
                                         <div class="flex items-center">
                                             <div class="flex-shrink-0 h-8 w-8">
                                                 <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
@@ -107,7 +111,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="w-24 px-3 py-4 text-center">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                             {% if demande.categorie == 'informatique' %}
                                                 bg-blue-100 text-blue-800
@@ -117,22 +121,22 @@
                                             {{ demande.get_categorie_display }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="w-32 px-3 py-4 text-sm text-gray-900">
                                         <div>
                                             <div class="font-medium">{{ demande.get_type_article_display }}</div>
                                             <div class="text-gray-500">{{ demande.get_type_demande_display }}</div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="w-32 px-3 py-4 text-sm text-gray-900">
                                         {% if demande.type_article == 'materiel' %}
                                             {% if demande.designation %}
-                                                <div class="font-medium">{{ demande.designation.nom }}</div>
+                                                <div class="font-medium truncate" title="{{ demande.designation.nom }}">{{ demande.designation.nom }}</div>
                                             {% else %}
                                                 <span class="text-gray-400">-</span>
                                             {% endif %}
                                         {% elif demande.type_article == 'fourniture' %}
                                             {% if demande.fourniture %}
-                                                <div class="font-medium">{{ demande.fourniture.nom }}</div>
+                                                <div class="font-medium truncate" title="{{ demande.fourniture.nom }}">{{ demande.fourniture.nom }}</div>
                                             {% else %}
                                                 <span class="text-red-400">Fourniture non sélectionnée</span>
                                             {% endif %}
@@ -140,16 +144,16 @@
                                             <span class="text-gray-400">-</span>
                                         {% endif %}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="w-36 px-3 py-4 text-sm text-gray-900">
                                         {% if demande.type_article == 'materiel' %}
                                             {% if demande.description %}
-                                                <div class="text-gray-700">{{ demande.description.nom }}</div>
+                                                <div class="text-gray-700 truncate" title="{{ demande.description.nom }}">{{ demande.description.nom }}</div>
                                             {% else %}
                                                 <span class="text-gray-400">-</span>
                                             {% endif %}
                                         {% elif demande.type_article == 'fourniture' %}
                                             {% if demande.fourniture %}
-                                                <div class="text-gray-700">{{ demande.fourniture.numero_serie }}</div>
+                                                <div class="text-gray-700 truncate" title="{{ demande.fourniture.numero_serie }}">{{ demande.fourniture.numero_serie }}</div>
                                             {% else %}
                                                 <span class="text-red-400">-</span>
                                             {% endif %}
@@ -158,7 +162,7 @@
                                         {% endif %}
                                     </td>
 
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="w-32 px-3 py-4 text-sm text-gray-900 text-center">
                                         {% if demande.type_article == 'materiel' %}
                                             {% if demande.code_inventaire_exemple and demande.code_inventaire_exemple != "N/A" %}
                                                 {% if demande.code_inventaire_exemple|slice:":1" == "❌" %}
@@ -173,7 +177,7 @@
                                             <span class="text-gray-400">-</span>
                                         {% endif %}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="w-20 px-3 py-4 text-sm text-gray-900 text-center">
                                         {% if demande.type_article == 'materiel' %}
                                             {% if demande.effectif_total > 0 %}
                                                 {{ demande.effectif_total }}
@@ -184,7 +188,7 @@
                                             <span class="text-gray-400">-</span>
                                         {% endif %}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="w-20 px-3 py-4 text-sm text-gray-900 text-center">
                                         {% if demande.type_article == 'materiel' %}
                                             {% if demande.stock_disponible > 0 %}
                                                 <span class="text-green-600 font-medium">{{ demande.stock_disponible }}</span>
@@ -195,7 +199,7 @@
                                             <span class="text-gray-400">-</span>
                                         {% endif %}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="w-32 px-3 py-4 text-sm text-gray-900 text-center">
                                         {% if demande.date_affectation %}
                                             {{ demande.date_affectation|date:"d/m/Y" }}
                                         {% elif demande.statut in 'approuvee,en_cours,terminee' %}
@@ -204,7 +208,7 @@
                                             <span class="text-gray-400">-</span>
                                         {% endif %}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="w-32 px-3 py-4 text-center">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                             {% if demande.statut == 'en_attente' %}
                                                 bg-yellow-100 text-yellow-800
@@ -225,15 +229,22 @@
                                                 {{ demande.get_statut_display }}
                                             {% endif %}
                                         </span>
+                                        {% if demande.statut == 'refusee' and demande.stock_disponible == 0 %}
+                                            <div class="mt-1">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-red-50 text-red-700 border border-red-200">
+                                                    Rupture de stock
+                                                </span>
+                                            </div>
+                                        {% endif %}
                                     </td>
                                     <!-- Colonne Décharge -->
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td class="w-32 px-3 py-4 text-sm">
                                         {% if demande.statut == 'approuvee' or demande.statut == 'terminee' %}
                                             {% if demande.decharge_signee %}
                                                 <div class="flex flex-col space-y-1">
-                                                    <span class="text-green-600 font-medium">✅ Signée</span>
+                                                    <span class="text-green-600 font-medium text-xs">✅ Signée</span>
                                                     <span class="text-xs text-gray-500">{{ demande.date_signature_formatted }}</span>
-                                                    <div class="flex space-x-1">
+                                                    <div class="flex flex-col space-y-1">
                                                         <a href="{% url 'demande_equipement:telecharger_decharge' demande.pk %}?inline=1" 
                                                            target="_blank"
                                                            class="text-green-600 hover:text-green-900 text-xs transition-colors">
@@ -247,9 +258,9 @@
                                                 </div>
                                             {% else %}
                                                 <div class="flex flex-col space-y-1">
-                                                    <span class="text-yellow-600 font-medium">⏳ En attente</span>
-                                                    <span class="text-xs text-gray-500">À signer par {{ demande.demandeur.get_full_name }}</span>
-                                                    <div class="flex space-x-1">
+                                                    <span class="text-yellow-600 font-medium text-xs">⏳ En attente</span>
+                                                    <span class="text-xs text-gray-500">À signer par {{ demande.demandeur.first_name }}</span>
+                                                    <div class="flex flex-col space-y-1">
                                                         <a href="{% url 'demande_equipement:telecharger_decharge' demande.pk %}?inline=1" 
                                                            target="_blank"
                                                            class="text-blue-600 hover:text-blue-900 text-xs transition-colors">
@@ -263,30 +274,30 @@
                                                 </div>
                                             {% endif %}
                                         {% else %}
-                                            <span class="text-gray-400">-</span>
+                                            <span class="text-gray-400 text-xs">-</span>
                                         {% endif %}
                                     </td>
                                     <!-- Colonne Actions -->
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
+                                    <td class="w-40 px-3 py-4 text-sm font-medium">
+                                        <div class="flex flex-col space-y-1">
                                             {% if demande.statut == 'en_attente' %}
                                                 <a href="{% url 'demande_equipement:approuver_demande' demande.pk %}" 
-                                                   class="text-green-600 hover:text-green-900 transition-colors">
-                                                    Approuver
+                                                   class="text-green-600 hover:text-green-900 transition-colors text-xs">
+                                                    ✅ Approuver
                                                 </a>
                                                 <a href="{% url 'demande_equipement:approuver_demande' demande.pk %}" 
-                                                   class="text-red-600 hover:text-red-900 transition-colors">
-                                                    Refuser
+                                                   class="text-red-600 hover:text-red-900 transition-colors text-xs">
+                                                    ❌ Refuser
                                                 </a>
                                             {% elif demande.statut == 'en_cours' %}
                                                 <a href="{% url 'demande_equipement:approuver_demande' demande.pk %}" 
-                                                   class="text-gray-600 hover:text-gray-900 transition-colors">
-                                                    Terminer
+                                                   class="text-gray-600 hover:text-gray-900 transition-colors text-xs">
+                                                    ✅ Terminer
                                                 </a>
                                             {% elif demande.statut == 'refusee' %}
-                                                <span class="text-red-600 font-medium">Refusée</span>
+                                                <span class="text-red-600 font-medium text-xs">Refusée</span>
                                             {% else %}
-                                                <span class="text-gray-400">-</span>
+                                                <span class="text-gray-400 text-xs">-</span>
                                             {% endif %}
                                         </div>
                                     </td>

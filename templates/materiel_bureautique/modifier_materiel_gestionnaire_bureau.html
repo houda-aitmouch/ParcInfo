@@ -198,7 +198,7 @@
                     <div>
                         <label class="block text-sm font-bold text-gray-800 mb-4">Statut <span class="text-red-500">*</span></label>
                         <select name="statut" class="w-full border-2 border-gray-300 rounded-xl px-5 py-4 focus:ring-3 focus:ring-purple-500 focus:border-purple-500 shadow-sm hover:shadow-md transition-all duration-200" required>
-                            <option value="Opérationnel" {% if form.instance.statut == 'Opérationnel' %}selected{% endif %}>Opérationnel</option>
+                            <option value="Opérationnel" {% if form.instance.statut == 'Opérationnel' or not form.instance.pk %}selected{% endif %}>En stock</option>
                             <option value="affecte" {% if form.instance.statut == 'affecte' %}selected{% endif %}>Affecté</option>
                             <option value="Réparation" {% if form.instance.statut == 'Réparation' %}selected{% endif %}>Réparation</option>
                             <option value="Réforme" {% if form.instance.statut == 'Réforme' %}selected{% endif %}>Réforme</option>

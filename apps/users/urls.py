@@ -6,7 +6,7 @@ from .views import custom_logout_view
 app_name = 'users'
 
 urlpatterns = [
-    path('', lambda request: redirect('users:redirect_user'), name='root'),  # Add 'users:' prefix
+    path('', views.home_view, name='root'),
     path('redirect-user/', views.redirect_user, name='redirect_user'),
     path('superadmin/', views.superadmin_dashboard, name='superadmin_dashboard'),
     path('superadmin-debug/', views.superadmin_dashboard_debug, name='superadmin_dashboard_debug'),

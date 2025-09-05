@@ -17,8 +17,8 @@ class MaterielInformatique(models.Model):
         choices=[
             ('nouveau', 'Nouveau'),
             ('affecte', 'Affecté'),
-            ('en panne', 'En panne'),
-            ('en maintenance', 'En maintenance'),
+            ('en_panne', 'En panne'),
+            ('en_maintenance', 'En maintenance'),
         ],
         default='nouveau'
     )

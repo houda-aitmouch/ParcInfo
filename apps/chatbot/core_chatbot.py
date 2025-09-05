@@ -18,8 +18,14 @@ try:
     from sentence_transformers import SentenceTransformer, util
     from transformers import pipeline
     NLP_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     # Fallback if sentence_transformers is not available
+    SentenceTransformer = None
+    util = None
+    pipeline = None
+    NLP_AVAILABLE = False
+except Exception as e:
+    # Handle other errors (like huggingface_hub compatibility issues)
     SentenceTransformer = None
     util = None
     pipeline = None
@@ -177,14 +183,25 @@ class ParcInfoChatbot:
             else:
                 logger.warning(" LLM not available, using structured responses only")
 
-            # Initialize NLP components with fallback
+            # Initialize NLP components with robust BART loading
+            # Reuse embedding model from RAGManager to avoid duplicate loading
             if SentenceTransformer is not None and pipeline is not None:
                 try:
-                    self.embedding_model = SentenceTransformer(EMBEDDING_MODEL)
-                    # Initialiser le classifieur zero-shot pour la détection d'intents
-                    self.intent_classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
-                    self.nlp_available = True
-                    logger.info("Advanced NLP components initialized successfully")
+                    # Use the embedding model from RAGManager to avoid duplicate loading
+                    self.embedding_model = self.rag.embed_model
+                    if self.embedding_model:
+                        logger.info(f"Load pretrained SentenceTransformer: {EMBEDDING_MODEL}")
+                        # Chargement robuste de BART avec retry et gestion d'erreurs
+                        self.intent_classifier = self._load_bart_model_robustly()
+                        self.nlp_available = True
+                        if self.intent_classifier:
+                            logger.info("Advanced NLP components initialized successfully (BART enabled)")
+                        else:
+                            logger.warning("Advanced NLP components initialized with BART fallback")
+                    else:
+                        logger.warning("Embedding model not available from RAGManager")
+                        self.intent_classifier = None
+                        self.nlp_available = False
                 except Exception as e:
                     logger.warning(f"Failed to initialize advanced NLP components: {e}")
                     self.embedding_model = None
@@ -304,76 +321,249 @@ class ParcInfoChatbot:
 
             # Initialize intent handlers mapping
             self.intent_handlers = {
-                # Handlers existants
-                'liste_fournisseurs': self._handle_list_suppliers,
-                'recherche_materiel': self._handle_find_material,
-                'statistiques': self._handle_statistics,
-                'statut_livraison': self._handle_delivery_status,
-                'liste_commandes': self._handle_list_commands,
-                'liste_materiel': self._handle_list_material,
-                'demandes_equipement': self._handle_equipment_requests,
-                'help': self._get_help_response,
-                'fallback': self._handle_fallback,
-                'analysis_complexe': self._handle_analysis_complexe,
+            # Handlers existants
+            'liste_fournisseurs': self._handle_list_suppliers,
+            'recherche_materiel': self._handle_find_material,
+            'statistiques': self._handle_statistics,
+            'statut_livraison': self._handle_delivery_status,
+            'liste_commandes': self._handle_list_commands,
+            'liste_materiel': self._handle_list_material,
+            'demandes_equipement': self._handle_equipment_requests,
+            'help': self._get_help_response,
+            'fallback': self._handle_fallback,
+            'analysis_complexe': self._handle_analysis_complexe,
                 
-                # NOUVEAUX HANDLERS SPÉCIFIQUES
-                # Handlers de comptage
-                'count_pending_commands': self._handle_count_pending_commands,
-                'count_approved_commands': self._handle_count_approved_commands,
-                'count_total_commands': self._handle_count_total_commands,
-                'count_it_material': self._handle_count_it_material,
-                'count_office_material': self._handle_count_office_material,
-                'count_total_material': self._handle_count_total_material,
-                            'count_suppliers': self._handle_count_suppliers,
+            # NOUVEAUX HANDLERS SPÉCIFIQUES
+            # Handlers de comptage
+            'count_pending_commands': self._handle_count_pending_commands,
+            'count_approved_commands': self._handle_count_approved_commands,
+            'count_total_commands': self._handle_count_total_commands,
+            'count_it_material': self._handle_count_it_material,
+            'count_office_material': self._handle_count_office_material,
+            'count_total_material': self._handle_count_total_material,
+            'count_suppliers': self._handle_count_suppliers,
             'count_users': self._handle_count_users,
             'count_completed_deliveries': self._handle_count_completed_deliveries,
             'count_delayed_deliveries': self._handle_count_delayed_deliveries,
             'count_total_deliveries': self._handle_count_total_deliveries,
-                'count_generic': self._handle_count_generic,
-                # Utilisateurs - rôles/groupes
-                'user_roles': self._handle_user_roles,
+            'delivery_comments': self._handle_delivery_comments,
+            'count_generic': self._handle_count_generic,
+            # Utilisateurs - rôles/groupes
+            'user_roles': self._handle_user_roles,
                 
-                # Handlers de matériel
-                'broken_material': self._handle_broken_material,
-                'working_material': self._handle_working_material,
-                'material_status': self._handle_material_status,
-                'material_types': self._handle_material_types,
-                'list_material': self._handle_list_material,
-                'user_material_assignment': self._handle_simple_material_query,
+            # Handlers de matériel
+            'broken_material': self._handle_broken_material,
+            'working_material': self._handle_working_material,
+            'material_status': self._handle_material_status,
+            'material_types': self._handle_material_types,
+            'list_material': self._handle_list_material,
+            'user_material_assignment': self._handle_simple_material_query,
                 
-                # Handlers de commandes
-                'command_history': self._handle_command_history,
-                'command_details': self._handle_command_details,
-                'list_commands': self._handle_list_commands,
+            # Handlers de commandes
+            'command_history': self._handle_command_history,
+            'command_details': self._handle_command_details,
+            'liste_commandes': self._handle_list_commands,
                 
-                # Handlers de fournisseurs
-                'list_suppliers': self._handle_list_suppliers,
-                'supplier_details': self._handle_supplier_details,
-                'supplier_ice': self._handle_supplier_ice,
+            # Handlers de fournisseurs
+            'list_suppliers': self._handle_list_suppliers,
+            'supplier_details': self._handle_supplier_details,
+            'supplier_ice': self._handle_supplier_ice,
                 
-                # Handlers de livraisons
-                'delivery_status': self._handle_delivery_status,
-                'completed_deliveries': self._handle_completed_deliveries,
-                'delayed_deliveries': self._handle_delayed_deliveries,
-                'delivery_overview': self._handle_delivery_overview,
-                'deliveries_by_month': self._handle_deliveries_by_month,
+            # Handlers de livraisons
+            'delivery_status': self._handle_delivery_status,
+            'completed_deliveries': self._handle_completed_deliveries,
+            'delayed_deliveries': self._handle_delayed_deliveries,
+            'delivery_overview': self._handle_delivery_overview,
+            'deliveries_by_month': self._handle_deliveries_by_month,
 
-                # Handlers spécifiques commandes
-                'order_mode_passation': self._handle_order_mode_passation,
-                'order_total_price': self._handle_order_total_price,
-                'order_total_by_supplier': self._handle_order_total_by_supplier,
-                'total_it_orders_amount': self._handle_total_it_orders_amount,
-                'total_bureau_orders_amount': self._handle_total_bureau_orders_amount,
+            # Handlers spécifiques commandes
+            'order_mode_passation': self._handle_order_mode_passation,
+            'order_total_price': self._handle_order_total_price,
+            'order_total_by_supplier': self._handle_order_total_by_supplier,
+            'total_it_orders_amount': self._handle_total_it_orders_amount,
+            'total_bureau_orders_amount': self._handle_total_bureau_orders_amount,
 
-                # Handlers spécifiques demandes
-                'count_equipment_requests': self._handle_count_equipment_requests,
-                'equipment_requests_by_date': self._handle_equipment_requests_by_date,
+            # Handlers spécifiques demandes
+            'count_equipment_requests': self._handle_count_equipment_requests,
+            'equipment_requests_by_date': self._handle_equipment_requests_by_date,
             }
 
             logger.info("Chatbot initialized successfully")
         except Exception as e:
             logger.error(f"Initialization error: {e}")
             raise
+
+    def _is_bart_model_cached(self, model_name: str = "facebook/bart-large-mnli") -> bool:
+        """
+        Vérifie si le modèle BART est déjà en cache local.
+        
+        Args:
+            model_name: Nom du modèle à vérifier
+            
+        Returns:
+            True si le modèle est en cache, False sinon
+        """
+        try:
+            from transformers import AutoTokenizer, AutoModelForSequenceClassification
+            from transformers.utils import cached_file
+            
+            # Vérifier si les fichiers du modèle sont en cache
+            tokenizer = AutoTokenizer.from_pretrained(model_name, local_files_only=True)
+            model = AutoModelForSequenceClassification.from_pretrained(model_name, local_files_only=True)
+            return True
+        except Exception:
+            return False
+
+    def _load_bart_model_robustly(self, max_retries: int = 3, retry_delay: int = 5):
+        """
+        Charge le modèle BART de manière robuste avec retry et gestion d'erreurs.
+        
+        Args:
+            max_retries: Nombre maximum de tentatives
+            retry_delay: Délai en secondes entre les tentatives
+            
+        Returns:
+            Le pipeline BART ou None si échec
+        """
+        import time
+        from transformers import pipeline
+        
+        model_name = "facebook/bart-large-mnli"
+        
+        # TEMPORAIRE: Désactiver BART pour éviter les bus errors
+        logger.warning("⚠️ BART classifier désactivé temporairement pour éviter les bus errors")
+        return None
+        
+        # Si pas en cache ou échec, procéder au téléchargement
+        logger.info("Modèle BART non trouvé en cache, téléchargement nécessaire...")
+        
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"Tentative {attempt + 1}/{max_retries} de téléchargement de BART...")
+                
+                # Créer le pipeline (téléchargement automatique si nécessaire)
+                intent_classifier = pipeline(
+                    "zero-shot-classification", 
+                    model=model_name,
+                    device=-1,  # CPU par défaut pour éviter les problèmes GPU
+                    return_all_scores=True
+                )
+                
+                # Test rapide pour vérifier que le modèle fonctionne
+                test_result = intent_classifier("test query", candidate_labels=["test"])
+                if test_result and "labels" in test_result:
+                    logger.info("BART téléchargé et testé avec succès")
+                    return intent_classifier
+                else:
+                    raise Exception("Test du modèle BART échoué")
+                    
+            except Exception as e:
+                logger.warning(f"Tentative {attempt + 1} échouée: {e}")
+                
+                if attempt < max_retries - 1:
+                    logger.info(f"Attente de {retry_delay} secondes avant la prochaine tentative...")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2  # Backoff exponentiel
+                else:
+                    logger.error(f"Échec définitif du téléchargement de BART après {max_retries} tentatives")
+                    
+        return None
+
+        # Model mapping for generic queries
+        from apps.fournisseurs.models import Fournisseur
+        from apps.users.models import CustomUser
+        from apps.materiel_informatique.models import MaterielInformatique
+        from apps.materiel_bureautique.models import MaterielBureau
+        from apps.commande_informatique.models import Commande as CommandeInfo
+        from apps.commande_bureau.models import CommandeBureau
+        from apps.livraison.models import Livraison
+        from apps.commande_informatique.models import Designation as DesignationInfo
+        from apps.commande_bureau.models import DesignationBureau
+        from apps.commande_informatique.models import Description as DescriptionInfo
+        from apps.commande_bureau.models import DescriptionBureau
+        from apps.demande_equipement.models import DemandeEquipement
+
+        # Intent configuration
+        self.intent_map = self._build_intent_map()
+        self._compiled_intent_patterns = self._compile_intent_patterns()
+        self._phrase_boosts = self._build_phrase_boosts()
+        self._entity_patterns = self._build_entity_patterns()
+
+        # Initialize intent examples
+        self._intent_examples = self._load_intent_examples()
+        if self.nlp_available:
+            self._intent_embeddings = self._encode_intent_examples()
+        else:
+            self._intent_embeddings = {}
+
+        # Initialize intent handlers mapping
+        self.intent_handlers = {
+            # Handlers existants
+            'liste_fournisseurs': self._handle_list_suppliers,
+            'recherche_materiel': self._handle_find_material,
+            'statistiques': self._handle_statistics,
+            'statut_livraison': self._handle_delivery_status,
+            'liste_commandes': self._handle_list_commands,
+            'liste_materiel': self._handle_list_material,
+            'demandes_equipement': self._handle_equipment_requests,
+            'help': self._get_help_response,
+            'fallback': self._handle_fallback,
+            'analysis_complexe': self._handle_analysis_complexe,
+                
+            # NOUVEAUX HANDLERS SPÉCIFIQUES
+            # Handlers de comptage
+            'count_pending_commands': self._handle_count_pending_commands,
+            'count_approved_commands': self._handle_count_approved_commands,
+            'count_total_commands': self._handle_count_total_commands,
+            'count_it_material': self._handle_count_it_material,
+            'count_office_material': self._handle_count_office_material,
+            'count_total_material': self._handle_count_total_material,
+            'count_suppliers': self._handle_count_suppliers,
+            'count_users': self._handle_count_users,
+            'count_completed_deliveries': self._handle_count_completed_deliveries,
+            'count_delayed_deliveries': self._handle_count_delayed_deliveries,
+            'count_total_deliveries': self._handle_count_total_deliveries,
+            'delivery_comments': self._handle_delivery_comments,
+            'count_generic': self._handle_count_generic,
+            # Utilisateurs - rôles/groupes
+            'user_roles': self._handle_user_roles,
+                
+            # Handlers de matériel
+            'broken_material': self._handle_broken_material,
+            'working_material': self._handle_working_material,
+            'material_status': self._handle_material_status,
+            'material_types': self._handle_material_types,
+            'list_material': self._handle_list_material,
+            'user_material_assignment': self._handle_simple_material_query,
+                
+            # Handlers de commandes
+            'command_history': self._handle_command_history,
+            'command_details': self._handle_command_details,
+            'liste_commandes': self._handle_list_commands,
+                
+            # Handlers de fournisseurs
+            'list_suppliers': self._handle_list_suppliers,
+            'supplier_details': self._handle_supplier_details,
+            'supplier_ice': self._handle_supplier_ice,
+                
+            # Handlers de livraisons
+            'delivery_status': self._handle_delivery_status,
+            'completed_deliveries': self._handle_completed_deliveries,
+            'delayed_deliveries': self._handle_delayed_deliveries,
+            'delivery_overview': self._handle_delivery_overview,
+            'deliveries_by_month': self._handle_deliveries_by_month,
+
+            # Handlers spécifiques commandes
+            'order_mode_passation': self._handle_order_mode_passation,
+            'order_total_price': self._handle_order_total_price,
+            'order_total_by_supplier': self._handle_order_total_by_supplier,
+            'total_it_orders_amount': self._handle_total_it_orders_amount,
+            'total_bureau_orders_amount': self._handle_total_bureau_orders_amount,
+
+            # Handlers spécifiques demandes
+            'count_equipment_requests': self._handle_count_equipment_requests,
+            'equipment_requests_by_date': self._handle_equipment_requests_by_date,
+            }
 
     def _build_intent_map(self) -> Dict[str, Dict]:
         """Build the intent recognition configuration with enhanced complex patterns, including generic model intent."""
@@ -655,6 +845,15 @@ class ParcInfoChatbot:
                 'keywords': ['livraisons', 'mois', 'prévue', 'prevue', '2025', '2024'],
                 'entities': ['date']
             },
+            'delivery_comments': {
+                'patterns': [
+                    r'.*livraisons?.*commentaires?.*',
+                    r'.*commentaires?.*livraisons?.*',
+                    r'.*combien.*livraisons?.*commentaires?.*',
+                ],
+                'keywords': ['livraisons', 'commentaires', 'commentaire', 'combien'],
+                'entities': []
+            },
             'equipment_requests_by_date': {
                 'patterns': [
                     r'.*qui.*a.*demand[eé].*\d{4}-\d{2}-\d{2}.*',
@@ -747,7 +946,7 @@ class ParcInfoChatbot:
                 'keywords': ['détails', 'details', 'spécifique', 'specifique', 'numéro', 'numero', 'commande'],
                 'entities': ['numero_commande', 'type_commande']
             },
-            'list_commands': {
+            'liste_commandes': {
                 'patterns': [
                     r'.*liste.*commande.*', r'.*voir.*commande.*',
                     r'.*afficher.*commande.*', r'.*toutes.*commande.*'
@@ -899,6 +1098,11 @@ class ParcInfoChatbot:
             'deliveries_by_month': [
                 re.compile(r"\b(livraisons?|pr[eé]vues?)\b.*\b(janvier|f[eé]vrier|mars|avril|mai|juin|juillet|a[oô]ut|septembre|octobre|novembre|d[eé]cembre)\b.*\b20\\d{2}\b", re.IGNORECASE),
                 re.compile(r"\bmois\s+(janvier|f[eé]vrier|mars|avril|mai|juin|juillet|a[oô]ut|septembre|octobre|novembre|d[eé]cembre)\s+20\\d{2}\b", re.IGNORECASE)
+            ],
+            'delivery_comments': [
+                re.compile(r"\b(livraisons?)\b.*\b(commentaires?)\b", re.IGNORECASE),
+                re.compile(r"\b(commentaires?)\b.*\b(livraisons?)\b", re.IGNORECASE),
+                re.compile(r"\b(combien)\b.*\b(livraisons?)\b.*\b(commentaires?)\b", re.IGNORECASE)
             ],
             'material_types': [
                 re.compile(r"\btypes?\s+de\s+mat[ée]riels?\b", re.IGNORECASE),
@@ -1080,7 +1284,7 @@ class ParcInfoChatbot:
                     }
         
         # PRIORITÉ 0.5: Détection précoce des demandes d'équipement (avant la détection de comptage)
-        if ('demande' in query_lower or 'demandes' in query_lower) and ('equip' in query_lower):
+        if ('demande' in query_lower or 'demandes' in query_lower):
             # Vérifier si c'est une demande de liste ou de comptage
             if any(marker in query_lower for marker in ['liste', 'lister', 'afficher', 'voir', 'détails', 'details', 'montre', 'en attente', 'approuvées', 'approuvees', 'attente', 'approuvée', 'approuvee']):
                 return {
@@ -1124,6 +1328,14 @@ class ParcInfoChatbot:
                     "entities": self._extract_entities(query),
                     "original_query": query
                 }
+            # Early override pour les commentaires de livraisons
+            if re.search(r"\b(livraisons?)\b.*\b(commentaires?)\b", query_lower) or re.search(r"\b(commentaires?)\b.*\b(livraisons?)\b", query_lower):
+                return {
+                    "intent": "delivery_comments",
+                    "confidence": 95,
+                    "entities": self._extract_entities(query),
+                    "original_query": query
+                }
             return self._classify_delivery_query(query_lower, query)
         
         # PRIORITÉ 6: Questions d'analyse complexe (seulement si vraiment complexe)
@@ -1156,7 +1368,7 @@ class ParcInfoChatbot:
         """Détecte si c'est une question de comptage simple et spécifique"""
         
         # EXCEPTION : Ne pas traiter comme question de comptage les demandes d'équipement qui sont des demandes de liste
-        if ('demande' in query_lower or 'demandes' in query_lower) and ('equip' in query_lower):
+        if ('demande' in query_lower or 'demandes' in query_lower):
             list_markers = ['liste', 'lister', 'afficher', 'voir', 'détails', 'details', 'montre']
             if any(marker in query_lower for marker in list_markers):
                 return False
@@ -1178,7 +1390,7 @@ class ParcInfoChatbot:
                 return True
         
         # Détection spéciale pour les demandes d'équipement avec statut spécifique
-        if ('demande' in query_lower or 'demandes' in query_lower) and ('equip' in query_lower):
+        if ('demande' in query_lower or 'demandes' in query_lower):
             if any(status in query_lower for status in ['approuv', 'attente', 'refus']):
                 return True
         
@@ -1294,6 +1506,13 @@ class ParcInfoChatbot:
             elif 'retard' in query_lower:
                 return {
                     "intent": "count_delayed_deliveries",
+                    "confidence": 98,
+                    "entities": self._extract_entities(original_query),
+                    "original_query": original_query
+                }
+            elif 'commentaire' in query_lower or 'commentaires' in query_lower:
+                return {
+                    "intent": "delivery_comments",
                     "confidence": 98,
                     "entities": self._extract_entities(original_query),
                     "original_query": original_query
@@ -1557,6 +1776,16 @@ class ParcInfoChatbot:
             ("ont des commandes" in query_lower or "avec des commandes" in query_lower)):
             intent_scores['analysis_complexe'] = 95
             logger.info(f"Boosted analysis_complexe to 95 for 'ont des commandes' query")
+        
+        # Améliorer la détection des listes de commandes
+        if any(word in query_lower for word in ['liste', 'list', 'afficher', 'voir', 'montrer']) and 'commande' in query_lower:
+            intent_scores['liste_commandes'] = max(intent_scores.get('liste_commandes', 0), 80)
+            logger.info(f"Boosted liste_commandes to 80 for list command query")
+        
+        # Détection spécifique pour "liste des commandes"
+        if query_lower.strip() in ['liste des commandes', 'liste des. commande', 'liste commandes']:
+            intent_scores['liste_commandes'] = 95
+            logger.info(f"Boosted liste_commandes to 95 for exact match")
 
         # Determine best intent
         best_intent = max(intent_scores, key=intent_scores.get)
@@ -1862,6 +2091,40 @@ class ParcInfoChatbot:
         
         return response
 
+    def _extract_quoted_name(self, query_text: str) -> Optional[str]:
+        """Extract a target name enclosed in quotes from a query, robust to French apostrophes.
+
+        Preference order:
+        1) Double quotes (including smart quotes “ ”)
+        2) Single quotes (including ’), skipping French elisions like l', d', qu'
+        Returns the last reasonable match found.
+        """
+        import re as _re_local
+
+        q = query_text or ""
+
+        # Try double quotes first (straight and smart)
+        double_matches = list(_re_local.finditer(r'["“”]([^"“”]+)["””]', q))
+        if double_matches:
+            return double_matches[-1].group(1).strip()
+
+        # Then single quotes (straight and curly)
+        single_matches = list(_re_local.finditer(r"['’]([^'’]+)['’]", q))
+        if single_matches:
+            elisions = {"l", "d", "j", "m", "n", "t", "s", "qu"}
+            for m in reversed(single_matches):
+                start = m.start()
+                # Look behind to detect French elision like l' or qu'
+                prefix = q[max(0, start - 3):start].lower()
+                is_elision = any(prefix.endswith(e + "") for e in ["l", "d", "j", "m", "n", "t", "s"]) or prefix.endswith("qu")
+                candidate = m.group(1).strip()
+                if not is_elision and len(candidate) >= 2:
+                    return candidate
+            # Fallback to the last candidate if none passed the filter
+            return single_matches[-1].group(1).strip()
+
+        return None
+
     def _format_material_list_human(self, materials: list, title: str, template_type: str = 'positive_confirmation') -> str:
         """Format a list of materials in a human, conversational way"""
         if not materials:
@@ -1875,7 +2138,7 @@ class ParcInfoChatbot:
         response = f"{greeting} {title} :\n"
         
         for material in materials:
-            response += f"• {material}\n"
+            response += f"- {material}\n"
         
         # Add engagement
         engagement = self._get_conversation_template('engagement')
@@ -1899,6 +2162,7 @@ class ParcInfoChatbot:
 
             # Early route: requête de numéro de série par désignation (tolère 'uméro')
             qlow = query.lower()
+            import re
             import re as _re
             if _re.search(r"\b(u|n)um[ée]ro\s+de\s+s[ée]rie\b", qlow):
                 # If it's about supplies, route to supplies; if it's about warranty, route to warranty-by-material
@@ -1944,6 +2208,505 @@ class ParcInfoChatbot:
                     'method': 'pre_rag_warranty'
                 }
 
+            # Early: liste des désignations (informatique/bureau)
+            if ('liste' in qlow) and ("designation" in qlow or "désignation" in qlow or "designations" in qlow or "désignations" in qlow):
+                dtype = 'informatique' if 'informatique' in qlow else ('bureau' if ('bureau' in qlow or 'bureautique' in qlow) else None)
+                return {
+                    'response': self._handle_list_designations({'original_query': query, 'type': dtype}),
+                    'intent': 'list_designations',
+                    'source': 'early_route',
+                    'confidence': 93,
+                    'method': 'early_override'
+                }
+
+            # Early: fournisseur par ICE (quoted number)
+            if (('fournisseur' in qlow or 'societe' in qlow or 'société' in qlow) and ('ice' in qlow)):
+                quoted = self._extract_quoted_name(query)
+                if quoted and re.fullmatch(r"\d{8,18}", quoted.replace(' ', '')):
+                    return {
+                        'response': self._handle_supplier_by_ice({'original_query': query}),
+                        'intent': 'supplier_by_ice',
+                        'source': 'early_route',
+                        'confidence': 95,
+                        'method': 'early_override'
+                    }
+                return {
+                    'response': self._handle_supplier_ice({'original_query': query}),
+                    'intent': 'supplier_ice',
+                    'source': 'early_route',
+                    'confidence': 95,
+                    'method': 'early_override'
+                }
+
+            # Early: vérification existence fournisseur
+            if ('est-ce que' in qlow or 'est ce que' in qlow) and 'fournisseur' in qlow and 'enregistré' in qlow:
+                return {
+                    'response': self._handle_supplier_exists_check({'original_query': query}),
+                    'intent': 'supplier_exists_check',
+                    'source': 'early_route',
+                    'confidence': 95,
+                    'method': 'early_override'
+                }
+
+            # Early: adresse/détails du fournisseur par nom
+            if ('fournisseur' in qlow or 'societe' in qlow or 'société' in qlow) and ('adresse' in qlow or 'détails' in qlow or 'details' in qlow):
+                return {
+                    'response': self._handle_supplier_details({'original_query': query}),
+                    'intent': 'supplier_details',
+                    'source': 'early_route',
+                    'confidence': 93,
+                    'method': 'early_override'
+                }
+
+            # Early: fournisseur situé à "<adresse exacte>"
+            if ('fournisseur' in qlow or 'fournisseurs' in qlow) and (('situé à' in qlow) or ('situe a' in qlow) or ('à' in qlow) or (' a ' in qlow)) and (('"' in query) or ("'" in query)):
+                return {
+                    'response': self._handle_supplier_by_address({'original_query': query}),
+                    'intent': 'supplier_by_address',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: fournisseurs par ville/localisation
+            if ('fournisseur' in qlow or 'fournisseurs' in qlow) and any(tok in qlow for tok in ['basé à', 'base a', 'situé à', 'situe a', 'à ', ' a ']):
+                return {
+                    'response': self._handle_supplier_location_query(query),
+                    'intent': 'supplier_location',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: prix unitaire par code inventaire
+            if ('prix unitaire' in qlow or 'prix' in qlow) and ('code inventaire' in qlow or 'code' in qlow):
+                return {
+                    'response': self._handle_unit_price_by_code({'original_query': query}),
+                    'intent': 'unit_price_by_code',
+                    'source': 'early_route',
+                    'confidence': 93,
+                    'method': 'early_override'
+                }
+
+            # Early: description par code inventaire
+            if ('description' in qlow) and ('code inventaire' in qlow or 'code' in qlow):
+                return {
+                    'response': self._handle_description_by_code({'original_query': query}),
+                    'intent': 'description_by_code',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: liste tous les utilisateurs enregistrés
+            if ('liste' in qlow) and ('tous' in qlow) and ('utilisateur' in qlow) and ('enregistr' in qlow):
+                return {
+                    'response': self._handle_list_users({'original_query': query}),
+                    'intent': 'list_users',
+                    'source': 'early_route',
+                    'confidence': 95,
+                    'method': 'early_override'
+                }
+
+            # Early: matériels bureautiques disponibles
+            if ('bureautique' in qlow or 'bureau' in qlow) and ('disponible' in qlow or 'disponibles' in qlow):
+                return {
+                    'response': self._handle_office_available_materials({'original_query': query}),
+                    'intent': 'office_available_materials',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: matériels bureautiques affectés à <user>
+            if ('bureautique' in qlow or 'bureau' in qlow) and ('affect' in qlow) and ('"' in query or "'" in query):
+                return {
+                    'response': self._handle_office_assigned_to_user({'original_query': query}),
+                    'intent': 'office_assigned_to_user',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: où est stocké le matériel <designation>
+            if ('où est stocké' in qlow or 'ou est stocke' in qlow or 'ou est stocké' in qlow) and ('matériel' in qlow or 'materiel' in qlow):
+                if ('code inventaire' in qlow or 'code' in qlow):
+                    return {
+                        'response': self._handle_storage_location_by_code({'original_query': query}),
+                        'intent': 'storage_by_code',
+                        'source': 'early_route',
+                        'confidence': 90,
+                        'method': 'early_override'
+                    }
+                else:
+                    return {
+                    'response': self._handle_storage_location_by_designation({'original_query': query}),
+                    'intent': 'storage_by_designation',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: matériels bureautiques avec statut Opérationnel
+            if (('bureautique' in qlow or 'bureau' in qlow) and ('opérationnel' in qlow or 'operationnel' in qlow)):
+                return {
+                    'response': self._handle_office_operational_materials({'original_query': query}),
+                    'intent': 'office_operational_materials',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: matériels informatiques statut nouveau
+            if ('informatique' in qlow and ('nouveau' in qlow)):
+                return {
+                    'response': self._handle_it_new_materials({'original_query': query}),
+                    'intent': 'it_new_materials',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: numéro de série par code inventaire
+            if (('numéro de série' in qlow or 'numero de serie' in qlow) and ('code inventaire' in qlow or 'code' in qlow)):
+                return {
+                    'response': self._handle_serial_by_code({'original_query': query}),
+                    'intent': 'serial_by_code',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: matériels informatiques affectés à un utilisateur (liste)
+            if ('informatique' in qlow and ('affect' in qlow) and ('utilisateur' in qlow or 'user' in qlow)):
+                return {
+                    'response': self._handle_it_assigned_materials({'original_query': query}),
+                    'intent': 'it_assigned_materials',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: matériels informatiques sans nom/désignation spécifiée
+            if ('informatique' in qlow and ("n'ont pas de nom" in qlow or 'sans nom' in qlow or 'nom non spécifié' in qlow or 'nom non specifie' in qlow)):
+                return {
+                    'response': self._handle_it_without_name({'original_query': query}),
+                    'intent': 'it_without_name',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: email d'un utilisateur par nom
+            if ('email' in qlow and ('utilisateur' in qlow or 'user' in qlow)):
+                return {
+                    'response': self._handle_user_email_by_name({'original_query': query}),
+                    'intent': 'user_email_by_name',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: date de création d'un utilisateur
+            if (('quand' in qlow or 'date' in qlow or 'créé' in qlow or 'cree' in qlow) and ('utilisateur' in qlow or 'user' in qlow)):
+                return {
+                    'response': self._handle_user_created_date({'original_query': query}),
+                    'intent': 'user_created_date',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: utilisateurs sans groupe
+            if ('utilisateurs' in qlow or 'users' in qlow) and ('aucun groupe' in qlow or 'sans groupe' in qlow or "n'appartiennent à aucun groupe" in qlow or 'n appartiennent a aucun groupe' in qlow):
+                return {
+                    'response': self._handle_users_without_group({'original_query': query}),
+                    'intent': 'users_without_group',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: liste des groupes (priorité sur groupe d'un utilisateur)
+            if ('liste' in qlow or 'voir' in qlow or 'afficher' in qlow) and ('groupe' in qlow or 'groupes' in qlow):
+                return {
+                    'response': self._handle_list_groups({'original_query': query}),
+                    'intent': 'list_groups',
+                    'source': 'early_route',
+                    'confidence': 95,
+                    'method': 'early_override'
+                }
+
+            # Early: groupe(s) d'un utilisateur (seulement si pas de "liste")
+            if ('groupe' in qlow or 'groupes' in qlow) and ('utilisateur' in qlow or 'user' in qlow) and not ('liste' in qlow or 'voir' in qlow or 'afficher' in qlow):
+                return {
+                    'response': self._handle_user_groups_by_name({'original_query': query}),
+                    'intent': 'user_groups_by_name',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: utilisateurs avec droits staff
+            if ('droits' in qlow or 'rights' in qlow or 'est staff' in qlow or 'staff' in qlow) and ('utilisateurs' in qlow or 'users' in qlow):
+                return {
+                    'response': self._handle_users_with_staff_rights({'original_query': query}),
+                    'intent': 'users_with_staff_rights',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: utilisateurs dans un groupe nommé
+            if ('utilisateurs' in qlow or 'users' in qlow) and ('dans le groupe' in qlow or 'du groupe' in qlow or 'groupe' in qlow):
+                return {
+                    'response': self._handle_users_in_group({'original_query': query}),
+                    'intent': 'users_in_group',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: statut actif/inactif de l'utilisateur "..."
+            if (('statut' in qlow or 'actif' in qlow or 'inactif' in qlow) and ('utilisateur' in qlow or 'user' in qlow)):
+                return {
+                    'response': self._handle_user_status_by_name({'original_query': query}),
+                    'intent': 'user_status_by_name',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: détails complets de l'utilisateur "..."
+            if (('détail' in qlow or 'details' in qlow or 'complet' in qlow or 'profil' in qlow) and ('utilisateur' in qlow or 'user' in qlow)):
+                return {
+                    'response': self._handle_user_full_details({'original_query': query}),
+                    'intent': 'user_full_details',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: qui a des droits de super admin
+            if ('super admin' in qlow or 'superadmin' in qlow) and ('droit' in qlow or 'droits' in qlow or 'qui' in qlow):
+                return {
+                    'response': self._handle_users_with_superadmin_rights({'original_query': query}),
+                    'intent': 'users_with_superadmin_rights',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: durée de garantie de la commande "BCxx"
+            if ('garantie' in qlow and 'commande' in qlow) or re.search(r'\bgarantie\s+de\s+bc\s*\d+', qlow):
+                return {
+                    'response': self._handle_order_warranty_duration({'original_query': query}),
+                    'intent': 'order_warranty_duration',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: montant total de la commande "BCxx" ou autres formats
+            if ('montant total' in qlow or ('montant' in qlow and 'commande' in qlow)):
+                return {
+                    'response': self._handle_order_total_amount({'original_query': query}),
+                    'intent': 'order_total_amount',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: statut d'une commande spécifique
+            if 'statut' in qlow and 'commande' in qlow:
+                return {
+                    'response': self._handle_order_status_direct({'original_query': query}),
+                    'intent': 'order_status',
+                    'source': 'early_route',
+                    'confidence': 95,
+                    'method': 'early_override'
+                }
+
+            # Early: commandes informatiques enregistrées (liste)
+            if ('commandes' in qlow and 'informatiques' in qlow and ('enregistr' in qlow or 'liste' in qlow or 'quelles' in qlow)):
+                return {
+                    'response': self._handle_list_it_orders({'original_query': query}),
+                    'intent': 'list_it_orders',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: toutes les désignations (tous types)
+            if (('désignations' in qlow or 'designations' in qlow) and ('toutes' in qlow or 'tous' in qlow or 'toute' in qlow or 'liste' in qlow)):
+                return {
+                    'response': self._handle_list_all_designations({'original_query': query}),
+                    'intent': 'list_all_designations',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: existe-t-il une désignation "X"
+            if (('désignation' in qlow or 'designation' in qlow) and ('existe' in qlow or 'y a-t-il' in qlow or 'ya t il' in qlow or 'y a t il' in qlow or 'appelée' in qlow or 'nommée' in qlow or 'nommee' in qlow)):
+                return {
+                    'response': self._handle_exists_designation({'original_query': query}),
+                    'intent': 'exists_designation',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: désignations commençant par lettre "C"
+            if (('désignations' in qlow or 'designations' in qlow) and ('commenc' in qlow or 'lettre' in qlow)):
+                return {
+                    'response': self._handle_designations_starting_with({'original_query': query}),
+                    'intent': 'designations_starting_with',
+                    'source': 'early_route',
+                    'confidence': 88,
+                    'method': 'early_override'
+                }
+
+            # Early: compter désignations total
+            if (('combien' in qlow or 'nombre' in qlow or 'total' in qlow) and ('désignations' in qlow or 'designations' in qlow)):
+                return {
+                    'response': self._handle_count_designations({'original_query': query}),
+                    'intent': 'count_designations',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: descriptions associées à la désignation "X"
+            if (('descriptions' in qlow or 'description' in qlow) and ('associ' in qlow or 'liée' in qlow or 'liee' in qlow) and ('désignation' in qlow or 'designation' in qlow)):
+                return {
+                    'response': self._handle_descriptions_by_designation({'original_query': query}),
+                    'intent': 'descriptions_by_designation',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: compter descriptions total
+            if (('combien' in qlow or 'nombre' in qlow or 'total' in qlow) and ('descriptions' in qlow)):
+                return {
+                    'response': self._handle_count_descriptions_total({'original_query': query}),
+                    'intent': 'count_descriptions_total',
+                    'source': 'early_route',
+                    'confidence': 92,
+                    'method': 'early_override'
+                }
+
+            # Early: compter descriptions contenant "term"
+            if (('combien' in qlow or 'nombre' in qlow) and ('descriptions' in qlow) and ('contien' in qlow or 'contenant' in qlow)):
+                return {
+                    'response': self._handle_count_descriptions_with_term({'original_query': query}),
+                    'intent': 'count_descriptions_with_term',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: lister descriptions contenant "term"
+            if (('quelles' in qlow or 'liste' in qlow or 'affiche' in qlow) and ('descriptions' in qlow) and ('contien' in qlow or 'contenant' in qlow)):
+                return {
+                    'response': self._handle_descriptions_with_term({'original_query': query}),
+                    'intent': 'descriptions_with_term',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: répartition des descriptions par désignation
+            if (('répartition' in qlow or 'repartition' in qlow or 'distribution' in qlow) and ('descriptions' in qlow) and ('désignation' in qlow or 'designation' in qlow)):
+                return {
+                    'response': self._handle_repartition_descriptions_by_designation({'original_query': query}),
+                    'intent': 'repartition_descriptions_by_designation',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: commandes informatiques par mois/année
+            if ('commandes' in qlow and 'informatiques' in qlow and any(m in qlow for m in ['janvier','février','fevrier','mars','avril','mai','juin','juillet','aout','août','septembre','octobre','novembre','décembre','decembre'])):
+                return {
+                    'response': self._handle_it_orders_by_month({'original_query': query}),
+                    'intent': 'it_orders_by_month',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: coût total des commandes bureautiques et informatiques
+            if ('coût total' in qlow or 'cout total' in qlow) and 'commandes' in qlow:
+                return {
+                    'response': self._handle_total_cost_all_orders({'original_query': query}),
+                    'intent': 'total_cost_all_orders',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: nombre total d'équipements (bureautiques et informatiques)
+            if ('nombre total' in qlow or 'total d\'équipements' in qlow or 'total des equipements' in qlow) and ('équipements' in qlow or 'equipements' in qlow):
+                return {
+                    'response': self._handle_total_equipment_count({'original_query': query}),
+                    'intent': 'total_equipment_count',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: fournisseurs ayant fourni à la fois bureautique et informatique
+            if ('fournisseurs' in qlow and 'à la fois' in qlow and ('bureautique' in qlow or 'bureau' in qlow) and 'informatique' in qlow):
+                return {
+                    'response': self._handle_suppliers_both_types({'original_query': query}),
+                    'intent': 'suppliers_both_types',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: commandes (bureautiques ou informatiques) montant > seuil
+            if ('commandes' in qlow and ('supérieur à' in qlow or 'superieur a' in qlow or '>' in qlow) and ('montant' in qlow or 'total' in qlow)):
+                return {
+                    'response': self._handle_orders_amount_gt_threshold({'original_query': query}),
+                    'intent': 'orders_amount_gt',
+                    'source': 'early_route',
+                    'confidence': 90,
+                    'method': 'early_override'
+                }
+
+            # Early: lignes de commande avec description contenant "xyz"
+            if ('lignes de commande' in qlow and ('description' in qlow or 'désignation' in qlow or 'designation' in qlow) and ('contenant' in qlow or 'contient' in qlow)):
+                return {
+                    'response': self._handle_order_lines_description_contains({'original_query': query}),
+                    'intent': 'order_lines_desc_contains',
+                    'source': 'early_route',
+                    'confidence': 88,
+                    'method': 'early_override'
+                }
+
+            # Early: prix unitaire de l'article X dans la commande BCxx
+            if ('prix unitaire' in qlow and ('article' in qlow or 'désignation' in qlow or 'designation' in qlow) and 'commande' in qlow):
+                return {
+                    'response': self._handle_unit_price_by_article_in_order({'original_query': query}),
+                    'intent': 'unit_price_by_article_in_order',
+                    'source': 'early_route',
+                    'confidence': 88,
+                    'method': 'early_override'
+                }
+
+            # Early: matériels affectés à l'utilisateur "..." (tous types) - seulement si pas de demande d'équipement
+            if ('affect' in qlow and ('utilisateur' in qlow or 'user' in qlow) and ('"' in query or "'" in query) and not ('demande' in qlow or 'demandes' in qlow)):
+                return {
+                    'response': self._handle_materials_assigned_to_user({'original_query': query}),
+                    'intent': 'materials_assigned_to_user',
+                    'source': 'early_route',
+                    'confidence': 88,
+                    'method': 'early_override'
+                }
+
             # Early: requêtes sur les utilisateurs
             if ('utilisateur' in qlow or 'user' in qlow) and ('liste' in qlow or 'list' in qlow):
                 return {
@@ -1955,7 +2718,8 @@ class ParcInfoChatbot:
                 }
             
             # Early: comptage d'utilisateurs
-            if ('utilisateur' in qlow or 'user' in qlow) and ('compte' in qlow or 'nombre' in qlow or 'total' in qlow or 'count' in qlow):
+            if (('utilisateur' in qlow or 'utilisateurs' in qlow or 'user' in qlow or 'users' in qlow)
+                and ('compte' in qlow or 'nombre' in qlow or 'combien' in qlow or 'total' in qlow or 'enregistr' in qlow or 'count' in qlow)):
                 return {
                     'response': self._handle_count_users({'original_query': query}),
                     'intent': 'count_users',
@@ -2131,11 +2895,19 @@ class ParcInfoChatbot:
                     'method': 'pre_rag'
                 }
 
-            # Groupes et permissions
-            if 'groupe' in ql_w and ('utilisateur' in ql_w or 'groupes' in ql_w or 'liste' in ql_w):
+            # Groupes et permissions - priorité à "liste des groupes"
+            if ('liste' in ql_w or 'voir' in ql_w or 'afficher' in ql_w) and ('groupe' in ql_w or 'groupes' in ql_w):
                 return {
                     'response': self._handle_list_groups({'original_query': query}),
                     'intent': 'list_groups',
+                    'source': 'early_override',
+                    'confidence': 95,
+                    'method': 'pre_rag'
+                }
+            elif 'groupe' in ql_w and ('utilisateur' in ql_w or 'user' in ql_w):
+                return {
+                    'response': self._handle_user_groups_by_name({'original_query': query}),
+                    'intent': 'user_groups_by_name',
                     'source': 'early_override',
                     'confidence': 90,
                     'method': 'pre_rag'
@@ -2461,11 +3233,19 @@ class ParcInfoChatbot:
                     'method': 'pre_rag'
                 }
 
-            # Early override: groupes et permissions
-            if 'groupe' in ql_w and ('utilisateur' in ql_w or 'groupes' in ql_w or 'liste' in ql_w):
+            # Early override: groupes et permissions - priorité à "liste des groupes"
+            if ('liste' in ql_w or 'voir' in ql_w or 'afficher' in ql_w) and ('groupe' in ql_w or 'groupes' in ql_w):
                 return {
                     'response': self._handle_list_groups({'original_query': query}),
                     'intent': 'list_groups',
+                    'source': 'early_override',
+                    'confidence': 95,
+                    'method': 'pre_rag'
+                }
+            elif 'groupe' in ql_w and ('utilisateur' in ql_w or 'user' in ql_w):
+                return {
+                    'response': self._handle_user_groups_by_name({'original_query': query}),
+                    'intent': 'user_groups_by_name',
                     'source': 'early_override',
                     'confidence': 90,
                     'method': 'pre_rag'
@@ -2589,8 +3369,14 @@ class ParcInfoChatbot:
                         "method": "fuzzy_detection"
                     }
             
-            # Check for clarity questions (amélioration de la clarté)
-            if any(word in query.lower() for word in ['expliquer', 'simplement', 'guide', 'étape', 'comment', 'exemple']):
+            # Check for clarity questions (amélioration de la clarté) - mais pas pour les questions techniques
+            clarity_words = ['expliquer', 'simplement', 'guide', 'étape', 'exemple']
+            # Vérifier si c'est une vraie question de clarté (pas technique)
+            is_clarity = any(word in query.lower() for word in clarity_words)
+            # Exclure les questions techniques qui contiennent "comment" mais ne sont pas des questions d'aide
+            technical_context = any(word in query.lower() for word in ['livraison', 'commande', 'matériel', 'fournisseur', 'statut', 'combien', 'où', 'qui', 'quand'])
+            
+            if is_clarity and not technical_context:
                 logger.info(" Clarity question detected")
                 clarity_response = self._handle_clarity_question(query)
                 if clarity_response:
@@ -2623,7 +3409,7 @@ class ParcInfoChatbot:
             
             # Check for equipment requests early (before count detection)
             ql = query.lower()
-            if ((('demande' in ql) or ('demandes' in ql)) and ('equip' in ql)):
+            if (('demande' in ql) or ('demandes' in ql)):
                 # Vérifier si c'est une demande de liste ou de comptage
                 if any(marker in ql for marker in ['liste', 'lister', 'afficher', 'voir', 'détails', 'details', 'montre', 'en attente', 'approuvées', 'approuvees', 'attente', 'approuvée', 'approuvee']):
                     logger.info(" Equipment list request detected early")
@@ -2635,9 +3421,17 @@ class ParcInfoChatbot:
                         'method': 'early_override'
                     }
             
-            # Check for universal questions (LOWEST PRIORITY - LAST RESORT)
-            logger.info("Step 2c: Universal questions will be handled as last resort...")
-            # Continue to specialized handlers
+            # Check for universal questions (HIGH PRIORITY for conversation)
+            logger.info("Step 2c: Checking for universal/conversation questions...")
+            universal_response = self._handle_universal_question(query)
+            if universal_response:
+                return {
+                    'response': universal_response,
+                    'intent': 'conversation',
+                    'confidence': 95,
+                    'source': 'universal_handler',
+                    'method': 'conversation_detection'
+                }
             
             # Step 3: Intent classification for heuristic search
             logger.info("Step 3: No universal question, proceeding with intent classification...")
@@ -2704,7 +3498,7 @@ class ParcInfoChatbot:
                         'source': 'heuristic_override',
                         'method': 'early_override'
                     }
-                if ((('demande' in ql) or ('demandes' in ql)) and ('equip' in ql)):
+                if (('demande' in ql) or ('demandes' in ql)):
                     # Vérifier si c'est une demande de liste ou de comptage
                     if any(marker in ql for marker in ['liste', 'lister', 'afficher', 'voir', 'détails', 'details', 'montre', 'en attente', 'approuvées', 'approuvees', 'attente', 'approuvée', 'approuvee', 'refus', 'refuse']):
                         return {
@@ -2776,7 +3570,7 @@ class ParcInfoChatbot:
             
             # PRIORITÉ : Vérifier d'abord si c'est une demande d'équipement (avant la détection de comptage)
             ql = query.lower()
-            if ((('demande' in ql) or ('demandes' in ql)) and ('equip' in ql)):
+            if (('demande' in ql) or ('demandes' in ql)):
                 # Vérifier si c'est une demande de liste ou de comptage
                 if any(marker in ql for marker in ['liste', 'lister', 'afficher', 'voir', 'détails', 'details', 'montre', 'en attente', 'approuvées', 'approuvees', 'attente', 'approuvée', 'approuvee']):
                     logger.info(" Equipment list request detected before count detection")
@@ -2803,8 +3597,8 @@ class ParcInfoChatbot:
                         'method': 'early_override'
                     }
             
-            # PRIORITÉ : Vérifier d'abord si c'est une question de livraison en retard
-            if any(word in ql for word in ['livré', 'livres', 'livraison', 'livraisons', 'retard', 'retards', 'après', 'apres', 'date prévue']):
+            # PRIORITÉ : Vérifier d'abord si c'est une question de livraison en retard (mais pas les commentaires)
+            if any(word in ql for word in ['livré', 'livres', 'retard', 'retards', 'après', 'apres', 'date prévue']) and 'commentaire' not in ql:
                 logger.info(" Delivery delay request detected before count detection")
                 return {
                     'response': self._handle_delivery_delay_analysis(query),
@@ -3402,10 +4196,10 @@ class ParcInfoChatbot:
         
         for i, material in enumerate(results[:10], 1):  # Limiter à 10 résultats
             response += f"{i}. **{material['code_inventaire']}**\n"
-            response += f"   • Numéro de série: {material['numero_serie']}\n"
-            response += f"   • Lieu: {material['lieu_stockage']}\n"
-            response += f"   • Statut: {material['statut']}\n"
-            response += f"   • Garantie: {material['duree_garantie_valeur']} {material['duree_garantie_unite']}\n\n"
+            response += f"   - Numéro de série: {material['numero_serie']}\n"
+            response += f"   - Lieu: {material['lieu_stockage']}\n"
+            response += f"   - Statut: {material['statut']}\n"
+            response += f"   - Garantie: {material['duree_garantie_valeur']} {material['duree_garantie_unite']}\n\n"
         
         return response
     
@@ -3453,11 +4247,11 @@ class ParcInfoChatbot:
         
         for i, material in enumerate(results[:10], 1):  # Limiter à 10 résultats
             response += f"{i}. **{material['code_inventaire']}**\n"
-            response += f"   • Numéro de série: {material['numero_serie']}\n"
-            response += f"   • Lieu: {material['lieu_stockage']}\n"
-            response += f"   • Statut: {material['statut']}\n"
+            response += f"   - Numéro de série: {material['numero_serie']}\n"
+            response += f"   - Lieu: {material['lieu_stockage']}\n"
+            response += f"   - Statut: {material['statut']}\n"
             if material['username']:
-                response += f"   • Utilisateur: {material['username']}\n"
+                response += f"   - Utilisateur: {material['username']}\n"
             response += "\n"
         
         return response
@@ -3478,11 +4272,11 @@ class ParcInfoChatbot:
         
         for i, material in enumerate(results[:10], 1):  # Limiter à 10 résultats
             response += f"{i}. **{material['code_inventaire']}**\n"
-            response += f"   • Numéro de série: {material['numero_serie']}\n"
-            response += f"   • Lieu: {material['lieu_stockage']}\n"
-            response += f"   • Statut: {material['statut']}\n"
+            response += f"   - Numéro de série: {material['numero_serie']}\n"
+            response += f"   - Lieu: {material['lieu_stockage']}\n"
+            response += f"   - Statut: {material['statut']}\n"
             if material['username']:
-                response += f"   • Utilisateur: {material['first_name']} {material['last_name']}\n"
+                response += f"   - Utilisateur: {material['first_name']} {material['last_name']}\n"
             response += "\n"
         
         if len(results) > 10:
@@ -3624,8 +4418,8 @@ class ParcInfoChatbot:
         
         for i, command in enumerate(results[:10], 1):  # Limiter à 10 résultats
             response += f"{i}. **{command['numero_commande']}**\n"
-            response += f"   • Date: {command['date_commande']}\n"
-            response += f"   • Montant total: {command['montant_total']:.2f} DH\n\n"
+            response += f"   - Date: {command['date_commande']}\n"
+            response += f"   - Montant total: {command['montant_total']:.2f} DH\n\n"
         
         if len(results) > 10:
             response += f"... et {len(results) - 10} autres commandes.\n"
@@ -3642,7 +4436,7 @@ class ParcInfoChatbot:
         
         for i, command in enumerate(results[:10], 1):  # Limiter à 10 résultats
             response += f"{i}. **{command['numero_commande']}**\n"
-            response += f"   • Date: {command['date_commande']}\n\n"
+            response += f"   - Date: {command['date_commande']}\n\n"
         
         if len(results) > 10:
             response += f"... et {len(results) - 10} autres commandes.\n"
@@ -3728,7 +4522,7 @@ class ParcInfoChatbot:
 
             lines = [f"Fournisseurs situés à {', '.join([l.title() for l in locations])}:"]
             for s in suppliers:
-                lines.append(f"• {s.nom} - ICE: {s.ice} - {s.adresse}")
+                lines.append(f"- {s.nom} - ICE: {s.ice} - {s.adresse}")
             return "\n".join(lines)
 
         except Exception as e:
@@ -3834,10 +4628,10 @@ class ParcInfoChatbot:
         
         for i, supplier in enumerate(results[:10], 1):  # Limiter à 10 résultats
             response += f"{i}. **{supplier['nom']}**\n"
-            response += f"   • ICE: {supplier['ice']}\n"
-            response += f"   • Adresse: {supplier['adresse']}\n"
-            response += f"   • Matériels livrés: {supplier['nb_materiels']}\n"
-            response += f"   • Montant total: {supplier['montant_total']:.2f} DH\n\n"
+            response += f"   - ICE: {supplier['ice']}\n"
+            response += f"   - Adresse: {supplier['adresse']}\n"
+            response += f"   - Matériels livrés: {supplier['nb_materiels']}\n"
+            response += f"   - Montant total: {supplier['montant_total']:.2f} DH\n\n"
         
         if len(results) > 10:
             response += f"... et {len(results) - 10} autres fournisseurs.\n"
@@ -3854,6 +4648,40 @@ class ParcInfoChatbot:
         logger.info(f"Original query: {original_query}")
         
         try:
+            # Analyser la requête pour détecter le type de question
+            query_lower = original_query.lower()
+            
+            # Question sur le statut d'une commande spécifique
+            if 'statut' in query_lower and 'commande' in query_lower:
+                import re
+                code_match = re.search(r'\b([A-Z]{2,6}\s*\d{2,4})\b', original_query)
+                if code_match:
+                    code = code_match.group(1).replace(' ', '').upper()
+                    # Chercher la commande
+                    cmd = Commande.objects.filter(numero_commande__iexact=code).first()
+                    if cmd:
+                        return f"Le statut de la commande {code} est : {cmd.statut}"
+                    cmd_b = CommandeBureau.objects.filter(numero_commande__iexact=code).first()
+                    if cmd_b:
+                        return f"Le statut de la commande {code} est : {cmd_b.statut}"
+                    return f"Aucune commande trouvée avec le code {code}."
+            
+            # Question sur les livraisons associées à une commande
+            elif 'livraisons' in query_lower and 'associées' in query_lower and 'commande' in query_lower:
+                import re
+                code_match = re.search(r'\b([A-Z]{2,6}\s*\d{2,4})\b', original_query)
+                if code_match:
+                    code = code_match.group(1).replace(' ', '').upper()
+                    # Chercher les livraisons
+                    livraisons = Livraison.objects.filter(numero_commande__iexact=code)
+                    if livraisons.exists():
+                        response = f"Livraisons associées à la commande {code} :\n"
+                        for liv in livraisons:
+                            response += f"- Livraison {liv.numero_livraison} - Statut: {liv.statut_livraison}\n"
+                        return response
+                    else:
+                        return f"Aucune livraison trouvée pour la commande {code}."
+            
             # Vérifier si c'est une requête complexe
             if self._detect_complex_query(original_query):
                 return self._handle_complex_delivery_query(original_query)
@@ -3931,8 +4759,8 @@ class ParcInfoChatbot:
         for i, delivery in enumerate(results[:10], 1):  # Limiter à 10 résultats
             delai_jours = delivery.get('delai_moyen_jours', 0)
             response += f"{i}. **{delivery['fournisseur']}**\n"
-            response += f"   • Délai moyen : {delai_jours:.1f} jours\n"
-            response += f"   • Nombre de commandes : {delivery['nombre_commandes']}\n\n"
+            response += f"   - Délai moyen : {delai_jours:.1f} jours\n"
+            response += f"   - Nombre de commandes : {delivery['nombre_commandes']}\n\n"
         
         if len(results) > 10:
             response += f"... et {len(results) - 10} autres fournisseurs.\n"
@@ -3947,6 +4775,12 @@ class ParcInfoChatbot:
 
             # Check if user wants specific status or all
             query_lower = entities.get('original_query', '').lower()
+            
+            # Vérifier si c'est une question sur les matériels bureautiques
+            if 'bureautiques' in query_lower or 'bureautique' in query_lower:
+                # Filtrer pour les demandes de matériels bureautiques
+                filters &= Q(categorie='Bureautique')
+            
             if 'en attente' in query_lower or 'attente' in query_lower:
                 filters &= Q(statut='en_attente')
                 status_label = "en attente"
@@ -3986,13 +4820,22 @@ class ParcInfoChatbot:
                 filters &= date_filter
 
             # User filter - improved to handle specific usernames like 'superadmin'
-            if entities.get("user") and entities["user"] not in ("current", "courant", "actuel"):
-                # Handle specific username detection
-                username = entities["user"]
-                if username.upper() == "SUPERADMIN":
-                    filters &= Q(demandeur__username__iexact="superadmin")
+            user_value = entities.get("user")
+            if (user_value and user_value not in ("current", "courant", "actuel")) or True:
+                # If entity user is missing, try to extract a quoted username from the query
+                username = None
+                if user_value and user_value not in ("current", "courant", "actuel"):
+                    username = user_value
                 else:
-                    filters &= Q(demandeur__username__icontains=username)
+                    quoted = self._extract_quoted_name(entities.get('original_query', '') or '')
+                    if quoted:
+                        username = quoted
+
+                if username:
+                    if username.upper() == "SUPERADMIN":
+                        filters &= Q(demandeur__username__iexact="superadmin")
+                    else:
+                        filters &= Q(demandeur__username__icontains=username)
 
             # Status filter (normalize accents)
             if entities.get("status"):
@@ -4008,6 +4851,27 @@ class ParcInfoChatbot:
                 target = status_aliases.get(s)
                 if target:
                     filters &= Q(statut=target)
+
+            # Optional description/content filter (e.g., description containing "Lenovo" or "Armoire")
+            description_keyword = None
+            q_orig = entities.get('original_query', '') or ''
+            q_orig_lower = q_orig.lower()
+            if any(k in q_orig_lower for k in ["description", "contenant", "contient", "incluent", "inclut", "incluant"]):
+                # Prefer quoted term if available; else, take last word after keyword
+                quoted_term = self._extract_quoted_name(q_orig)
+                if quoted_term:
+                    description_keyword = quoted_term
+                else:
+                    # Fallback: simple regex to catch a word after 'description'
+                    m = re.search(r"description\s*(?:contenant|contient|incluant|inclut)?\s*\"([^\"]+)\"", q_orig_lower)
+                    if m:
+                        description_keyword = m.group(1)
+
+            if description_keyword:
+                filters &= (
+                    Q(description_info__nom__icontains=description_keyword) |
+                    Q(description_bureau__nom__icontains=description_keyword)
+                )
 
             # Query
             demandes = (
@@ -4040,8 +4904,31 @@ class ParcInfoChatbot:
                         
                         for d in demandes_approuvees:
                             desig_obj = d.designation
+                            desc_obj = d.description
                             desig = getattr(desig_obj, 'nom', None) if desig_obj else None
-                            response += f"• Demande n°{d.id} ({desig or 'N/A'}) : Approuvée le {d.date_approbation.strftime('%d/%m/%Y') if d.date_approbation else 'N/A'}\n"
+                            desc = getattr(desc_obj, 'nom', None) if desc_obj else None
+                            
+                            # Déterminer si l'utilisateur est un gestionnaire ou super-admin
+                            demandeur = d.demandeur
+                            is_manager_or_superadmin = False
+                            
+                            if demandeur:
+                                user_groups = demandeur.groups.all()
+                                group_names = [g.name for g in user_groups]
+                                
+                                if any(group in group_names for group in ['Super Admin', 'Gestionnaire Informatique', 'Gestionnaire Bureau']):
+                                    is_manager_or_superadmin = True
+                                elif demandeur.username.lower() == 'superadmin':
+                                    is_manager_or_superadmin = True
+                            
+                            # Affichage simplifié pour gestionnaires/super-admin
+                            if is_manager_or_superadmin:
+                                response += f"- Demande n°{d.id} : Approuvée le {d.date_approbation.strftime('%d/%m/%Y') if d.date_approbation else 'N/A'}\n"
+                                response += f"  - Désignation: {desig or 'N/A'}\n"
+                                response += f"  - Description: {desc or 'N/A'}\n"
+                            else:
+                                # Affichage complet pour employés
+                                response += f"- Demande n°{d.id} ({desig or 'N/A'}) : Approuvée le {d.date_approbation.strftime('%d/%m/%Y') if d.date_approbation else 'N/A'}\n"
                         
                         response += "\nVeux-tu vérifier les détails d'une demande spécifique ?"
                         return self._make_response_human(
@@ -4069,34 +4956,60 @@ class ParcInfoChatbot:
                 desig = getattr(desig_obj, 'nom', None) if desig_obj else None
                 desc = getattr(desc_obj, 'nom', None) if desc_obj else None
                 
-                # Vérifier si des matériels sont affectés à cette demande
-                materiels_affectes = []
+                # Déterminer si l'utilisateur est un gestionnaire ou super-admin
+                # en vérifiant les groupes de l'utilisateur demandeur
+                demandeur = d.demandeur
+                is_manager_or_superadmin = False
                 
-                # Chercher dans les matériels informatiques par utilisateur
-                it_materiels = MaterielInformatique.objects.filter(utilisateur=d.demandeur)
-                for mat in it_materiels:
-                    materiels_affectes.append(f"{mat.code_inventaire} ({mat.numero_serie})")
+                if demandeur:
+                    # Vérifier si l'utilisateur est dans les groupes de gestionnaires ou super-admin
+                    user_groups = demandeur.groups.all()
+                    group_names = [g.name for g in user_groups]
+                    
+                    # Vérifier si c'est un gestionnaire ou super-admin
+                    if any(group in group_names for group in ['Super Admin', 'Gestionnaire Informatique', 'Gestionnaire Bureau']):
+                        is_manager_or_superadmin = True
+                    # Vérifier aussi si c'est superadmin par nom d'utilisateur
+                    elif demandeur.username.lower() == 'superadmin':
+                        is_manager_or_superadmin = True
                 
-                # Chercher dans les matériels bureautiques par utilisateur
-                bu_materiels = MaterielBureau.objects.filter(utilisateur=d.demandeur)
-                for mat in bu_materiels:
-                    materiels_affectes.append(f"{mat.code_inventaire}")
-                
-                # Format de la réponse
-                if materiels_affectes:
-                    materiels_str = f"Matériels affectés : {', '.join(materiels_affectes)}"
+                # Si c'est un gestionnaire ou super-admin, afficher seulement désignation et description
+                if is_manager_or_superadmin:
+                    lines.append(
+                        f"\n- Demande n°{d.id} du {d.date_demande.strftime('%d/%m/%Y')}\n"
+                        f"  - Désignation: {desig or 'N/A'}\n"
+                        f"  - Description: {desc or 'N/A'}"
+                    )
                 else:
-                    materiels_str = "Aucun matériel affecté identifié"
-                
-                lines.append(
-                    f"\n• Demande n°{d.id} ({desig or 'N/A'}) du {d.date_demande.strftime('%d/%m/%Y')}\n"
-                    f"  - Demandeur: {getattr(d.demandeur, 'username', 'N/A')}\n"
-                    f"  - Catégorie: {d.get_categorie_display()} | Type: {d.get_type_demande_display()} | Article: {d.get_type_article_display()}\n"
-                    f"  - {materiels_str}"
-                    f"  - Statut: {d.get_statut_display()}\n"
-                    f"  - Désignation: {desig or 'N/A'}\n"
-                    f"  - Description: {desc or 'N/A'}"
-                )
+                    # Affichage complet pour les employés (logique existante)
+                    # Vérifier si des matériels sont affectés à cette demande
+                    materiels_affectes = []
+                    
+                    # Chercher dans les matériels informatiques par utilisateur
+                    it_materiels = MaterielInformatique.objects.filter(utilisateur=d.demandeur)
+                    for mat in it_materiels:
+                        materiels_affectes.append(f"{mat.code_inventaire} ({mat.numero_serie})")
+                    
+                    # Chercher dans les matériels bureautiques par utilisateur
+                    bu_materiels = MaterielBureau.objects.filter(utilisateur=d.demandeur)
+                    for mat in bu_materiels:
+                        materiels_affectes.append(f"{mat.code_inventaire}")
+                    
+                    # Format de la réponse
+                    if materiels_affectes:
+                        materiels_str = f"Matériels affectés : {', '.join(materiels_affectes)}"
+                    else:
+                        materiels_str = "Aucun matériel affecté identifié"
+                    
+                    lines.append(
+                        f"\n- Demande n°{d.id} ({desig or 'N/A'}) du {d.date_demande.strftime('%d/%m/%Y')}\n"
+                        f"  - Demandeur: {getattr(d.demandeur, 'username', 'N/A')}\n"
+                        f"  - Catégorie: {d.get_categorie_display()} | Type: {d.get_type_demande_display()} | Article: {d.get_type_article_display()}\n"
+                        f"  - {materiels_str}\n"
+                        f"  - Statut: {d.get_statut_display()}\n"
+                        f"  - Désignation: {desig or 'N/A'}\n"
+                        f"  - Description: {desc or 'N/A'}"
+                    )
 
             response = "\n".join(lines)
             
@@ -4107,9 +5020,9 @@ class ParcInfoChatbot:
                 refusees = DemandeEquipement.objects.filter(statut='refusee').count()
                 
                 response += f"\n\n** Résumé par statut :**\n"
-                response += f"• Approuvées : {approuvees}\n"
-                response += f"• En attente : {en_attente}\n"
-                response += f"• Refusées : {refusees}\n"
+                response += f"- Approuvées : {approuvees}\n"
+                response += f"- En attente : {en_attente}\n"
+                response += f"- Refusées : {refusees}\n"
             
             response += f"\n\n"
             return response
@@ -4145,23 +5058,23 @@ class ParcInfoChatbot:
                     found = True
                     response.append(
                         f"**Matériel informatique trouvé:**\n"
-                        f"• Code inventaire: {it_item.code_inventaire}\n"
-                        f"• Numéro de série: {it_item.numero_serie or 'N/A'}\n"
-                        f"• Désignation: {it_item.ligne_commande.designation.nom if it_item.ligne_commande and it_item.ligne_commande.designation else 'N/A'}\n"
-                        f"• Statut: {it_item.statut}\n"
-                        f"• Lieu: {it_item.lieu_stockage or 'N/A'}\n"
-                        f"• Utilisateur: {it_item.utilisateur.username if it_item.utilisateur else 'Non affecté'}"
+                        f"- Code inventaire: {it_item.code_inventaire}\n"
+                        f"- Numéro de série: {it_item.numero_serie or 'N/A'}\n"
+                        f"- Désignation: {it_item.ligne_commande.designation.nom if it_item.ligne_commande and it_item.ligne_commande.designation else 'N/A'}\n"
+                        f"- Statut: {it_item.statut}\n"
+                        f"- Lieu: {it_item.lieu_stockage or 'N/A'}\n"
+                        f"- Utilisateur: {it_item.utilisateur.username if it_item.utilisateur else 'Non affecté'}"
                     )
                 
                 if office_item:
                     found = True
                     response.append(
                         f"**Matériel bureau trouvé:**\n"
-                        f"• Code inventaire: {office_item.code_inventaire}\n"
-                        f"• Désignation: {office_item.ligne_commande.designation.nom if office_item.ligne_commande and office_item.ligne_commande.designation else 'N/A'}\n"
-                        f"• Statut: {office_item.statut}\n"
-                        f"• Lieu: {office_item.lieu_stockage or 'N/A'}\n"
-                        f"• Utilisateur: {office_item.utilisateur.username if office_item.utilisateur else 'Non affecté'}"
+                        f"- Code inventaire: {office_item.code_inventaire}\n"
+                        f"- Désignation: {office_item.ligne_commande.designation.nom if office_item.ligne_commande and office_item.ligne_commande.designation else 'N/A'}\n"
+                        f"- Statut: {office_item.statut}\n"
+                        f"- Lieu: {office_item.lieu_stockage or 'N/A'}\n"
+                        f"- Utilisateur: {office_item.utilisateur.username if office_item.utilisateur else 'Non affecté'}"
                     )
             
             # If no exact match, try partial matches for codes
@@ -4184,7 +5097,7 @@ class ParcInfoChatbot:
                 if similar_codes:
                     response.append("\n**Codes similaires trouvés:**")
                     for code in similar_codes:
-                        response.append(f"• {code}")
+                        response.append(f"- {code}")
                 
                 # Also check for designation matches
                 if len(similar_codes) < 3:  # If not many similar codes, try designations
@@ -4195,7 +5108,7 @@ class ParcInfoChatbot:
                     if designations:
                         response.append("\n**Désignations similaires trouvées:**")
                         for desc in designations:
-                            response.append(f"• {desc}")
+                            response.append(f"- {desc}")
             
             # Handle serial number search
             if not found and entities.get("serial"):
@@ -4208,11 +5121,11 @@ class ParcInfoChatbot:
                     found = True
                     response.append(
                         f"**Matériel trouvé par numéro de série:**\n"
-                        f"• Code: {it_serial.code_inventaire}\n"
-                        f"• Désignation: {it_serial.ligne_commande.designation.nom if it_serial.ligne_commande and it_serial.ligne_commande.designation else 'N/A'}\n"
-                        f"• Statut: {it_serial.statut}\n"
-                        f"• Lieu: {it_serial.lieu_stockage or 'N/A'}\n"
-                        f"• Utilisateur: {it_serial.utilisateur.username if it_serial.utilisateur else 'Non affecté'}"
+                        f"- Code: {it_serial.code_inventaire}\n"
+                        f"- Désignation: {it_serial.ligne_commande.designation.nom if it_serial.ligne_commande and it_serial.ligne_commande.designation else 'N/A'}\n"
+                        f"- Statut: {it_serial.statut}\n"
+                        f"- Lieu: {it_serial.lieu_stockage or 'N/A'}\n"
+                        f"- Utilisateur: {it_serial.utilisateur.username if it_serial.utilisateur else 'Non affecté'}"
                     )
             
             # Handle designation search + retourner numéro de série si demandé
@@ -4238,7 +5151,7 @@ class ParcInfoChatbot:
                             response.append("\n**Matériel informatique:**")
                             for item in it_items:
                                 response.append(
-                                    f"• {item.code_inventaire}: "
+                                    f"- {item.code_inventaire}: "
                                     f"{item.ligne_commande.designation.nom if item.ligne_commande and item.ligne_commande.designation else 'N/A'}, "
                                     f"Statut: {item.statut}, "
                                     f"Lieu: {item.lieu_stockage or 'N/A'}" +
@@ -4249,7 +5162,7 @@ class ParcInfoChatbot:
                             response.append("\n**Matériel bureau:**")
                             for item in office_items:
                                 response.append(
-                                    f"• {item.code_inventaire}: "
+                                    f"- {item.code_inventaire}: "
                                     f"{item.ligne_commande.designation.nom if item.ligne_commande and item.ligne_commande.designation else 'N/A'}, "
                                     f"Statut: {item.statut}, "
                                     f"Lieu: {item.lieu_stockage or 'N/A'}"
@@ -4306,7 +5219,7 @@ class ParcInfoChatbot:
                                 response.append("\n**Matériel informatique:**")
                                 for item in it_items:
                                     response.append(
-                                        f"• {item.code_inventaire}: "
+                                        f"- {item.code_inventaire}: "
                                         f"{item.ligne_commande.designation.nom if item.ligne_commande and item.ligne_commande.designation else 'N/A'}, "
                                         f"Statut: {item.statut}, "
                                         f"Lieu: {item.lieu_stockage or 'N/A'}"
@@ -4315,7 +5228,7 @@ class ParcInfoChatbot:
                                 response.append("\n**Matériel bureau:**")
                                 for item in office_items:
                                     response.append(
-                                        f"• {item.code_inventaire}: "
+                                        f"- {item.code_inventaire}: "
                                         f"{item.ligne_commande.designation.nom if item.ligne_commande and item.ligne_commande.designation else 'N/A'}, "
                                         f"Statut: {item.statut}, "
                                         f"Lieu: {item.lieu_stockage or 'N/A'}"
@@ -4386,7 +5299,7 @@ class ParcInfoChatbot:
             for r in rows:
                 code = r.get('code_inventaire') or 'N/A'
                 sn = r.get('numero_serie') or 'N/A'
-                lines.append(f"• {code} — {sn}")
+                lines.append(f"- {code} — {sn}")
             return "\n".join(lines)
 
         except Exception as e:
@@ -4597,7 +5510,7 @@ class ParcInfoChatbot:
                     response.append("**Matériel par utilisateur (hors panne/nouveau):**")
                     for ua in user_assignments[:limit]:
                         if ua['utilisateur__username']:  # Only show users with assignments
-                            response.append(f"• {ua['utilisateur__username']}: {ua['count']} appareils")
+                            response.append(f"- {ua['utilisateur__username']}: {ua['count']} appareils")
                 else:
                     response.append("Aucune donnée d'affectation utilisateur trouvée.")
 
@@ -4614,7 +5527,7 @@ class ParcInfoChatbot:
                 if status_dist:
                     response.append("\n**Répartition par statut:**")
                     for stat in status_dist:
-                        response.append(f"• {stat['statut'] or 'Non spécifié'}: {stat['count']}")
+                        response.append(f"- {stat['statut'] or 'Non spécifié'}: {stat['count']}")
                 
                 # Material by type
                 type_dist = (
@@ -4628,7 +5541,7 @@ class ParcInfoChatbot:
                 if type_dist:
                     response.append("\n**Répartition par type de matériel:**")
                     for t in type_dist[:limit]:
-                        response.append(f"• {t['ligne_commande__designation__nom'] or 'Non spécifié'}: {t['count']}")
+                        response.append(f"- {t['ligne_commande__designation__nom'] or 'Non spécifié'}: {t['count']}")
 
             # 3. Warranty Status
             if any(term in query for term in ["garantie", "garanties", "expiré", "expire"]):
@@ -4651,9 +5564,9 @@ class ParcInfoChatbot:
                 ).count()
                 
                 response.append("\n**Statut des garanties:**")
-                response.append(f"• Expirées: {expired}")
-                response.append(f"• Expirent sous 30 jours: {soon}")
-                response.append(f"• Valides: {valid}")
+                response.append(f"- Expirées: {expired}")
+                response.append(f"- Expirent sous 30 jours: {soon}")
+                response.append(f"- Valides: {valid}")
 
             # 4. Top Suppliers
             if any(term in query for term in ["fournisseur", "fournisseurs", "commandes"]):
@@ -4703,7 +5616,7 @@ class ParcInfoChatbot:
                     response.append("\n**Derniers ajouts de matériel:**")
                     for mat in recent_material:
                         response.append(
-                            f"• {mat.code_inventaire}: "
+                            f"- {mat.code_inventaire}: "
                             f"{mat.ligne_commande.designation.nom if mat.ligne_commande and mat.ligne_commande.designation else 'N/A'} "
                             f"(Ajouté le {mat.date_creation.strftime('%d/%m/%Y')})"
                         )
@@ -4719,7 +5632,7 @@ class ParcInfoChatbot:
                     response.append("\n**Dernières commandes:**")
                     for cmd in recent_commands:
                         response.append(
-                            f"• {cmd.numero_commande}: "
+                            f"- {cmd.numero_commande}: "
                             f"{cmd.fournisseur.nom if cmd.fournisseur else 'N/A'} "
                             f"({cmd.date_commande.strftime('%d/%m/%Y')})"
                         )
@@ -4727,10 +5640,10 @@ class ParcInfoChatbot:
             if not response:
                 return (
                     "Aucune statistique trouvée. Voici quelques exemples de requêtes :\n"
-                    "• 'Top 5 fournisseurs'\n"
-                    "• 'Matériel par utilisateur'\n"
-                    "• 'Statut des garanties'\n"
-                    "• 'Dernières commandes'"
+                    "- 'Top 5 fournisseurs'\n"
+                    "- 'Matériel par utilisateur'\n"
+                    "- 'Statut des garanties'\n"
+                    "- 'Dernières commandes'"
                 )
 
             return "\n".join(response)
@@ -4849,127 +5762,106 @@ class ParcInfoChatbot:
     def _get_enhanced_fallback_response(self, query: str) -> str:
         """Return an enhanced data-aware fallback response with intelligent suggestions and comprehensive guidance"""
         try:
-            # Get actual data from the database for suggestions
-            material_count = MaterielInformatique.objects.count() + MaterielBureau.objects.count()
-            supplier_count = Fournisseur.objects.count()
-            order_count = Commande.objects.count() + CommandeBureau.objects.count()
-            delivery_count = Livraison.objects.count()
+            # Analyser la requête pour essayer de donner une réponse plus pertinente
+            query_lower = query.lower()
             
-            # Get sample real data for suggestions
-            sample_suppliers = list(Fournisseur.objects.values_list('nom', flat=True)[:3])
-            sample_materials = list(MaterielInformatique.objects.values_list('code_inventaire', flat=True).exclude(code_inventaire__isnull=True)[:3])
-            sample_commands = list(Commande.objects.values_list('numero_commande', flat=True)[:3])
-
-            # Enhanced response with better structure and guidance
-            response = f"""**🤖 Assistant ParcInfo - Réponse Intelligente**
-
-Je n'ai pas trouvé d'information exacte pour votre requête, mais je peux vous aider avec des alternatives pertinentes.
-
-##  **État Actuel du Système**
-• ** Matériels** : {material_count} équipements enregistrés
-• **🏢 Fournisseurs** : {supplier_count} partenaires référencés
-• ** Commandes** : {order_count} transactions dans le système
-• **🚚 Livraisons** : {delivery_count} expéditions suivies
-
-##  **Informations Disponibles**
-
-Voici ce que je peux vous proposer :"""
-
-            # Add real data examples
-            if sample_suppliers:
-                response += f"\n\n## 🏢 **Exemples de Fournisseurs Disponibles**"
-                response += f"\n{', '.join(sample_suppliers)}"
+            # Détecter les questions spécifiques et y répondre directement
+            if 'statut' in query_lower and 'commande' in query_lower:
+                # Extraire le code de commande
+                import re
+                code_match = re.search(r'\b([A-Z]{2,6}\s*\d{2,4})\b', query)
+                if code_match:
+                    code = code_match.group(1).replace(' ', '').upper()
+                    # Chercher la commande
+                    cmd = Commande.objects.filter(numero_commande__iexact=code).first()
+                    if cmd:
+                        return f"Le statut de la commande {code} est : {cmd.statut}"
+                    cmd_b = CommandeBureau.objects.filter(numero_commande__iexact=code).first()
+                    if cmd_b:
+                        return f"Le statut de la commande {code} est : {cmd_b.statut}"
+                    return f"Aucune commande trouvée avec le code {code}."
             
-            if sample_materials:
-                response += f"\n\n##  **Exemples de Codes Matériel**"
-                response += f"\n{', '.join(sample_materials)}"
+            elif 'montant' in query_lower and 'commande' in query_lower:
+                # Extraire le code de commande
+                import re
+                code_match = re.search(r'\b([A-Z]{2,6}\s*\d{2,4})\b', query)
+                if code_match:
+                    code = code_match.group(1).replace(' ', '').upper()
+                    # Calculer le montant
+                    cmd = Commande.objects.filter(numero_commande__iexact=code).first()
+                    if cmd:
+                        lines = LigneCommande.objects.filter(commande=cmd)
+                        total = sum((getattr(ln, 'quantite', 0) or 0) * (getattr(ln, 'prix_unitaire', 0) or 0) for ln in lines)
+                        return f"Le montant total de la commande {code} est de {total:.2f} DH HT."
+                    cmd_b = CommandeBureau.objects.filter(numero_commande__iexact=code).first()
+                    if cmd_b:
+                        lines = LigneCommandeBureau.objects.filter(commande=cmd_b)
+                        total = sum((getattr(ln, 'quantite', 0) or 0) * (getattr(ln, 'prix_unitaire', 0) or 0) for ln in lines)
+                        return f"Le montant total de la commande {code} est de {total:.2f} DH HT."
+                    return f"Aucune commande trouvée avec le code {code}."
             
-            if sample_commands:
-                response += f"\n\n##  **Exemples de Commandes**"
-                response += f"\n{', '.join(sample_commands)}"
+            elif 'date' in query_lower and 'commande' in query_lower:
+                # Extraire le code de commande
+                import re
+                code_match = re.search(r'\b([A-Z]{2,6}\s*\d{2,4})\b', query)
+                if code_match:
+                    code = code_match.group(1).replace(' ', '').upper()
+                    # Chercher la date
+                    cmd = Commande.objects.filter(numero_commande__iexact=code).first()
+                    if cmd and cmd.date_commande:
+                        return f"La date de la commande {code} est le {cmd.date_commande.strftime('%d/%m/%Y')}."
+                    cmd_b = CommandeBureau.objects.filter(numero_commande__iexact=code).first()
+                    if cmd_b and cmd_b.date_commande:
+                        return f"La date de la commande {code} est le {cmd_b.date_commande.strftime('%d/%m/%Y')}."
+                    return f"Aucune commande trouvée avec le code {code}."
             
-            response += """
-
-##  **Comment Obtenir une Réponse Précise**
-
-###  **Conseils pour des Questions Efficaces**
-• **Soyez spécifique** : "Matériel informatique" plutôt que "matériel"
-• **Ajoutez des critères** : "affecté", "opérationnel", "en attente"
-• **Spécifiez la période** : "juillet 2025", "ce mois"
-• **Utilisez les codes** : "PC-123", "BC-2023-456"
-
-### 🔄 **Reformulation Recommandée**
-Si votre question ne fonctionne pas :
-1. **Précisez le type** : "matériel informatique" ou "matériel de bureau"
-2. **Ajoutez un statut** : "affecté", "opérationnel", "en attente"
-3. **Posez une question ciblée** : "Quel est le mode de passation de BC23 ?"
-4. **Utilisez des synonymes** : "équipement" au lieu de "matériel"
-
-##  **Fonctionnalités Avancées Disponibles**
-
-### 📦 **Gestion du Matériel**
-• Liste complète et recherche avancée
-• Localisation et statut en temps réel
-• Analyse de performance et maintenance
-
-###  **Gestion des Commandes**
-• Suivi complet des achats
-• Analyse des fournisseurs
-• Optimisation des coûts
-
-### 🚚 **Suivi des Livraisons**
-• Statut en temps réel
-• Gestion des retards
-• PV de réception
-
-###  **Analyses et Rapports**
-• Statistiques détaillées
-• Tendances et prédictions
-• Optimisation continue
-
-** Le système est prêt à répondre à vos questions sur le parc informatique.**
-"""
+            elif 'livré' in query_lower and 'commande' in query_lower:
+                # Extraire le code de commande
+                import re
+                code_match = re.search(r'\b([A-Z]{2,6}\s*\d{2,4})\b', query)
+                if code_match:
+                    code = code_match.group(1).replace(' ', '').upper()
+                    # Chercher le fournisseur de la commande
+                    cmd = Commande.objects.filter(numero_commande__iexact=code).first()
+                    if cmd and cmd.fournisseur:
+                        return f"La commande {code} a été livrée par {cmd.fournisseur.nom}."
+                    cmd_b = CommandeBureau.objects.filter(numero_commande__iexact=code).first()
+                    if cmd_b and cmd_b.fournisseur:
+                        return f"La commande {code} a été livrée par {cmd_b.fournisseur.nom}."
+                    return f"Aucune commande trouvée avec le code {code}."
             
-            # Finaliser avec un ton humain et une invitation systématique
-            return self._make_response_human(
-                response,
-                template_type='no_results',
-                include_engagement=True
-            )
+            # Si aucune correspondance spécifique, donner une réponse d'aide simple
+            return "Je n'ai pas compris votre question. Pouvez-vous reformuler votre demande de manière plus précise ?"
             
         except Exception as e:
-            logger.error(f"Error generating enhanced fallback: {e}")
-            return self._make_response_human(
-                self._get_help_response(),
-                template_type='no_results',
-                include_engagement=True
-            )
-    
+            logger.error(f"Error in enhanced fallback response: {e}")
+            return "Je n'ai pas pu traiter votre demande. Veuillez réessayer."
+
     def _get_help_response(self, entities=None) -> str:
         """Return enhanced help message with comprehensive guidance"""
         # Check if this is a simple greeting
         if entities and entities.get('original_query'):
             query_lower = entities.get('original_query', '').lower()
             if any(word in query_lower for word in ['bonjour', 'salut', 'hello']):
-                return """**Bonjour ! 👋**
+                return """**Bonjour !**
 
 Bienvenue sur l'Assistant ParcInfo !
 
 Je suis votre assistant intelligent pour la gestion du parc informatique et bureautique. Je peux vous aider avec :
 
-• **Gestion du matériel** (liste, recherche, localisation)
-• **Fournisseurs** (liste, performance, analyse)
-• **Commandes et livraisons** (suivi, statut, retards)
-• **Demandes d'équipement** (validation, suivi)
-• **Statistiques et analyses** (performance, risques, optimisation)
+- **Gestion du matériel** (liste, recherche, localisation)
+- **Fournisseurs** (liste, performance, analyse)
+- **Commandes et livraisons** (suivi, statut, retards)
+- **Demandes d'équipement** (validation, suivi)
+- **Statistiques et analyses** (performance, risques, optimisation)
 
 **Exemples de questions :**
-• "Liste du matériel informatique"
-• "Où est le matériel PC-123 ?"
-• "Statut des livraisons"
-• "Analyse de performance des fournisseurs"
+- "Liste du matériel informatique"
+- "Où est le matériel PC-123 ?"
+- "Statut des livraisons"
+- "Analyse de performance des fournisseurs"
 
-Comment puis-je vous aider aujourd'hui ? 😊"""
+Comment puis-je vous aider aujourd'hui ?"""
         
         # Enhanced help response with better structure and examples
         return """**Assistant ParcInfo - Guide Complet** 📚
@@ -4983,10 +5875,10 @@ Comment puis-je vous aider aujourd'hui ? 😊"""
 - **Analyser** : Statut, affectation, garantie, performance
 
 **Exemples pratiques :**
-• "Liste tout le matériel informatique"
-• "Où se trouve le matériel PC-123 ?"
-• "Matériel en panne ou en stock"
-• "Matériel affecté à l'étage 2"
+- "Liste tout le matériel informatique"
+- "Où se trouve le matériel PC-123 ?"
+- "Matériel en panne ou en stock"
+- "Matériel affecté à l'étage 2"
 
 ###  **Gestion des Commandes**
 **Actions disponibles :**
@@ -4995,10 +5887,10 @@ Comment puis-je vous aider aujourd'hui ? 😊"""
 - **Suivre** : Statut, délais, retards
 
 **Exemples pratiques :**
-• "Commandes de juillet 2025"
-• "Montant total des commandes informatiques"
-• "Commandes supérieures à 1000 DH"
-• "Mode de passation des commandes"
+- "Commandes de juillet 2025"
+- "Montant total des commandes informatiques"
+- "Commandes supérieures à 1000 DH"
+- "Mode de passation des commandes"
 
 ### 🏢 **Gestion des Fournisseurs**
 **Actions disponibles :**
@@ -5007,10 +5899,10 @@ Comment puis-je vous aider aujourd'hui ? 😊"""
 - **Comparer** : Performance entre fournisseurs
 
 **Exemples pratiques :**
-• "Liste des fournisseurs"
-• "Fournisseurs avec le plus de commandes"
-• "Fournisseurs en retard de livraison"
-• "Analyse de performance des fournisseurs"
+- "Liste des fournisseurs"
+- "Fournisseurs avec le plus de commandes"
+- "Fournisseurs en retard de livraison"
+- "Analyse de performance des fournisseurs"
 
 ### 🚚 **Suivi des Livraisons**
 **Actions disponibles :**
@@ -5019,10 +5911,10 @@ Comment puis-je vous aider aujourd'hui ? 😊"""
 - **Gérer** : PV de réception, incidents
 
 **Exemples pratiques :**
-• "Statut de la livraison BC-2023-456"
-• "Livraisons en retard"
-• "Livraisons prévues pour août"
-• "PV de réception manquants"
+- "Statut de la livraison BC-2023-456"
+- "Livraisons en retard"
+- "Livraisons prévues pour août"
+- "PV de réception manquants"
 
 ###  **Statistiques et Rapports**
 **Actions disponibles :**
@@ -5031,30 +5923,30 @@ Comment puis-je vous aider aujourd'hui ? 😊"""
 - **Prédire** : Besoins futurs, planification
 
 **Exemples pratiques :**
-• "Statistiques du parc informatique"
-• "Analyse des demandes d'équipement"
-• "Tendances d'utilisation du matériel"
-• "Rapport de performance global"
+- "Statistiques du parc informatique"
+- "Analyse des demandes d'équipement"
+- "Tendances d'utilisation du matériel"
+- "Rapport de performance global"
 
 ## 🔧 **Questions Universelles Supportées**
 
 ###  **Comment faire...**
-• "Comment fonctionne ce système ?"
-• "Comment demander un nouvel équipement ?"
-• "Comment gérer les livraisons ?"
-• "Comment configurer le système ?"
+- "Comment fonctionne ce système ?"
+- "Comment demander un nouvel équipement ?"
+- "Comment gérer les livraisons ?"
+- "Comment configurer le système ?"
 
 ### 🆘 **Aide et Support**
-• "J'ai besoin d'aide"
-• "Comment résoudre un problème ?"
-• "Qui contacter en cas de problème ?"
-• "Y a-t-il de la documentation ?"
+- "J'ai besoin d'aide"
+- "Comment résoudre un problème ?"
+- "Qui contacter en cas de problème ?"
+- "Y a-t-il de la documentation ?"
 
 ### 📈 **Analyse et Optimisation**
-• "Comment optimiser le parc ?"
-• "Quels sont les indicateurs de performance ?"
-• "Comment analyser les tendances ?"
-• "Quels sont les plans de maintenance ?"
+- "Comment optimiser le parc ?"
+- "Quels sont les indicateurs de performance ?"
+- "Comment analyser les tendances ?"
+- "Quels sont les plans de maintenance ?"
 
 ##  **Conseils pour des Réponses Optimales**
 
@@ -5073,19 +5965,123 @@ Si une réponse ne vous convient pas :
 
 ###  **Fonctionnalités Avancées**
 - **Recherche intelligente** : Reconnaissance automatique des intentions
-- **Analyse prédictive** : Identification des tendances et risques
-- **Optimisation automatique** : Suggestions d'amélioration
-- **Support multilingue** : Questions en français et anglais
+- **Analyse contextuelle** : Compréhension des relations entre données
+- **Réponses personnalisées** : Adaptation au contexte de votre question
+- **Validation automatique** : Vérification des données avant affichage
 
-## 📞 **Support Technique**
+**Le système est prêt à répondre à vos questions sur le parc informatique.**"""
 
-**En cas de problème :**
-1. **Reformulez** votre question
-2. **Utilisez** les exemples ci-dessus
-3. **Contactez** l'équipe technique si nécessaire
+    def _validate_response_data(self, response: str, query_type: str) -> str:
+        """Validate response data against DB to prevent hallucinations"""
+        try:
+            # Extract potential codes, amounts, and references from response
+            codes = re.findall(r'\b[A-Z]{2,6}[/-][A-Z0-9/-]+\b', response)
+            amounts = re.findall(r'\b\d+(?:\s*\d{3})*(?:[.,]\d{2})?\s*(?:DH|€|MAD)\b', response)
+            ice_numbers = re.findall(r'\bICE:\s*(\d{15})\b', response)
+            # Extract potential supplier names (look for capitalized words or phrases)
+            supplier_names = re.findall(r'\b[A-Z][A-Z0-9\s&-]+\b(?=\s*\()', response) + re.findall(r'\b[A-Z][A-Z0-9\s&-]+\b(?=\s*:\s*\d)', response)
+            
+            # Validate codes against actual DB
+            for code in codes:
+                if not self._code_exists_in_db(code):
+                    logger.warning(f"Potential hallucinated code detected: {code}")
+                    response = response.replace(code, "[CODE_VÉRIFIÉ_REQUIS]")
+            
+            # Validate supplier names against DB
+            db_suppliers = [f.nom for f in Fournisseur.objects.all()]
+            for supplier in supplier_names:
+                supplier = supplier.strip()
+                if supplier and supplier not in db_suppliers:
+                    logger.warning(f"Potential hallucinated supplier detected: {supplier}")
+                    response = response.replace(supplier, "[FOURNISSEUR_NON_VÉRIFIÉ]")
+            
+            # Validate ICE numbers (simplified check for format only if DB check not feasible)
+            for ice in ice_numbers:
+                if not Fournisseur.objects.filter(ice=ice).exists():
+                    logger.warning(f"Potential hallucinated ICE detected: {ice}")
+                    response = response.replace(ice, "[ICE_VÉRIFIÉ_REQUIS]")
+            
+            # Add validation footer for business queries
+            # Auto-detect query type keywords to avoid mismatches
+            qt = (query_type or "").lower()
+            if any(k in qt for k in ['statistique', 'statistics', 'stats']) or \
+               any(k in qt for k in ['matériel', 'materiel', 'material']) or \
+               any(k in qt for k in ['fournisseur', 'supplier']) or \
+               any(k in qt for k in ['livraison', 'delivery']):
+                pass  # Validation logic removed
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Response validation error: {e}")
+            return response
 
-**Le système s'améliore continuellement grâce à l'IA ! 🤖✨**
-"""
+    def get_system_status(self) -> Dict[str, Any]:
+        """Get comprehensive system status"""
+        return {
+            'rag_documents': self.rag.get_rag_count(),
+            'llm_available': self.use_llm,
+            'ollama_models': self.llm_client.list_models() if self.use_llm else [],
+            'embedding_model': getattr(self, 'embedding_model_name', 'sentence-transformers'),
+            'timestamp': datetime.now().isoformat()
+        }
+
+    # **Exemples pratiques :**
+    # - "Statistiques du parc informatique"
+    # - "Analyse des demandes d'équipement"
+    # - "Tendances d'utilisation du matériel"
+    # - "Rapport de performance global"
+
+    # ## 🔧 **Questions Universelles Supportées**
+
+    # ###  **Comment faire...**
+    # - "Comment fonctionne ce système ?"
+    # - "Comment demander un nouvel équipement ?"
+    # - "Comment gérer les livraisons ?"
+    # - "Comment configurer le système ?"
+
+    # ### 🆘 **Aide et Support**
+    # - "J'ai besoin d'aide"
+    # - "Comment résoudre un problème ?"
+    # - "Qui contacter en cas de problème ?"
+    # - "Y a-t-il de la documentation ?"
+
+    # ### 📈 **Analyse et Optimisation**
+    # - "Comment optimiser le parc ?"
+    # - "Quels sont les indicateurs de performance ?"
+    # - "Comment analyser les tendances ?"
+    # - "Quels sont les plans de maintenance ?"
+
+    # ##  **Conseils pour des Réponses Optimales**
+
+    # ###  **Questions Efficaces**
+    # - **Soyez précis** : "Matériel informatique" plutôt que "matériel"
+    # - **Ajoutez des critères** : "affecté", "opérationnel", "en attente"
+    # - **Spécifiez la période** : "juillet 2025", "ce mois"
+    # - **Utilisez des codes** : "PC-123", "BC-2023-456"
+
+    # ### 🔄 **Reformulation en Cas d'Erreur**
+    # Si une réponse ne vous convient pas :
+    # 1. **Précisez le type** : "matériel informatique" ou "matériel de bureau"
+    # 2. **Ajoutez un statut** : "affecté", "opérationnel", "en attente"
+    # 3. **Posez une question ciblée** : "Quel est le mode de passation de BC23 ?"
+    # 4. **Utilisez des synonymes** : "équipement" au lieu de "matériel"
+
+    # ###  **Fonctionnalités Avancées**
+    # - **Recherche intelligente** : Reconnaissance automatique des intentions
+    # - **Analyse prédictive** : Identification des tendances et risques
+    # - **Optimisation automatique** : Suggestions d'amélioration
+    # - **Support multilingue** : Questions en français et anglais
+
+    # ## 📞 **Support Technique**
+
+    # **En cas de problème :**
+    # 1. **Reformulez** votre question
+    # 2. **Utilisez** les exemples ci-dessus
+    # 3. **Contactez** l'équipe technique si nécessaire
+
+    # **Le système s'améliore continuellement grâce à l'IA ! 🤖✨**
+    # """
 
     def get_system_status(self) -> Dict[str, Any]:
         """Get comprehensive system status"""
@@ -5316,7 +6312,7 @@ Si une réponse ne vous convient pas :
             scope = f" pour l'année {year}" if year else ""
             response = (
                 "**💰 Montant total des commandes informatiques**" + (f"{scope}" if scope else "") + ":\n"
-                f"• {amount_txt}\n\n"
+                f"- {amount_txt}\n\n"
                 
             )
             return response
@@ -5361,7 +6357,7 @@ Si une réponse ne vous convient pas :
             response = (
                 "**💰 Montant total des commandes bureau**"
                 f"{scope}:\n"
-                f"• {amount_txt}\n\n"
+                f"- {amount_txt}\n\n"
                 
             )
             return response
@@ -5467,10 +6463,10 @@ Si une réponse ne vous convient pas :
         
         for i, supplier in enumerate(results, 1):
             response += f"{i}. **{supplier['fournisseur']}** 🥇\n"
-            response += f"   • ICE : {supplier.get('ice', 'N/A')}\n"
-            response += f"   • Adresse : {supplier.get('adresse', 'N/A')}\n"
-            response += f"   • Nombre de commandes : {supplier['nombre_commandes']}\n"
-            response += f"   • Montant total : {supplier['montant_total']:.2f} DH\n\n"
+            response += f"   - ICE : {supplier.get('ice', 'N/A')}\n"
+            response += f"   - Adresse : {supplier.get('adresse', 'N/A')}\n"
+            response += f"   - Nombre de commandes : {supplier['nombre_commandes']}\n"
+            response += f"   - Montant total : {supplier['montant_total']:.2f} DH\n\n"
         
         response += ""
         return response
@@ -5513,8 +6509,8 @@ Si une réponse ne vous convient pas :
             response = "**📦 Analyse des livraisons par fournisseur :**\n\n"
             for i, supplier in enumerate(suppliers_with_deliveries, 1):
                 response += f"{i}. **{supplier.nom}**\n"
-                response += f"   • ICE : {supplier.ice or 'N/A'}\n"
-                response += f"   • Livraisons : {supplier.nombre_livraisons}\n"
+                response += f"   - ICE : {supplier.ice or 'N/A'}\n"
+                response += f"   - Livraisons : {supplier.nombre_livraisons}\n"
                 # delai_moyen est un timedelta (DurationField agrégé). Convertir en jours pour l'affichage.
                 try:
                     if supplier.delai_moyen and hasattr(supplier.delai_moyen, 'total_seconds'):
@@ -5523,7 +6519,7 @@ Si une réponse ne vous convient pas :
                         avg_days = 0.0
                 except Exception:
                     avg_days = 0.0
-                response += f"   • Délai moyen : {avg_days:.1f} jours\n\n"
+                response += f"   - Délai moyen : {avg_days:.1f} jours\n\n"
             
             response += ""
             return response
@@ -5555,7 +6551,7 @@ Si une réponse ne vous convient pas :
                             commandes_info = Commande.objects.filter(fournisseur=supplier).count()
                             commandes_bureau = CommandeBureau.objects.filter(fournisseur=supplier).count()
                             
-                            response += f"• **{supplier.nom}** : {supplier.command_count} commande{'s' if supplier.command_count > 1 else ''} totales\n"
+                            response += f"- **{supplier.nom}** : {supplier.command_count} commande{'s' if supplier.command_count > 1 else ''} totales\n"
                             response += f"  - Informatique : {commandes_info}\n"
                             response += f"  - Bureau : {commandes_bureau}\n"
                             response += f"  - ICE : {supplier.ice or 'Non renseigné'}\n"
@@ -5599,10 +6595,10 @@ Si une réponse ne vous convient pas :
                             ).count()
                             
                             response += f"{i}. **{supplier.nom}** 🥇\n"
-                            response += f"   • Total commandes récentes : {supplier.recent_command_count}\n"
-                            response += f"   • Informatique : {commandes_info_recent}\n"
-                            response += f"   • Bureau : {commandes_bureau_recent}\n"
-                            response += f"   • ICE : {supplier.ice or 'Non renseigné'}\n\n"
+                            response += f"   - Total commandes récentes : {supplier.recent_command_count}\n"
+                            response += f"   - Informatique : {commandes_info_recent}\n"
+                            response += f"   - Bureau : {commandes_bureau_recent}\n"
+                            response += f"   - ICE : {supplier.ice or 'Non renseigné'}\n\n"
                         
                         response += f"**📅 Période analysée :** 30 derniers jours\n"
                         response += ""
@@ -5628,7 +6624,7 @@ Si une réponse ne vous convient pas :
                             commandes_info = Commande.objects.filter(fournisseur=supplier).count()
                             commandes_bureau = CommandeBureau.objects.filter(fournisseur=supplier).count()
                             
-                            response += f"• **{supplier.nom}** : {supplier.command_count} commandes totales\n"
+                            response += f"- **{supplier.nom}** : {supplier.command_count} commandes totales\n"
                             response += f"  - Informatique : {commandes_info}\n"
                             response += f"  - Bureau : {commandes_bureau}\n"
                             response += f"  - ICE : {supplier.ice or 'Non renseigné'}\n"
@@ -5647,7 +6643,7 @@ Si une réponse ne vous convient pas :
                                 commandes_info = Commande.objects.filter(fournisseur=supplier).count()
                                 commandes_bureau = CommandeBureau.objects.filter(fournisseur=supplier).count()
                                 
-                                response += f"• **{supplier.nom}** : {supplier.command_count} commande{'s' if threshold > 1 else ''} totales\n"
+                                response += f"- **{supplier.nom}** : {supplier.command_count} commande{'s' if threshold > 1 else ''} totales\n"
                                 response += f"  - Informatique : {commandes_info}\n"
                                 response += f"  - Bureau : {commandes_bureau}\n"
                                 response += f"  - ICE : {supplier.ice or 'Non renseigné'}\n"
@@ -5669,7 +6665,7 @@ Si une réponse ne vous convient pas :
                 if casablanca_suppliers.exists():
                     response = "**🏢 Fournisseurs à Casablanca avec ICE de plus de 10 chiffres :**\n\n"
                     for supplier in casablanca_suppliers:
-                        response += f"• **{supplier.nom}**\n"
+                        response += f"- **{supplier.nom}**\n"
                         response += f"  - ICE : {supplier.ice} ({len(supplier.ice)} chiffres)\n"
                         response += f"  - Adresse : {supplier.adresse}\n\n"
                     response += ""
@@ -5683,7 +6679,7 @@ Si une réponse ne vous convient pas :
                 if suppliers.exists():
                     response = "**🏢 Fournisseurs avec ICE commençant par '0015' :**\n\n"
                     for supplier in suppliers:
-                        response += f"• **{supplier.nom}**\n"
+                        response += f"- **{supplier.nom}**\n"
                         response += f"  - ICE : {supplier.ice}\n"
                         response += f"  - Adresse : {supplier.adresse}\n\n"
                     response += ""
@@ -5697,7 +6693,7 @@ Si une réponse ne vous convient pas :
                 if suppliers.exists():
                     response = "**🏢 Fournisseurs situés à Rabat :**\n\n"
                     for supplier in suppliers:
-                        response += f"• **{supplier.nom}**\n"
+                        response += f"- **{supplier.nom}**\n"
                         response += f"  - ICE : {supplier.ice}\n"
                         response += f"  - Adresse : {supplier.adresse}\n\n"
                     response += ""
@@ -5721,11 +6717,11 @@ Si une réponse ne vous convient pas :
                 ).distinct().count()
                 
                 response = f"""**🏢 Analyse des fournisseurs :**
-• Total : {total_suppliers} fournisseurs
-• Avec commandes informatiques : {suppliers_with_commands_info} fournisseurs
-• Avec commandes bureau : {suppliers_with_commands_bureau} fournisseurs
-• Avec au moins une commande : {suppliers_with_any_commands} fournisseurs
-• Taux d'activité : {suppliers_with_any_commands/total_suppliers*100:.1f}%
+- Total : {total_suppliers} fournisseurs
+- Avec commandes informatiques : {suppliers_with_commands_info} fournisseurs
+- Avec commandes bureau : {suppliers_with_commands_bureau} fournisseurs
+- Avec au moins une commande : {suppliers_with_any_commands} fournisseurs
+- Taux d'activité : {suppliers_with_any_commands/total_suppliers*100:.1f}%
 
 """
                 return response
@@ -5752,9 +6748,9 @@ Si une réponse ne vous convient pas :
             avg_amount = total_amount / command_count if command_count > 0 else 0
             
             response = f"""**💰 Analyse des montants de commandes :**
-• Montant total : {total_amount:.2f} DH
-• Montant moyen par commande : {avg_amount:.2f} DH
-• Nombre de commandes : {command_count}
+- Montant total : {total_amount:.2f} DH
+- Montant moyen par commande : {avg_amount:.2f} DH
+- Nombre de commandes : {command_count}
 
 """
             return response
@@ -5776,8 +6772,8 @@ Si une réponse ne vous convient pas :
             ).count()
             
             response = f"""**📅 Analyse des commandes par date :**
-• Commandes du mois {current_month}/{current_year} : {monthly_commands}
-• Total des commandes : {Commande.objects.count()}
+- Commandes du mois {current_month}/{current_year} : {monthly_commands}
+- Total des commandes : {Commande.objects.count()}
 
 """
             return response
@@ -5804,18 +6800,18 @@ Si une réponse ne vous convient pas :
                         cmd_info = Commande.objects.filter(numero_commande__icontains=cmd_num).first()
                         if cmd_info:
                             response += f"**Commande {cmd_info.numero_commande}**\n"
-                            response += f"• Fournisseur : {cmd_info.fournisseur.nom if cmd_info.fournisseur else 'N/A'}\n"
-                            response += f"• Date : {cmd_info.date_commande.strftime('%d/%m/%Y') if cmd_info.date_commande else 'N/A'}\n"
-                            response += f"• Statut : {cmd_info.statut if hasattr(cmd_info, 'statut') else 'N/A'}\n"
-                            response += f"• Durée de garantie : {cmd_info.duree_garantie_valeur} {cmd_info.get_duree_garantie_unite_display()}\n\n"
+                            response += f"- Fournisseur : {cmd_info.fournisseur.nom if cmd_info.fournisseur else 'N/A'}\n"
+                            response += f"- Date : {cmd_info.date_commande.strftime('%d/%m/%Y') if cmd_info.date_commande else 'N/A'}\n"
+                            response += f"- Statut : {cmd_info.statut if hasattr(cmd_info, 'statut') else 'N/A'}\n"
+                            response += f"- Durée de garantie : {cmd_info.duree_garantie_valeur} {cmd_info.get_duree_garantie_unite_display()}\n\n"
                         else:
                             # Chercher dans les commandes bureau
                             cmd_bureau = CommandeBureau.objects.filter(numero_commande__icontains=cmd_num).first()
                             if cmd_bureau:
                                 response += f"**Commande Bureau {cmd_bureau.numero_commande}**\n"
-                                response += f"• Fournisseur : {cmd_bureau.fournisseur.nom if cmd_bureau.fournisseur else 'N/A'}\n"
-                                response += f"• Date : {cmd_bureau.date_commande.strftime('%d/%m/%Y') if cmd_bureau.date_commande else 'N/A'}\n"
-                                response += f"• Durée de garantie : {cmd_bureau.duree_garantie_valeur} {cmd_bureau.get_duree_garantie_unite_display()}\n\n"
+                                response += f"- Fournisseur : {cmd_bureau.fournisseur.nom if cmd_bureau.fournisseur else 'N/A'}\n"
+                                response += f"- Date : {cmd_bureau.date_commande.strftime('%d/%m/%Y') if cmd_bureau.date_commande else 'N/A'}\n"
+                                response += f"- Durée de garantie : {cmd_bureau.duree_garantie_valeur} {cmd_bureau.get_duree_garantie_unite_display()}\n\n"
                             else:
                                 response += f" Aucune commande trouvée pour {cmd_num}\n\n"
                     
@@ -5834,17 +6830,17 @@ Si une réponse ne vous convient pas :
                         cmd_info = Commande.objects.filter(numero_commande__icontains=cmd_num).first()
                         if cmd_info:
                             response += f"**Commande {cmd_info.numero_commande}**\n"
-                            response += f"• Durée de garantie : {cmd_info.duree_garantie_valeur} {cmd_info.get_duree_garantie_unite_display()}\n"
-                            response += f"• Fournisseur : {cmd_info.fournisseur.nom if cmd_info.fournisseur else 'N/A'}\n"
-                            response += f"• Date de commande : {cmd_info.date_commande.strftime('%d/%m/%Y') if cmd_info.date_commande else 'N/A'}\n\n"
+                            response += f"- Durée de garantie : {cmd_info.duree_garantie_valeur} {cmd_info.get_duree_garantie_unite_display()}\n"
+                            response += f"- Fournisseur : {cmd_info.fournisseur.nom if cmd_info.fournisseur else 'N/A'}\n"
+                            response += f"- Date de commande : {cmd_info.date_commande.strftime('%d/%m/%Y') if cmd_info.date_commande else 'N/A'}\n\n"
                         else:
                             # Chercher dans les commandes bureau
                             cmd_bureau = CommandeBureau.objects.filter(numero_commande__icontains=cmd_num).first()
                             if cmd_bureau:
                                 response += f"**Commande Bureau {cmd_bureau.numero_commande}**\n"
-                                response += f"• Durée de garantie : {cmd_bureau.duree_garantie_valeur} {cmd_bureau.get_duree_garantie_unite_display()}\n"
-                                response += f"• Fournisseur : {cmd_bureau.fournisseur.nom if cmd_bureau.fournisseur else 'N/A'}\n"
-                                response += f"• Date de commande : {cmd_bureau.date_commande.strftime('%d/%m/%Y') if cmd_bureau.date_commande else 'N/A'}\n\n"
+                                response += f"- Durée de garantie : {cmd_bureau.duree_garantie_valeur} {cmd_bureau.get_duree_garantie_unite_display()}\n"
+                                response += f"- Fournisseur : {cmd_bureau.fournisseur.nom if cmd_bureau.fournisseur else 'N/A'}\n"
+                                response += f"- Date de commande : {cmd_bureau.date_commande.strftime('%d/%m/%Y') if cmd_bureau.date_commande else 'N/A'}\n\n"
                             else:
                                 response += f" Aucune commande trouvée pour {cmd_num}\n\n"
                     
@@ -5855,9 +6851,9 @@ Si une réponse ne vous convient pas :
                     commands_with_warranty = Commande.objects.filter(duree_garantie_valeur__gt=0).count() + CommandeBureau.objects.filter(duree_garantie_valeur__gt=0).count()
                     
                     response = f"""**🛡️ Vue d'ensemble des garanties :**
-• Total des commandes : {total_commands}
-• Commandes avec garantie : {commands_with_warranty}
-• Taux de couverture garantie : {commands_with_warranty/total_commands*100:.1f}%
+- Total des commandes : {total_commands}
+- Commandes avec garantie : {commands_with_warranty}
+- Taux de couverture garantie : {commands_with_warranty/total_commands*100:.1f}%
 
 ** Pour obtenir les détails de garantie d'une commande spécifique, précisez son numéro (ex: "garantie commande AOO2025")**
 """
@@ -5873,13 +6869,13 @@ Si une réponse ne vous convient pas :
                 if recent_commands:
                     response += "**Informatique :**\n"
                     for cmd in recent_commands:
-                        response += f"• {cmd.numero_commande} - {cmd.fournisseur.nom if cmd.fournisseur else 'N/A'} - {cmd.date_commande.strftime('%d/%m/%Y') if cmd.date_commande else 'N/A'}\n"
+                        response += f"- {cmd.numero_commande} - {cmd.fournisseur.nom if cmd.fournisseur else 'N/A'} - {cmd.date_commande.strftime('%d/%m/%Y') if cmd.date_commande else 'N/A'}\n"
                     response += "\n"
                 
                 if recent_bureau:
                     response += "**Bureautique :**\n"
                     for cmd in recent_bureau:
-                        response += f"• {cmd.numero_commande} - {cmd.fournisseur.nom if cmd.fournisseur else 'N/A'} - {cmd.date_commande.strftime('%d/%m/%Y') if cmd.date_commande else 'N/A'}\n"
+                        response += f"- {cmd.numero_commande} - {cmd.fournisseur.nom if cmd.fournisseur else 'N/A'} - {cmd.date_commande.strftime('%d/%m/%Y') if cmd.date_commande else 'N/A'}\n"
                 
                 return response
             
@@ -5894,7 +6890,7 @@ Si une réponse ne vous convient pas :
                     total_cmd = cmd_count + cmd_bureau_count
                     
                     if total_cmd > 0:
-                        response += f"• **{supplier.nom}** : {total_cmd} commande(s)\n"
+                        response += f"- **{supplier.nom}** : {total_cmd} commande(s)\n"
                         response += f"  - Informatique : {cmd_count}\n"
                         response += f"  - Bureautique : {cmd_bureau_count}\n\n"
                 
@@ -5902,7 +6898,7 @@ Si une réponse ne vous convient pas :
             
             # Réponse par défaut
             total_commands = Commande.objects.count() + CommandeBureau.objects.count()
-            return f"** Vue d'ensemble des commandes :**\n• Total des commandes : {total_commands}\n• Utilisez des termes plus spécifiques pour des analyses détaillées"
+            return f"** Vue d'ensemble des commandes :**\n- Total des commandes : {total_commands}\n- Utilisez des termes plus spécifiques pour des analyses détaillées"
             
         except Exception as e:
             logger.error(f"Specific command analysis error: {e}")
@@ -6069,10 +7065,10 @@ Si une réponse ne vous convient pas :
         
         return (
             f"Commande {code}\n"
-            f"• Durée: {val} {unite_str}\n"
-            f"• Réception: {rec_str}\n"
-            f"• Fin de garantie: {end_str}\n"
-            f"• Active: {'Oui' if active else 'Non'}" + (f" — Restant: {days_left} jours" if days_left is not None else "")
+            f"- Durée: {val} {unite_str}\n"
+            f"- Réception: {rec_str}\n"
+            f"- Fin de garantie: {end_str}\n"
+            f"- Active: {'Oui' if active else 'Non'}" + (f" — Restant: {days_left} jours" if days_left is not None else "")
         )
 
     def _handle_commands_warranty_in_months(self, entities: Dict[str, Any]) -> str:
@@ -6269,9 +7265,11 @@ Si une réponse ne vous convient pas :
         return data
 
     def _classify_intent(self, query: str) -> Dict[str, Any]:
-        """Classifie l'intent d'une requête en utilisant le modèle zero-shot."""
+        """Classifie l'intent d'une requête en utilisant le modèle zero-shot avec fallback intelligent."""
         if not self.nlp_available or not self.intent_classifier:
-            return {"intent": "unknown", "confidence": 0.0, "method": "fallback"}
+            # Fallback intelligent vers la classification basée sur les règles
+            logger.info("BART non disponible, utilisation du fallback basé sur les règles")
+            return self._rule_based_intent_classification(query)
         
         try:
             # Classification zero-shot avec les intents prédéfinis
@@ -6291,8 +7289,9 @@ Si une réponse ne vous convient pas :
                 "all_scores": dict(zip(result["labels"], result["scores"]))
             }
         except Exception as e:
-            logger.warning(f"Intent classification failed: {e}")
-            return {"intent": "unknown", "confidence": 0.0, "method": "error_fallback"}
+            logger.warning(f"Intent classification BART failed: {e}, using rule-based fallback")
+            # Fallback vers la classification basée sur les règles en cas d'erreur
+            return self._rule_based_intent_classification(query)
 
     def _validate_semantic_relevance(self, intent: str, query: str) -> bool:
         """Valide la pertinence sémantique de l'intent détecté."""
@@ -6430,14 +7429,14 @@ Si une réponse ne vous convient pas :
                 end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
                 if end and today <= end <= soon:
                     count += 1
-                    lines.append(f"• {m.code_inventaire} (Informatique) — Cmd {cmd.numero_commande} — fin {end.strftime('%d/%m/%Y')}")
+                    lines.append(f"- {m.code_inventaire} (Informatique) — Cmd {cmd.numero_commande} — fin {end.strftime('%d/%m/%Y')}")
         if type_filter in (None, 'bureau'):
             for m in MaterielBureau.objects.select_related('ligne_commande__commande'):
                 cmd = m.ligne_commande.commande
                 end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
                 if end and today <= end <= soon:
                     count += 1
-                    lines.append(f"• {m.code_inventaire} (Bureau) — Cmd {cmd.numero_commande} — fin {end.strftime('%d/%m/%Y')}")
+                    lines.append(f"- {m.code_inventaire} (Bureau) — Cmd {cmd.numero_commande} — fin {end.strftime('%d/%m/%Y')}")
         if count == 0:
             scope = 'bureautique' if type_filter == 'bureau' else ('informatique' if type_filter == 'informatique' else 'le parc')
             
@@ -6503,7 +7502,7 @@ Si une réponse ne vous convient pas :
                     days_remaining = (end - today).days
                     if days_remaining < threshold_days:
                         count += 1
-                        lines.append(f"• {m.code_inventaire} (Informatique) — Cmd {cmd.numero_commande} — {days_remaining} jours restants — fin {end.strftime('%d/%m/%Y')}")
+                        lines.append(f"- {m.code_inventaire} (Informatique) — Cmd {cmd.numero_commande} — {days_remaining} jours restants — fin {end.strftime('%d/%m/%Y')}")
         
         if type_filter in (None, 'bureau'):
             for m in MaterielBureau.objects.select_related('ligne_commande__commande'):
@@ -6513,7 +7512,7 @@ Si une réponse ne vous convient pas :
                     days_remaining = (end - today).days
                     if days_remaining < threshold_days:
                         count += 1
-                        lines.append(f"• {m.code_inventaire} (Bureau) — Cmd {cmd.numero_commande} — {days_remaining} jours restants — fin {end.strftime('%d/%m/%Y')}")
+                        lines.append(f"- {m.code_inventaire} (Bureau) — Cmd {cmd.numero_commande} — {days_remaining} jours restants — fin {end.strftime('%d/%m/%Y')}")
         
         if count == 0:
             scope = 'bureautique' if type_filter == 'bureau' else ('informatique' if type_filter == 'informatique' else 'le parc')
@@ -6584,7 +7583,7 @@ Si une réponse ne vous convient pas :
                         response = f"La demande n°{request_number} n'existe pas dans la base de données.\n\n"
                         response += "Voici quelques demandes existantes :\n"
                         for alt_req in alternative_requests:
-                            response += f"• n°{alt_req.id} : {alt_req.get_categorie_display()}\n"
+                            response += f"- n°{alt_req.id} : {alt_req.get_categorie_display()}\n"
                         response += f"\nVoulez-vous des détails sur l'une de ces demandes ?"
                     else:
                         response = f"La demande n°{request_number} n'existe pas dans la base de données.\n\nAucune demande d'équipement trouvée."
@@ -6647,8 +7646,8 @@ Si une réponse ne vous convient pas :
             return f"Aucune commande trouvée pour {code}."
         o = rec['obj']
         if not o.date_reception:
-            return f"Commande {code} — Date de réception: N/A"
-        return f"Commande {code} — Date de réception: {o.date_reception.strftime('%d/%m/%Y')}"
+            return f"La commande {code} n'a pas encore été réceptionnée."
+        return f"La date de réception de la commande {code} est le {o.date_reception.strftime('%d/%m/%Y')}."
 
     def _handle_material_warranty_status(self, entities: Dict[str, Any]) -> str:
         q = entities.get('original_query', '') or ''
@@ -6758,7 +7757,7 @@ Si une réponse ne vous convient pas :
                         designation = getattr(m.ligne_commande.designation, 'nom', 'non disponible')
                 numero_serie = getattr(m, 'numero_serie', 'non disponible')
                 days_remaining = (end - today).days if end and end >= today else 0
-                results.append(f"• {m.code_inventaire} ({designation}, {numero_serie}) : Expire {end.strftime('%d/%m/%Y')} ({cmd.numero_commande}, {days_remaining} jours restants)")
+                results.append(f"- {m.code_inventaire} ({designation}, {numero_serie}) : Expire {end.strftime('%d/%m/%Y')} ({cmd.numero_commande}, {days_remaining} jours restants)")
         for m in bu_list:
             cmd = m.ligne_commande.commande
             end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
@@ -6769,7 +7768,7 @@ Si une réponse ne vous convient pas :
                     if hasattr(m.ligne_commande, 'designation') and m.ligne_commande.designation:
                         designation = getattr(m.ligne_commande.designation, 'nom', 'non disponible')
                 days_remaining = (end - today).days if end and end >= today else 0
-                results.append(f"• {m.code_inventaire} ({designation}) : Expire {end.strftime('%d/%m/%Y')} ({cmd.numero_commande}, {days_remaining} jours restants)")
+                results.append(f"- {m.code_inventaire} ({designation}) : Expire {end.strftime('%d/%m/%Y')} ({cmd.numero_commande}, {days_remaining} jours restants)")
         
         if not results:
             return self._make_response_human(
@@ -6812,7 +7811,7 @@ Si une réponse ne vous convient pas :
                             designation = getattr(material.ligne_commande.designation, 'nom', 'non disponible')
                     utilisateur = getattr(material.utilisateur, 'username', 'non affecté') if material.utilisateur else 'non affecté'
                     
-                    lines.append(f"• {material.code_inventaire} ({designation}, {numero_serie}, {utilisateur}) : Expire {end.strftime('%d/%m/%Y')} ({cmd.numero_commande})")
+                    lines.append(f"- {material.code_inventaire} ({designation}, {numero_serie}, {utilisateur}) : Expire {end.strftime('%d/%m/%Y')} ({cmd.numero_commande})")
 
         # Bureautique
         if type_filter in (None, 'bureau'):
@@ -6833,7 +7832,7 @@ Si une réponse ne vous convient pas :
                             designation = getattr(material.ligne_commande.designation, 'nom', 'non disponible')
                     utilisateur = getattr(material.utilisateur, 'username', 'non affecté') if material.utilisateur else 'non affecté'
                     
-                    lines.append(f"• {material.code_inventaire} ({designation}, {numero_serie}, {utilisateur}) : Expire {end.strftime('%d/%m/%Y')} ({cmd.numero_commande})")
+                    lines.append(f"- {material.code_inventaire} ({designation}, {numero_serie}, {utilisateur}) : Expire {end.strftime('%d/%m/%Y')} ({cmd.numero_commande})")
 
         if not lines:
             scope = 'informatique' if type_filter == 'informatique' else ('bureautique' if type_filter == 'bureau' else 'le parc')
@@ -6905,7 +7904,7 @@ Si une réponse ne vous convient pas :
                 return f"Aucune ligne pour {code}."
             out = [f"Lignes de commande {code}:"]
             for l in lines_qs:
-                out.append(f"• {l.designation.nom if l.designation else 'N/A'} — {l.description.nom if l.description else 'N/A'} — Qté {l.quantite} — PU {l.prix_unitaire} DH")
+                out.append(f"- {l.designation.nom if l.designation else 'N/A'} — {l.description.nom if l.description else 'N/A'} — Qté {l.quantite} — PU {l.prix_unitaire} DH")
             return "\n".join(out)
         cmd_b = CommandeBureau.objects.filter(numero_commande__iexact=code).first()
         if cmd_b:
@@ -6914,7 +7913,7 @@ Si une réponse ne vous convient pas :
                 return f"Aucune ligne pour {code}."
             out = [f"Lignes de commande {code}:"]
             for l in lines_qs:
-                out.append(f"• {l.designation.nom if l.designation else 'N/A'} — {l.description.nom if l.description else 'N/A'} — Qté {l.quantite} — PU {l.prix_unitaire} DH")
+                out.append(f"- {l.designation.nom if l.designation else 'N/A'} — {l.description.nom if l.description else 'N/A'} — Qté {l.quantite} — PU {l.prix_unitaire} DH")
             return "\n".join(out)
         return f"Aucune commande trouvée pour {code}."
 
@@ -6996,7 +7995,7 @@ Si une réponse ne vous convient pas :
             response += f" a passé {len(commands)} commande{'s' if len(commands) > 1 else ''} :\n\n"
             
             for cmd in commands:
-                response += f"• {cmd['id']} ({cmd['type']}, {cmd['date'].strftime('%d/%m/%Y') if cmd['date'] else 'N/A'}"
+                response += f"- {cmd['id']} ({cmd['type']}, {cmd['date'].strftime('%d/%m/%Y') if cmd['date'] else 'N/A'}"
                 if cmd['montant'] != 'N/A':
                     response += f", {cmd['montant']} DH"
                 response += "\n"
@@ -7050,7 +8049,7 @@ Si une réponse ne vous convient pas :
             for user, materials in user_materials.items():
                 response += f"👤 **{user.get_full_name() or user.username}** ({user.email})\n"
                 for material in materials:
-                    response += f"  • {material.code_inventaire}"
+                    response += f"  - {material.code_inventaire}"
                     if hasattr(material, 'numero_serie') and material.numero_serie:
                         response += f" (S/N: {material.numero_serie})"
                     response += "\n"
@@ -7222,7 +8221,7 @@ Si une réponse ne vous convient pas :
             # Build response with human tone
             response = f"Bonjour ! La commande {code} (matériels informatiques) inclut :\n\n"
             for materiel in materiels:
-                response += f"• {materiel}\n"
+                response += f"- {materiel}\n"
             
             response += "\nBesoin de plus d'infos sur cette commande ?"
             
@@ -7506,9 +8505,9 @@ Si une réponse ne vous convient pas :
             groups = Group.objects.all().values_list('name', flat=True)
             if not groups:
                 return "Aucun groupe trouvé."
-            lines = ["Groupes d'utilisateurs :"]
+            lines = ["Voici les groupes d'utilisateurs disponibles :"]
             for g in groups:
-                lines.append(f"• {g}")
+                lines.append(f"- {g}")
             return "\n".join(lines)
         
         return self._get_cached_data("groups_list", fetch_groups, CACHE_TTL)
@@ -7535,7 +8534,7 @@ Si une réponse ne vous convient pas :
                     return f"Aucune permission pour le groupe {target}."
                 lines = [f"Permissions du groupe {target} :"]
                 for p in sorted(perms):
-                    lines.append(f"• {p}")
+                    lines.append(f"- {p}")
                 return "\n".join(lines)
             except Group.DoesNotExist:
                 return f"Groupe introuvable: {target}"
@@ -7639,8 +8638,9 @@ Si une réponse ne vous convient pas :
     def _handle_materials_at_location(self, entities: Dict[str, Any]) -> str:
         q = entities.get('original_query', '') or ''
         import re as _re
-        m_etage = _re.search(r'(?:etage|étage)\s*(\d+)', q.lower())
-        m_salle = _re.search(r'\bsalle\s*([a-z0-9_-]+)', q.lower())
+        q_lower = q.lower()
+        m_etage = _re.search(r'(?:etage|étage)\s*(\d+)', q_lower)
+        m_salle = _re.search(r'\bsalle\s*([a-z0-9_-]+)', q_lower)
         location = None
         if m_etage:
             location = f"etage{m_etage.group(1)}"
@@ -7648,26 +8648,47 @@ Si une réponse ne vous convient pas :
             location = m_salle.group(1)
         if not location:
             return self._make_response_human("Veuillez préciser l'étage ou la salle.", 'no_results', False)
-        it_list = list(MaterielInformatique.objects.filter(lieu_stockage__iexact=location))
-        bu_list = list(MaterielBureau.objects.filter(lieu_stockage__iexact=location))
+
+        # Determine requested material type from query
+        want_bureau = any(t in q_lower for t in ['bureautique', 'bureau'])
+        want_it = 'informatique' in q_lower or ('informatique' not in q_lower and not want_bureau)
+        # If explicitly bureau only
+        if want_bureau and 'informatique' not in q_lower:
+            want_it = False
+
+        it_list = list(MaterielInformatique.objects.filter(lieu_stockage__iexact=location)) if want_it else []
+        bu_list = list(MaterielBureau.objects.filter(lieu_stockage__iexact=location)) if want_bureau or (not want_it and not want_bureau) else []
+
         if not it_list and not bu_list:
             return self._make_response_human(f"Aucun matériel trouvé à {location}.", 'no_results', False)
-        lines = [f"Matériels à {location} :"]
+
+        total = len(it_list) + len(bu_list)
+        title = []
+        if want_it and not want_bureau:
+            title.append("Matériels informatiques")
+        elif want_bureau and not want_it:
+            title.append("Matériels bureautiques")
+        else:
+            title.append("Matériels")
+        title.append(f"à {location} — Total : {total}")
+        lines = [" ".join(title) + ":"]
+
         if it_list:
-            lines.append("Informatique :")
+            if want_bureau and want_it:
+                lines.append("Informatique :")
             for m in it_list:
-                # Garantie
-                cmd = m.ligne_commande.commande
-                end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
-                warr = end.strftime('%d/%m/%Y') if end else 'N/A'
-                lines.append(f"• {m.code_inventaire} — Statut: {m.statut} — Utilisateur: {m.utilisateur.username if m.utilisateur else 'Non affecté'} — Fin garantie: {warr}")
+                # Print concise, DB-backed fields only
+                serial = m.numero_serie or 'N/A'
+                user = m.utilisateur.username if m.utilisateur else 'Non affecté'
+                lines.append(f"- {m.code_inventaire} (S/N: {serial}) — Statut: {m.statut} — Utilisateur: {user}")
+
         if bu_list:
-            lines.append("Bureautique :")
+            if want_bureau and want_it:
+                lines.append("Bureautique :")
             for m in bu_list:
-                cmd = m.ligne_commande.commande
-                end = self._compute_warranty_end(cmd.date_reception, cmd.duree_garantie_valeur, cmd.duree_garantie_unite)
-                warr = end.strftime('%d/%m/%Y') if end else 'N/A'
-                lines.append(f"• {m.code_inventaire} — Statut: {m.statut} — Utilisateur: {m.utilisateur.username if m.utilisateur else 'Non affecté'} — Fin garantie: {warr}")
+                user = m.utilisateur.username if m.utilisateur else 'Non affecté'
+                lines.append(f"- {m.code_inventaire} — Statut: {m.statut} — Utilisateur: {user}")
+
         return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
 
     # ======== FOURNITURES ========
@@ -7697,7 +8718,7 @@ Si une réponse ne vous convient pas :
                 return self._make_response_human(f"Aucune fourniture trouvée pour '{name}'.", 'no_results', False)
             lines = [f"Fournitures correspondant à '{name}':"]
             for it in items:
-                lines.append(f"• {it.nom} — Série: {it.numero_serie} — Type: {it.type}")
+                lines.append(f"- {it.nom} — Série: {it.numero_serie} — Type: {it.type}")
             return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
         # Si on demande une liste générique
         items = list(Fourniture.objects.filter(actif=True)[:20])
@@ -7705,7 +8726,7 @@ Si une réponse ne vous convient pas :
             return self._make_response_human("Aucune fourniture active.", 'no_results', False)
         lines = ["Fournitures actives (Top 20):"]
         for it in items:
-            lines.append(f"• {it.nom} — Série: {it.numero_serie} — Type: {it.type}")
+            lines.append(f"- {it.nom} — Série: {it.numero_serie} — Type: {it.type}")
         return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
 
     # ======== ARCHIVES ========
@@ -7727,7 +8748,7 @@ Si une réponse ne vous convient pas :
             return self._make_response_human("Aucune archive de décharge.", 'no_results', False)
         lines = ["Archives de décharges (Top 10):"]
         for a in items:
-            lines.append(f"• {a.numero_archive} — {a.date_archivage.strftime('%d/%m/%Y')} — Statut: {a.statut_archive}")
+            lines.append(f"- {a.numero_archive} — {a.date_archivage.strftime('%d/%m/%Y')} — Statut: {a.statut_archive}")
         return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
 
     def _handle_bureau_archives(self, entities: Dict[str, Any]) -> str:
@@ -7793,7 +8814,7 @@ Si une réponse ne vous convient pas :
                     
                     materiels_str = ", ".join(materiels) if materiels else "matériels non spécifiés"
                     
-                    response += f"• {materiels_str} (commande {delivery.numero_commande}) : "
+                    response += f"- {materiels_str} (commande {delivery.numero_commande}) : "
                     response += f"prévu {delivery.date_livraison_prevue.strftime('%d/%m/%Y')}, "
                     response += f"livré {delivery.date_livraison_effective.strftime('%d/%m/%Y')} "
                     response += f"({delay_days} jour{'s' if delay_days > 1 else ''} de retard).\n"
@@ -7829,7 +8850,7 @@ Si une réponse ne vous convient pas :
                 if august_deliveries:
                     response = "**📦 Livraisons prévues pour août 2025 :**\n\n"
                     for delivery in august_deliveries:
-                        response += f"• Commande {delivery.numero_commande}\n"
+                        response += f"- Commande {delivery.numero_commande}\n"
                         response += f"  - Prévue : {delivery.date_livraison_prevue.strftime('%d/%m/%Y')}\n"
                         response += f"  - Statut : {delivery.date_livraison_effective.strftime('%d/%m/%Y') if delivery.date_livraison_effective else 'Non livrée'}\n\n"
                     response += ""
@@ -7857,11 +8878,11 @@ Si une réponse ne vous convient pas :
             response = f"""** Statut du matériel :**
 
 Informatique :
-• nouveau : {new_it}
-• affecte : {assigned_it}
+- nouveau : {new_it}
+- affecte : {assigned_it}
 
 Bureautique :
-• affecte : {assigned_office}
+- affecte : {assigned_office}
 
 """
             return response
@@ -7903,7 +8924,7 @@ Bureautique : {etage1_office.count()} matériels
                 if pare_feu_materials:
                     response = "**🔥 Matériels de type Pare-feu :**\n\n"
                     for material in pare_feu_materials:
-                        response += f"• {material.code_inventaire}\n"
+                        response += f"- {material.code_inventaire}\n"
                         response += f"  - Statut : {material.statut}\n"
                         response += f"  - Lieu : {material.lieu_stockage}\n\n"
                     response += ""
@@ -7925,6 +8946,12 @@ Bureautique : {etage1_office.count()} matériels
             # Fournir une réponse contextuelle basée sur la requête
             query_lower = query.lower()
             
+            # Vérifier si c'est vraiment une question d'analyse
+            analysis_keywords = ['analyse', 'statistique', 'récapitulatif', 'résumé', 'état', 'parc total']
+            if not any(keyword in query_lower for keyword in analysis_keywords):
+                # Si ce n'est pas une question d'analyse, retourner une réponse d'erreur
+                return "Je n'ai pas compris votre question. Pouvez-vous reformuler votre demande ?"
+            
             if 'analyse' in query_lower or 'statistiques' in query_lower:
                 return self._handle_simple_analysis_query({'original_query': query})
             elif 'fournisseur' in query_lower:
@@ -7936,7 +8963,7 @@ Bureautique : {etage1_office.count()} matériels
             elif 'matériel' in query_lower:
                 return self._handle_simple_material_query({'original_query': query})
             else:
-                # Fallback vers l'analyse simple
+                # Fallback vers l'analyse simple seulement si c'est vraiment une question d'analyse
                 return self._handle_simple_analysis_query({'original_query': query})
                 
         except Exception as e:
@@ -7946,6 +8973,16 @@ Bureautique : {etage1_office.count()} matériels
     def _handle_simple_analysis_query(self, entities: Dict) -> str:
         """Gère les requêtes simples d'analyse avec informations enrichies et validées"""
         try:
+            # Cette méthode ne doit PAS être utilisée comme fallback pour toutes les questions
+            # Elle doit seulement être appelée pour des questions d'analyse spécifiques
+            original_query = entities.get('original_query', '').lower()
+            
+            # Vérifier si c'est vraiment une question d'analyse
+            analysis_keywords = ['analyse', 'statistique', 'récapitulatif', 'résumé', 'état', 'parc total']
+            if not any(keyword in original_query for keyword in analysis_keywords):
+                # Si ce n'est pas une question d'analyse, retourner une réponse d'erreur
+                return "Je n'ai pas compris votre question. Pouvez-vous reformuler votre demande ?"
+            
             response = ["** Analyse complète du parc :**"]
             
             # Utiliser les statistiques cohérentes et validées
@@ -7976,24 +9013,24 @@ Bureautique : {etage1_office.count()} matériels
             total_etage1 = etage1_it + etage1_office
             
             response.extend([
-                f"• **Parc total :** {total_material} matériels",
+                f"- **Parc total :** {total_material} matériels",
                 f"  - Informatique : {total_it} ({stats['pourcentage_it']:.1f}%)",
                 f"  - Bureautique : {total_office} ({stats['pourcentage_bureau']:.1f}%)",
                 "",
-                f"• **Répartition par statut :**",
+                f"- **Répartition par statut :**",
                 f"  - Affectés : {total_assigned} ({total_assigned/total_material*100:.1f}%)",
                 f"  - Nouveaux : {total_new} ({total_new/total_material*100:.1f}%)",
                 f"  - En stock : {total_material - total_assigned} ({(total_material - total_assigned)/total_material*100:.1f}%)",
                 "",
-                f"• **Répartition par localisation :**",
+                f"- **Répartition par localisation :**",
                 f"  - Étage 1 : {total_etage1} ({total_etage1/total_material*100:.1f}%)",
                 f"  - Autres : {total_material - total_etage1} ({(total_material - total_etage1)/total_material*100:.1f}%)",
                 "",
-                f"• **Infrastructure :**",
+                f"- **Infrastructure :**",
                 f"  - Commandes totales : {total_commands}",
                 f"  - Fournisseurs : {total_suppliers}",
                 "",
-                f"• **Taux d'affectation détaillé :**",
+                f"- **Taux d'affectation détaillé :**",
                 f"  - Informatique : {assigned_it}/{total_it} ({assigned_it/total_it*100:.1f}%)",
                 f"  - Bureautique : {assigned_office}/{total_office} ({assigned_office/total_office*100:.1f}%)",
                 f"  - **Global :** {total_assigned}/{total_material} ({total_assigned/total_material*100:.1f}%)"
@@ -8180,7 +9217,8 @@ Bureautique : {etage1_office.count()} matériels
     def _handle_simple_supplier_query(self, entities: Dict) -> str:
         """Gère les requêtes simples de fournisseurs"""
         try:
-            query = entities.get("original_query", "").lower()
+            query_raw = entities.get("original_query", "")
+            query = query_raw.lower()
             # Cas spécifique: requêtes autour de "call server" ou serveurs
             if any(term in query for term in ["call server", "call-server", "serveur", "server"]):
                 try:
@@ -8196,12 +9234,106 @@ Bureautique : {etage1_office.count()} matériels
                         "Aucun matériel 'call server' trouvé. Fournisseurs avec commandes informatiques :"
                     ]
                     for s in suppliers:
-                        lines.append(f"• {s.nom} - ICE: {s.ice} - {s.adresse}")
+                        lines.append(f"- {s.nom} - ICE: {s.ice} - {s.adresse}")
                     return "\n".join(lines)
                 except Exception:
                     pass
             
-            # Check if this is a specific supplier search
+            # Patterns spécifiques AVANT la recherche par nom pour éviter les faux positifs
+            # 1) ICE commençant par "XXX"
+            if ("ice" in query and ("commençant par" in query or "commencant par" in query or "commence par" in query)):
+                prefix = self._extract_quoted_name(query_raw) or ""
+                prefix = (prefix or "").replace(" ", "")
+                if not prefix:
+                    # Essayer sans guillemets: prendre le premier groupe de chiffres après la mention
+                    m = re.search(r"ice[^0-9]*([0-9]{1,})", query)
+                    prefix = m.group(1) if m else ""
+                try:
+                    suppliers = Fournisseur.objects.filter(ice__startswith=prefix)
+                    if not suppliers.exists():
+                        return f"Aucun fournisseur avec un ICE commençant par '{prefix}'."
+                    lines = [f"Fournisseurs avec ICE commençant par '{prefix}' :"]
+                    for s in suppliers:
+                        lines.append(f"- {s.nom} - ICE: {s.ice} - {s.adresse}")
+                    return "\n".join(lines)
+                except Exception as e:
+                    logger.error(f"Error filtering suppliers by ICE prefix: {e}")
+                    return "Erreur lors de la recherche des ICE par préfixe."
+
+            # 2) Adresse contenant "TERM"
+            if ("adresse" in query and ("contenant" in query or "contient" in query or "contenant" in query)):
+                term = self._extract_quoted_name(query_raw)
+                if not term:
+                    # Essayer sans guillemets: après 'contenant' ou 'contient'
+                    m = re.search(r"(?:contenant|contient)\s+([\w\-À-ÿ ]{2,})", query)
+                    term = m.group(1).strip() if m else ""
+                try:
+                    qs = Fournisseur.objects.filter(adresse__icontains=term)
+                    count = qs.count()
+                    if count == 0:
+                        return f"Aucun fournisseur avec une adresse contenant '{term}'."
+                    lines = [f"Fournisseurs avec adresse contenant '{term}' : {count}"]
+                    for f in qs[:50]:
+                        lines.append(f"- {f.nom} - {f.adresse}")
+                    return "\n".join(lines)
+                except Exception as e:
+                    logger.error(f"Error filtering suppliers by address contains: {e}")
+                    return "Erreur lors de la recherche par adresse."
+
+            # 3) Répartition par ville
+            if ("répartition" in query or "repartition" in query or "distribution" in query) and ("ville" in query or "villes" in query):
+                known_cities = [
+                    'casablanca', 'rabat', 'fes', 'fès', 'marrakech', 'temara', 'témara', 'sale', 'salé',
+                    'agdal', 'bouskoura', 'kenitra', 'kénitra', 'benguerir', 'tetouan', 'tétouan', 'tanger',
+                ]
+                try:
+                    totals = {}
+                    all_suppliers = list(Fournisseur.objects.all())
+                    for city in known_cities:
+                        totals[city] = sum(1 for s in all_suppliers if (s.adresse or '').lower().find(city) != -1)
+                    grand_total = len(all_suppliers)
+                    # Garder uniquement les villes avec au moins un fournisseur
+                    non_zero = [(c, n) for c, n in totals.items() if n > 0]
+                    if not non_zero:
+                        return "Aucune répartition par ville disponible."
+                    non_zero.sort(key=lambda t: (-t[1], t[0]))
+                    lines = ["Répartition des fournisseurs par ville :"]
+                    for city, n in non_zero:
+                        lines.append(f"- {city.title()} : {n}")
+                    lines.append(f"- Total : {grand_total}")
+                    return "\n".join(lines)
+                except Exception as e:
+                    logger.error(f"Error computing city distribution: {e}")
+                    return "Erreur lors du calcul de la répartition par ville."
+
+            # 4) Combien de fournisseurs (optionnellement par ville)
+            if ("combien" in query or "nombre" in query or "total" in query) and ("fournisseur" in query or "fournisseurs" in query):
+                try:
+                    # Détection ville simple
+                    city = None
+                    m_city = re.search(r"(?:à|a|bas[eé]|situ[eé])\s+([\w\-À-ÿ ]{3,})", query)
+                    if m_city:
+                        city = m_city.group(1).split(',')[0].split(' et ')[0].strip()
+                    qs = Fournisseur.objects.all()
+                    if city:
+                        qs = qs.filter(adresse__icontains=city)
+                    n = qs.count()
+                    if city:
+                        return f"{n} fournisseur{'s' if n != 1 else ''} basé{'s' if n != 1 else ''} à {city.title()}."
+                    return f"Total des fournisseurs : {n}."
+                except Exception as e:
+                    logger.error(f"Error counting suppliers: {e}")
+                    return "Erreur lors du comptage des fournisseurs."
+
+            # 5) Existence par nom: "Existe-t-il un fournisseur nommé 'X' ?"
+            if ("existe" in query and ("nomm" in query or 'fournisseur' in query)):
+                name = self._extract_quoted_name(query_raw)
+                if name:
+                    exists = Fournisseur.objects.filter(nom__iexact=name).exists()
+                    return (f"Oui, le fournisseur '{name}' existe."
+                            if exists else f"Non, aucun fournisseur nommé '{name}'.")
+
+            # Check if this is a specific supplier search (après les cas spéciaux)
             if entities.get("supplier") or "ice" in query or "adresse" in query:
                 # Handle specific supplier search
                 supplier_name = entities.get("supplier", "")
@@ -8212,10 +9344,10 @@ Bureautique : {etage1_office.count()} matériels
                     try:
                         supplier = Fournisseur.objects.get(ice=ice)
                         return f"""Fournisseur trouvé :
-• Nom : {supplier.nom}
-• ICE : {supplier.ice}
-• Adresse : {supplier.adresse}
-• IF Fiscal : {supplier.if_fiscal}
+- Nom : {supplier.nom}
+- ICE : {supplier.ice}
+- Adresse : {supplier.adresse}
+- IF Fiscal : {supplier.if_fiscal}
 
 """
                     except Fournisseur.DoesNotExist:
@@ -8225,10 +9357,10 @@ Bureautique : {etage1_office.count()} matériels
                     try:
                         supplier = Fournisseur.objects.get(nom__iexact=supplier_name)
                         return f"""Fournisseur trouvé :
-• Nom : {supplier.nom}
-• ICE : {supplier.ice}
-• Adresse : {supplier.adresse}
-• IF Fiscal : {supplier.if_fiscal}
+- Nom : {supplier.nom}
+- ICE : {supplier.ice}
+- Adresse : {supplier.adresse}
+- IF Fiscal : {supplier.if_fiscal}
 
 """
                     except Fournisseur.DoesNotExist:
@@ -8242,7 +9374,7 @@ Bureautique : {etage1_office.count()} matériels
                             if suppliers:
                                 response = [f"Fournisseurs situés à {location.title()}"]
                                 for supplier in suppliers:
-                                    response.append(f"• {supplier.nom} (Adresse : {supplier.adresse})")
+                                    response.append(f"- {supplier.nom} (Adresse : {supplier.adresse})")
                                 return "\n".join(response)
                             else:
                                 return f"Aucun fournisseur trouvé à {location.title()}"
@@ -8254,7 +9386,7 @@ Bureautique : {etage1_office.count()} matériels
             
             response = ["**Liste des fournisseurs :**"]
             for supplier in suppliers:
-                response.append(f"• {supplier.nom} - ICE: {supplier.ice} - {supplier.adresse}")
+                response.append(f"- {supplier.nom} - ICE: {supplier.ice} - {supplier.adresse}")
             
             return "\n".join(response)
                 
@@ -8380,7 +9512,6 @@ Bureautique : {etage1_office.count()} matériels
             
             # Handle IT commands (section affichée si 'informatique' est mentionné, ou si aucune précision n'est donnée)
             if is_informatique:
-                response.append("**Commandes informatiques:**")
                 it_commands = (
                     Commande.objects
                     .filter(filters)
@@ -8395,7 +9526,6 @@ Bureautique : {etage1_office.count()} matériels
                     )[:20]
                 )
                 
-                response.append("**Commandes informatiques:**")
                 if it_commands:
                     for cmd in it_commands:
                         # Si un numéro précis est demandé, ne renvoyer que celui-ci
@@ -8458,7 +9588,7 @@ Bureautique : {etage1_office.count()} matériels
 
             # Si aucune commande spécifique n'est demandée, afficher toutes les commandes
             if not is_bureau and not is_informatique:
-                response.append("**Commandes informatiques:**")
+                response.append("Voici les commandes informatiques :")
                 it_commands = (
                     Commande.objects
                     .filter(filters)
@@ -8488,7 +9618,7 @@ Bureautique : {etage1_office.count()} matériels
                 else:
                     response.append("Aucune commande informatique trouvée")
 
-                response.append("\n**Commandes bureau:**")
+                response.append("\nEt voici les commandes bureau :")
                 office_commands = (
                     CommandeBureau.objects
                     .filter(filters)
@@ -8562,7 +9692,7 @@ Bureautique : {etage1_office.count()} matériels
             for obj in objects:
                 # Try __str__, otherwise show fields
                 try:
-                    lines.append(f"• {str(obj)}")
+                    lines.append(f"- {str(obj)}")
                 except Exception:
                     fields = []
                     for field in obj._meta.fields:
@@ -8788,33 +9918,80 @@ Bureautique : {etage1_office.count()} matériels
                     logger.debug(f"Ignored generic serial value: {serial_value}")
 
             # Free-text filter on designation/description (e.g., "baie", "armoire")
-            # Build keyword list from query tokens, excluding generic words
+            # Build keyword list from query tokens, excluding generic words and common typos
             generic_words = {
-                'materiel', 'matériel', 'informatique', 'bureautique', 'bureau', 'code', 'inventaire',
-                'numero', 'numéro', 'serie', 'série', 'affecte', 'affecté', 'statut', 'etage', 'étage',
-                'liste', 'chercher', 'recherche', 'trouver', 'avec', 'du', 'de', 'la', 'le', 'les',
-                'un', 'une', 'des', 'ou', 'où', 'a', 'à', 'qui', 'est', 'pour', 'désignation', 'designation', 'description', 'contient', 'dont',
-                'quels', 'quelles', 'sont', 'avec', 'pour', 'dans', 'sur', 'par', 'vers', 'chez', 'que', 'quel', 'quelle',
-                'utilisateur', 'utilisateurs', 'ayant', 'ont', 'a', 'affectes', 'affectés'
+                'materiel', 'matériel', 'informatique', 'informatiques', 'bureautique', 'bureautiques', 'bureau',
+                'code', 'inventaire', 'numero', 'numéro', 'serie', 'série', 'affecte', 'affecté', 'statut',
+                'etage', 'étage', 'liste', 'chercher', 'recherche', 'trouver', 'avec', 'du', 'de', 'la', 'le', 'les',
+                'un', 'une', 'des', 'ou', 'où', 'a', 'à', 'qui', 'est', 'pour', 'désignation', 'designation',
+                'description', 'contient', 'dont', 'quels', 'quelles', 'sont', 'dans', 'sur', 'par', 'vers', 'chez',
+                'que', 'quel', 'quelle', 'utilisateur', 'utilisateurs', 'ayant', 'ont', 'a', 'affectes', 'affectés',
+                # Common typo tokens observed in logs
+                'liset', 'matereils', 'bureatiques', 'bureatique', 'materiaux', 'materiels', 'materiel*s',
             }
             tokens = re.findall(r"[\w\-À-ÿ]+", query_lower)
             keyword_terms = [t for t in tokens if len(t) >= 3 and t not in generic_words]
             # normaliser guillemets typographiques et enlever ponctuation terminale
             keyword_terms = [t.strip('"“"\'\'.,;:!?') for t in keyword_terms]
             keyword_terms = [t for t in keyword_terms if t]
+
             # Ne pas appliquer les filtres de désignation si on a déjà des filtres de statut spécifiques
+            # et ne les appliquer que si les mots-clés correspondent (fuzzy) à des désignations/descriptions connues
             if keyword_terms and not ('affecté' in query_lower or 'affecte' in query_lower or 'nouveau' in query_lower or 'opérationnel' in query_lower or 'operationnel' in query_lower):
-                has_specific_filters = True
-                keyword_q = Q()
-                for kw in keyword_terms:
-                    keyword_q |= Q(ligne_commande__designation__nom__icontains=kw)
-                    keyword_q |= Q(ligne_commande__description__nom__icontains=kw)
-                filters_it &= keyword_q
-                filters_office &= keyword_q
-                logger.info(f"Applied designation/description keyword filters: {keyword_terms}")
-                # When searching by designation/description terms, search both IT and office
-                is_informatique = True
-                is_bureau = True
+                try:
+                    # Collect known designation/description terms from DB once per call
+                    known_terms_set = set()
+                    try:
+                        known_terms_set.update(
+                            [d.nom.lower() for d in Designation.objects.all().only('nom')]
+                        )
+                    except Exception:
+                        pass
+                    try:
+                        known_terms_set.update(
+                            [d.nom.lower() for d in Description.objects.all().only('nom')]
+                        )
+                    except Exception:
+                        pass
+                    try:
+                        known_terms_set.update(
+                            [d.nom.lower() for d in DesignationBureau.objects.all().only('nom')]
+                        )
+                    except Exception:
+                        pass
+                    try:
+                        known_terms_set.update(
+                            [d.nom.lower() for d in DescriptionBureau.objects.all().only('nom')]
+                        )
+                    except Exception:
+                        pass
+
+                    # Add common synonyms explicitly
+                    known_terms_set.update({'baie', 'armoire', 'bureau', 'table', 'moniteur', 'écran', 'ecran'})
+
+                    # Fuzzy-keep only keywords that are close to a known term
+                    from rapidfuzz import fuzz as _fuzz
+                    filtered_keywords = []
+                    for kw in keyword_terms:
+                        if any(_fuzz.ratio(kw, kt) >= 80 for kt in known_terms_set):
+                            filtered_keywords.append(kw)
+
+                    if filtered_keywords:
+                        has_specific_filters = True
+                        keyword_q = Q()
+                        for kw in filtered_keywords:
+                            keyword_q |= Q(ligne_commande__designation__nom__icontains=kw)
+                            keyword_q |= Q(ligne_commande__description__nom__icontains=kw)
+                        filters_it &= keyword_q
+                        filters_office &= keyword_q
+                        logger.info(f"Applied designation/description keyword filters: {filtered_keywords}")
+                        # When searching by designation/description terms, search both IT and office
+                        is_informatique = True
+                        is_bureau = True
+                    else:
+                        logger.info(f"Skipped designation filters: no keyword matched known terms (keywords={keyword_terms})")
+                except Exception as _e:
+                    logger.warning(f"Keyword filter step failed; skipping designation filters: {_e}")
             else:
                 logger.info(f"Skipped designation filters due to status filters or generic terms: {keyword_terms}")
 
@@ -8836,8 +10013,15 @@ Bureautique : {etage1_office.count()} matériels
                 elif 'opérationnel' in query_lower or 'operationnel' in query_lower:
                     # Pour le matériel informatique, pas de statut 'opérationnel'
                     # Pour le matériel bureau, utiliser le statut 'Opérationnel'
-                    filters_office &= Q(statut__iexact='Opérationnel')
+                    filters_office &= Q(statut__iexact='operationnel')
                     logger.info("Applied status filter: 'Opérationnel' (bureau only)")
+
+            # Explicit handling for queries asking for non-assigned materials
+            if ('non affect' in query_lower) or ('pas affect' in query_lower) or ("n'ont pas été affect" in query_lower):
+                has_specific_filters = True
+                filters_it &= Q(utilisateur__isnull=True)
+                filters_office &= Q(utilisateur__isnull=True)
+                logger.info("Applied special filter: utilisateur__isnull=True (non affecté)")
 
             # Location filtering
             if 'étage 1' in query_lower or 'etage1' in query_lower or "l'étage 1" in query_lower:
@@ -8913,6 +10097,28 @@ Bureautique : {etage1_office.count()} matériels
 
             # Build response based on query type
             total_count = len(it_items) + len(office_items)
+
+            # Handle simple existence questions like "Existe-t-il ... ?" / "Y a-t-il ... ?"
+            if any(ph in query_lower for ph in ['existe-t-il', 'existe il', 'existe t il', 'y a-t-il', 'y a t il', 'y a il']):
+                if total_count > 0:
+                    # Prefer concise, human-like confirmation
+                    if code_match or entities.get('code'):
+                        target_code = (code_match.group(1).upper() if code_match else entities.get('code'))
+                        return f"Oui, le matériel avec le code inventaire {target_code} existe."
+                    return "Oui, j'ai trouvé des matériels correspondants."
+                else:
+                    return "Non, je n'ai trouvé aucun matériel correspondant."
+
+            # Handle direct serial number queries like "Quel est le numéro de série ... ?"
+            if any(ph in query_lower for ph in ['numéro de série', 'numero de serie', 'num de série', 'num de serie']):
+                # If we have filtered IT items by code, return the serial of the first match
+                if it_items:
+                    item = it_items[0]
+                    serie_val = self._safe_get_field(item, 'numero_serie', 'N/A')
+                    code_val = self._safe_get_field(item, 'code_inventaire', 'N/A')
+                    if serie_val and serie_val != 'N/A':
+                        return f"Le numéro de série de {code_val} est {serie_val}."
+                    return f"Je n'ai pas trouvé de numéro de série pour {code_val}."
             
             # Handle user assignment queries (e.g., "utilisateurs ayant du matériel")
             if is_user_assignment_query:
@@ -8958,11 +10164,11 @@ Bureautique : {etage1_office.count()} matériels
                         
                         # Afficher le nom de l'utilisateur avec le nombre total de matériels
                         if is_informatique and not is_bureau:
-                            response.append(f"• **{username}** - {len(user_info.get('it', []))} matériel(s) informatique(s)")
+                            response.append(f"- **{username}** - {len(user_info.get('it', []))} matériel(s) informatique(s)")
                         elif is_bureau and not is_informatique:
-                            response.append(f"• **{username}** - {len(user_info.get('office', []))} matériel(s) bureautique(s)")
+                            response.append(f"- **{username}** - {len(user_info.get('office', []))} matériel(s) bureautique(s)")
                         else:
-                            response.append(f"• **{username}** - {total_items} matériel(s) au total")
+                            response.append(f"- **{username}** - {total_items} matériel(s) au total")
                         
                         # Afficher les détails du matériel informatique pour cet utilisateur
                         if is_informatique and user_info.get('it'):
@@ -9005,7 +10211,7 @@ Bureautique : {etage1_office.count()} matériels
                                     logger.warning(f"Error formatting office detail item: {e}")
                                     response.append(f"  └─ {self._safe_get_field(item, 'code_inventaire', 'N/A')} - Erreur formatage")
                 else:
-                    response.append("• Aucun utilisateur avec du matériel affecté")
+                    response.append("- Aucun utilisateur avec du matériel affecté")
                 
                 # Les détails sont maintenant affichés dans la section des utilisateurs ci-dessus
             
@@ -9039,10 +10245,10 @@ Bureautique : {etage1_office.count()} matériels
                                 dd_part = f", Désignation: {desig_txt}, Description: {desc_txt}" if (desig_txt or desc_txt) else ""
                             except Exception:
                                 dd_part = ""
-                            response.append(f"• {code} - Statut: {statut} (Série: {serie}, Lieu: {lieu}{user_part}{dd_part})")
+                            response.append(f"- {code} - Statut: {statut} (Série: {serie}, Lieu: {lieu}{user_part}{dd_part})")
                         except Exception as e:
                             logger.warning(f"Error formatting IT item: {e}")
-                            response.append(f"• {self._safe_get_field(item, 'code_inventaire', 'N/A')} - Erreur formatage")
+                            response.append(f"- {self._safe_get_field(item, 'code_inventaire', 'N/A')} - Erreur formatage")
                         
                 if office_items and is_bureau:
                     response.append("**Matériel bureautique :**")
@@ -9055,10 +10261,10 @@ Bureautique : {etage1_office.count()} matériels
                             desig_txt = getattr(item, 'designation', None)
                             desc_txt = getattr(item, 'description', None)
                             dd_part = f", Désignation: {desig_txt}, Description: {desc_txt}" if (desig_txt or desc_txt) else ""
-                            response.append(f"• {code} - Statut: {statut} (Lieu: {lieu}{dd_part})")
+                            response.append(f"- {code} - Statut: {statut} (Lieu: {lieu}{dd_part})")
                         except Exception as e:
                             logger.warning(f"Error formatting office item: {e}")
-                            response.append(f"• {self._safe_get_field(item, 'code_inventaire', 'N/A')} - Erreur formatage")
+                            response.append(f"- {self._safe_get_field(item, 'code_inventaire', 'N/A')} - Erreur formatage")
 
             # Handle no results case
             if not it_items and not office_items:
@@ -9095,13 +10301,13 @@ Bureautique : {etage1_office.count()} matériels
             total_available = available_it + available_office
 
             response.extend([
-                f"• **Matériel total :** {total_material}",
+                f"- **Matériel total :** {total_material}",
                 f"  - Informatique : {total_it}",
                 f"  - Bureautique : {total_office}",
-                f"• **Matériel affecté :** {total_assigned}",
+                f"- **Matériel affecté :** {total_assigned}",
                 f"  - Informatique : {assigned_it}",
                 f"  - Bureautique : {assigned_office}",
-                f"• **Matériel disponible :** {total_available}",
+                f"- **Matériel disponible :** {total_available}",
                 f"  - Informatique : {available_it}",
                 f"  - Bureautique : {available_office}"
             ])
@@ -9118,6 +10324,7 @@ Bureautique : {etage1_office.count()} matériels
             response = ["**📦 Statut des livraisons :**"]
             livraisons = Livraison.objects.all()
             query = entities.get("original_query", "").lower()
+            q_orig = entities.get("original_query", "") or ""
 
             if not livraisons:
                 return "Aucune livraison trouvée dans la base de données."
@@ -9133,6 +10340,161 @@ Bureautique : {etage1_office.count()} matériels
                     return None
                 except Exception:
                     return None
+
+            # 0) Questions directes (existence, dates, notes, créateur, statut) avant tout
+            # 0.a) Existe-t-il une livraison pour la commande "X" ?
+            if ("existe" in query or "y a-t-il" in query or "y a t il" in query) and "commande" in query:
+                code = self._extract_order_code(q_orig)
+                if not code:
+                    return "Veuillez préciser le numéro de commande."
+                exists = Livraison.objects.filter(numero_commande__iexact=code).exists()
+                return (f"Oui, une livraison existe pour la commande {code}." if exists else f"Non, aucune livraison pour la commande {code}.")
+
+            # 0.b) Date effective pour la commande "X"
+            if ("date" in query and ("effective" in query or "effectif" in query)) and "commande" in query:
+                code = self._extract_order_code(q_orig)
+                if not code:
+                    return "Veuillez préciser le numéro de commande."
+                liv = Livraison.objects.filter(numero_commande__iexact=code).first()
+                if not liv:
+                    return f"Aucune livraison trouvée pour {code}."
+                eff = liv.date_livraison_effective.strftime('%d/%m/%Y') if liv.date_livraison_effective else 'Non livrée'
+                return f"Date effective de la livraison pour {code} : {eff}"
+
+            # 0.c) Livraisons associées à la commande "X"
+            if ("livraisons" in query and "commande" in query) and ("associ" in query or "pour" in query):
+                code = self._extract_order_code(q_orig)
+                if not code:
+                    return "Veuillez préciser le numéro de commande."
+                items = list(Livraison.objects.filter(numero_commande__iexact=code))
+                if not items:
+                    return f"Aucune livraison trouvée pour {code}."
+                lines = [f"Livraisons pour la commande {code} :"]
+                for l in items:
+                    eff = l.date_livraison_effective.strftime('%d/%m/%Y') if l.date_livraison_effective else 'N/A'
+                    prev = l.date_livraison_prevue.strftime('%d/%m/%Y') if l.date_livraison_prevue else 'N/A'
+                    lines.append(f"- id {l.pk} — Statut: {l.statut_livraison} — Prévu: {prev} — Effectif: {eff}")
+                return "\n".join(lines)
+
+            # 0.d) Statut/notes pour la livraison numéro N
+            import re as _re
+            m_id = _re.search(r"livraison\s*(?:n[o°]|num[eé]ro|#)?\s*(\d+)", query)
+            if m_id and ("statut" in query or "status" in query):
+                pk = int(m_id.group(1))
+                liv = Livraison.objects.filter(pk=pk).first()
+                if not liv:
+                    return f"Aucune livraison trouvée avec l'identifiant {pk}."
+                eff = liv.date_livraison_effective.strftime('%d/%m/%Y') if liv.date_livraison_effective else 'N/A'
+                prev = liv.date_livraison_prevue.strftime('%d/%m/%Y') if liv.date_livraison_prevue else 'N/A'
+                return f"Livraison #{pk} — Statut: {liv.statut_livraison} — Prévu: {prev} — Effectif: {eff}"
+            if m_id and ("note" in query or "remarque" in query):
+                pk = int(m_id.group(1))
+                liv = Livraison.objects.filter(pk=pk).first()
+                if not liv:
+                    return f"Aucune livraison trouvée avec l'identifiant {pk}."
+                return f"Notes de la livraison #{pk} : {liv.notes or 'Aucune note.'}"
+
+            # 0.e) Livraisons créées par "username"
+            if ("créé" in q_orig.lower() or "cree" in q_orig.lower()) and ("par" in q_orig.lower()):
+                # Extraire l'utilisateur entre guillemets si présent
+                username = self._extract_quoted_name(q_orig) or ''
+                if not username:
+                    # fallback: mot après 'par'
+                    m_user = _re.search(r"par\s*['\"]?([a-z0-9_\-]+)['\"]?", q_orig.lower())
+                    username = m_user.group(1) if m_user else ''
+                if username:
+                    items = list(Livraison.objects.filter(cree_par__username__iexact=username))
+                    if not items:
+                        return f"Aucune livraison créée par '{username}'."
+                    lines = [f"Livraisons créées par {username} :"]
+                    for l in items[:20]:
+                        lines.append(f"- #{l.pk} — {l.numero_commande} — Statut: {l.statut_livraison}")
+                    if len(items) > 20:
+                        lines.append(f"... et {len(items)-20} autres.")
+                    return "\n".join(lines)
+
+            # 0.f) Compter les livraisons par statut
+            if ("combien" in query or "nombre" in query or "total" in query) and ("livraison" in query or "livraisons" in query):
+                status_map = {
+                    'en_attente': ['en_attente', 'en attente', 'attente'],
+                    'en_cours': ['en_cours', 'en cours'],
+                    'livree': ['livree', 'livrée', 'livrer'],
+                    'retardee': ['retardee', 'retardée', 'en retard']
+                }
+                requested_status = None
+                for key, variants in status_map.items():
+                    if any(v in query for v in variants):
+                        requested_status = key
+                        break
+                qs = Livraison.objects.all()
+                label = 'toutes'
+                if requested_status:
+                    qs = qs.filter(statut_livraison=requested_status)
+                    label = requested_status.replace('_', ' ')
+                count = qs.count()
+                return f"{count} livraison(s) {'' if label=='toutes' else 'avec statut ' + label}."
+
+            # 0.g) Filtrer par type de commande (bureau/informatique)
+            if ("bureautique" in query or "bureau" in query) and ("livraison" in query or "livraisons" in query):
+                items = list(Livraison.objects.filter(type_commande='bureau'))
+                if not items:
+                    return "Aucune livraison associée à des commandes bureautiques."
+                lines = ["Livraisons de commandes bureautiques :"]
+                for l in items[:20]:
+                    eff = l.date_livraison_effective.strftime('%d/%m/%Y') if l.date_livraison_effective else 'N/A'
+                    lines.append(f"- {l.numero_commande} — Statut: {l.statut_livraison} — Effectif: {eff}")
+                return "\n".join(lines)
+
+            # 0.h) Filtrer par date prévue avant une date donnée
+            if ("date prévue" in q_orig.lower() or "prevue" in query) and ("avant" in query or "<" in query):
+                # Supporte formats: 01/08/2025, 1/8/2025, "1er août 2025"
+                month_map = {
+                    'janvier': 1, 'février': 2, 'fevrier': 2, 'mars': 3, 'avril': 4, 'mai': 5,
+                    'juin': 6, 'juillet': 7, 'août': 8, 'aout': 8, 'septembre': 9,
+                    'octobre': 10, 'novembre': 11, 'décembre': 12, 'decembre': 12
+                }
+                date_target = None
+                # Try dd/mm/yyyy
+                m_dmy = _re.search(r"(\d{1,2})[/-](\d{1,2})[/-](\d{4})", q_orig)
+                if m_dmy:
+                    try:
+                        from datetime import datetime as _dt
+                        date_target = _dt.strptime(m_dmy.group(0), "%d/%m/%Y").date()
+                    except Exception:
+                        pass
+                if not date_target:
+                    m_fr = _re.search(r"(\d{1,2}|1er)\s+(janvier|f[ée]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[ée]cembre)\s+(\d{4})", q_orig.lower())
+                    if m_fr:
+                        day_str = m_fr.group(1)
+                        day = 1 if day_str.startswith('1er') else int(day_str)
+                        month = month_map.get(m_fr.group(2).replace('û','u').replace('é','e'))
+                        year = int(m_fr.group(3))
+                        if month:
+                            from datetime import date as _date
+                            date_target = _date(year, month, day)
+                if date_target:
+                    items = list(Livraison.objects.filter(date_livraison_prevue__lt=date_target))
+                    if not items:
+                        return f"Aucune livraison avec date prévue avant le {date_target.strftime('%d/%m/%Y')} ."
+                    lines = [f"Livraisons prévues avant le {date_target.strftime('%d/%m/%Y')} :"]
+                    for l in items[:20]:
+                        prev = l.date_livraison_prevue.strftime('%d/%m/%Y') if l.date_livraison_prevue else 'N/A'
+                        lines.append(f"- {l.numero_commande} — Prévu: {prev} — Statut: {l.statut_livraison}")
+                    return "\n".join(lines)
+
+            # 0.i) Compter les livraisons avec date effective dans un mois donné (ex: août 2025)
+            if ("date effective" in query or "effectif" in query) and any(m in q_orig.lower() for m in ["janvier","février","fevrier","mars","avril","mai","juin","juillet","août","aout","septembre","octobre","novembre","décembre","decembre"]):
+                m = _re.search(r"(janvier|f[ée]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[ée]cembre)\s+(\d{4})", q_orig.lower())
+                if m:
+                    month_map = {
+                        'janvier': 1, 'février': 2, 'fevrier': 2, 'mars': 3, 'avril': 4, 'mai': 5,
+                        'juin': 6, 'juillet': 7, 'août': 8, 'aout': 8, 'septembre': 9,
+                        'octobre': 10, 'novembre': 11, 'décembre': 12, 'decembre': 12
+                    }
+                    month = month_map[m.group(1)]
+                    year = int(m.group(2))
+                    cnt = Livraison.objects.filter(date_livraison_effective__year=year, date_livraison_effective__month=month).count()
+                    return f"{cnt} livraison(s) avec date effective en {m.group(1)} {year}."
 
             # Gestion spécifique du statut de livraison pour une commande
             if "statut" in query and "livraison" in query and "commande" in query:
@@ -9167,19 +10529,19 @@ Bureautique : {etage1_office.count()} matériels
                         status = getattr(livraison, 'statut_livraison', 'N/A')
                         
                         response = f"**📦 Statut de la livraison pour la commande {command_number} :**\n\n"
-                        response += f"• **Fournisseur :** {fournisseur}\n"
-                        response += f"• **Statut :** {status}\n"
-                        response += f"• **Date prévue :** {livraison.date_livraison_prevue or 'Non définie'}\n"
-                        response += f"• **Date effective :** {livraison.date_livraison_effective or 'Non livrée'}\n"
-                        response += f"• **PV de réception :** {pv_status}\n"
+                        response += f"- **Fournisseur :** {fournisseur}\n"
+                        response += f"- **Statut :** {status}\n"
+                        response += f"- **Date prévue :** {livraison.date_livraison_prevue or 'Non définie'}\n"
+                        response += f"- **Date effective :** {livraison.date_livraison_effective or 'Non livrée'}\n"
+                        response += f"- **PV de réception :** {pv_status}\n"
                         
                         if retard_days is not None:
                             if retard_days > 0:
-                                response += f"• **Retard :** {retard_days} jour(s)\n"
+                                response += f"- **Retard :** {retard_days} jour(s)\n"
                             elif retard_days < 0:
-                                response += f"• **Avance :** {abs(retard_days)} jour(s)\n"
+                                response += f"- **Avance :** {abs(retard_days)} jour(s)\n"
                             else:
-                                response += f"• **Livraison :** À l'heure\n"
+                                response += f"- **Livraison :** À l'heure\n"
                         
                         response += "\n"
                         return response
@@ -9346,22 +10708,22 @@ Bureautique : {etage1_office.count()} matériels
             
             response = f" **Analyse des commandes récentes et livraisons :**\n\n"
             response += f"**📦 Commandes récentes (30 derniers jours) :**\n"
-            response += f"• Informatique : {recent_it_commands}\n"
-            response += f"• Bureautique : {recent_office_commands}\n"
-            response += f"• **Total : {total_recent}**\n\n"
+            response += f"- Informatique : {recent_it_commands}\n"
+            response += f"- Bureautique : {recent_office_commands}\n"
+            response += f"- **Total : {total_recent}**\n\n"
             
             response += f"**🚚 État des livraisons :**\n"
-            response += f"• En retard : {delayed_deliveries}\n"
-            response += f"• En attente : {pending_deliveries}\n"
-            response += f"• **Total problèmes : {total_delivery_issues}**\n\n"
+            response += f"- En retard : {delayed_deliveries}\n"
+            response += f"- En attente : {pending_deliveries}\n"
+            response += f"- **Total problèmes : {total_delivery_issues}**\n\n"
             
             # Ajouter des recommandations
             if total_delivery_issues > 0:
                 response += f"** Recommandations :**\n"
                 if delayed_deliveries > 0:
-                    response += f"• {delayed_deliveries} livraison(s) en retard - suivi urgent recommandé\n"
+                    response += f"- {delayed_deliveries} livraison(s) en retard - suivi urgent recommandé\n"
                 if pending_deliveries > 0:
-                    response += f"• {pending_deliveries} livraison(s) en attente - vérification des dates\n"
+                    response += f"- {pending_deliveries} livraison(s) en attente - vérification des dates\n"
             
             response += f""
             
@@ -9387,9 +10749,9 @@ Bureautique : {etage1_office.count()} matériels
             total_approved = approved_it_commands + approved_office_commands
             
             response = f" **Commandes approuvées :**\n"
-            response += f"• Informatique : {approved_it_commands}\n"
-            response += f"• Bureautique : {approved_office_commands}\n"
-            response += f"• **Total : {total_approved}**\n\n"
+            response += f"- Informatique : {approved_it_commands}\n"
+            response += f"- Bureautique : {approved_office_commands}\n"
+            response += f"- **Total : {total_approved}**\n\n"
             response += ""
             
             return response
@@ -9407,9 +10769,9 @@ Bureautique : {etage1_office.count()} matériels
             total_commands = total_it_commands + total_office_commands
             
             response = f" **Total des commandes :**\n"
-            response += f"• Informatique : {total_it_commands}\n"
-            response += f"• Bureautique : {total_office_commands}\n"
-            response += f"• **Total général : {total_commands}**\n\n"
+            response += f"- Informatique : {total_it_commands}\n"
+            response += f"- Bureautique : {total_office_commands}\n"
+            response += f"- **Total général : {total_commands}**\n\n"
             response += ""
             
             return response
@@ -9428,9 +10790,9 @@ Bureautique : {etage1_office.count()} matériels
             available_it_material = total_it_material - assigned_it_material
             
             response = f" **Matériel informatique :**\n"
-            response += f"• Total : {total_it_material}\n"
-            response += f"• Affecté : {assigned_it_material}\n"
-            response += f"• Disponible : {available_it_material}\n\n"
+            response += f"- Total : {total_it_material}\n"
+            response += f"- Affecté : {assigned_it_material}\n"
+            response += f"- Disponible : {available_it_material}\n\n"
             response += ""
             
             return response
@@ -9449,9 +10811,9 @@ Bureautique : {etage1_office.count()} matériels
             available_office_material = total_office_material - assigned_office_material
             
             response = f" **Matériel bureautique :**\n"
-            response += f"• Total : {total_office_material}\n"
-            response += f"• Affecté : {assigned_office_material}\n"
-            response += f"• Disponible : {available_office_material}\n\n"
+            response += f"- Total : {total_office_material}\n"
+            response += f"- Affecté : {assigned_office_material}\n"
+            response += f"- Disponible : {available_office_material}\n\n"
             response += ""
             
             return response
@@ -9490,9 +10852,9 @@ Bureautique : {etage1_office.count()} matériels
                 
                 response = f"Actuellement, {total} matériel{'s' if total > 1 else ''} {'sont' if total > 1 else 'est'} en maintenance :"
                 if it_count > 0:
-                    response += f"\n• {it_count} matériel{'s' if it_count > 1 else ''} informatique{'s' if it_count > 1 else ''}"
+                    response += f"\n- {it_count} matériel{'s' if it_count > 1 else ''} informatique{'s' if it_count > 1 else ''}"
                 if bu_count > 0:
-                    response += f"\n• {bu_count} matériel{'s' if bu_count > 1 else ''} bureautique{'s' if bu_count > 1 else ''}"
+                    response += f"\n- {bu_count} matériel{'s' if bu_count > 1 else ''} bureautique{'s' if bu_count > 1 else ''}"
                 
                 return self._make_response_human(response, template_type='positive_confirmation', include_engagement=True)
             
@@ -9504,9 +10866,9 @@ Bureautique : {etage1_office.count()} matériels
                 
                 response = f"Actuellement, {total} matériel{'s' if total > 1 else ''} {'sont' if total > 1 else 'est'} affecté{'s' if total > 1 else ''} à un utilisateur :"
                 if it_count > 0:
-                    response += f"\n• {it_count} matériel{'s' if it_count > 1 else ''} informatique{'s' if it_count > 1 else ''}"
+                    response += f"\n- {it_count} matériel{'s' if it_count > 1 else ''} informatique{'s' if it_count > 1 else ''}"
                 if bu_count > 0:
-                    response += f"\n• {bu_count} matériel{'s' if bu_count > 1 else ''} bureautique{'s' if bu_count > 1 else ''}"
+                    response += f"\n- {bu_count} matériel{'s' if bu_count > 1 else ''} bureautique{'s' if bu_count > 1 else ''}"
                 
                 return self._make_response_human(response, template_type='positive_confirmation', include_engagement=True)
             
@@ -9517,8 +10879,8 @@ Bureautique : {etage1_office.count()} matériels
                 total_material = total_it + total_office
                 
                 response = f"Le parc total comprend {total_material} matériel{'s' if total_material > 1 else ''} :"
-                response += f"\n• {total_it} matériel{'s' if total_it > 1 else ''} informatique{'s' if total_it > 1 else ''}"
-                response += f"\n• {total_office} matériel{'s' if total_office > 1 else ''} bureautique{'s' if total_office > 1 else ''}"
+                response += f"\n- {total_it} matériel{'s' if total_it > 1 else ''} informatique{'s' if total_it > 1 else ''}"
+                response += f"\n- {total_office} matériel{'s' if total_office > 1 else ''} bureautique{'s' if total_office > 1 else ''}"
                 
                 return self._make_response_human(response, template_type='positive_confirmation', include_engagement=True)
             
@@ -9536,7 +10898,7 @@ Bureautique : {etage1_office.count()} matériels
             total_suppliers = Fournisseur.objects.count()
             
             response = f"🏢 **Total des fournisseurs :**\n"
-            response += f"• **Total : {total_suppliers}**\n\n"
+            response += f"- **Total : {total_suppliers}**\n\n"
             response += ""
             
             return response
@@ -9550,24 +10912,49 @@ Bureautique : {etage1_office.count()} matériels
         try:
             from apps.users.models import CustomUser
             from django.contrib.auth.models import Group
+            import re as _re_local
+            from datetime import datetime
             
-            total_users = CustomUser.objects.count()
-            active_users = CustomUser.objects.filter(is_active=True).count()
+            ql = (entities.get('original_query') or '').lower()
+            # Optional filter: month and year e.g., "juillet 2025"
+            mois_map = {
+                'janvier': 1, 'fevrier': 2, 'février': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6,
+                'juillet': 7, 'aout': 8, 'août': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'decembre': 12, 'décembre': 12
+            }
+            month_num = None
+            for mname, mnum in mois_map.items():
+                if mname in ql:
+                    month_num = mnum
+                    break
+            ymatch = _re_local.search(r'(19|20)\d{2}', ql)
+            year_num = int(ymatch.group(0)) if ymatch else None
+
+            base_qs = CustomUser.objects.all()
+            label_suffix = ''
+            if month_num and year_num:
+                base_qs = base_qs.filter(date_joined__year=year_num, date_joined__month=month_num)
+                label_suffix = f" — Créés en {list(mois_map.keys())[list(mois_map.values()).index(month_num)].capitalize()} {year_num}"
+            
+            total_users = base_qs.count()
+            active_users = base_qs.filter(is_active=True).count()
             
             groups = Group.objects.all()
             group_counts = {}
             
             for group in groups:
-                group_counts[group.name] = group.user_set.count()
+                if month_num and year_num:
+                    group_counts[group.name] = group.user_set.filter(date_joined__year=year_num, date_joined__month=month_num).count()
+                else:
+                    group_counts[group.name] = group.user_set.count()
             
-            response = f" **Total des utilisateurs :**\n"
-            response += f"• **Total : {total_users}**\n"
-            response += f"• **Actifs : {active_users}**\n\n"
+            response = f" **Total des utilisateurs{label_suffix} :**\n"
+            response += f"- **Total : {total_users}**\n"
+            response += f"- **Actifs : {active_users}**\n\n"
             
             if group_counts:
                 response += "**Répartition par groupe :**\n"
                 for group_name, count in group_counts.items():
-                    response += f"• {group_name} : {count}\n"
+                    response += f"- {group_name} : {count}\n"
             
             response += "\n"
             
@@ -9587,13 +10974,13 @@ Bureautique : {etage1_office.count()} matériels
             for u in users:
                 group_names = [g.name for g in u.groups.all()]
                 role_display = ", ".join(group_names) if group_names else "(aucun groupe)"
-                lines.append(f"• {u.username} — {role_display}")
+                lines.append(f"- {u.username} — {role_display}")
             # Ajout d'un récapitulatif par groupe
             groups = Group.objects.all()
             if groups.exists():
                 lines.append("\n**Répartition par groupe :**")
                 for g in groups:
-                    lines.append(f"• {g.name} : {g.user_set.count()}")
+                    lines.append(f"- {g.name} : {g.user_set.count()}")
             lines.append("\n")
             return "\n".join(lines)
         except Exception as e:
@@ -9611,7 +10998,7 @@ Bureautique : {etage1_office.count()} matériels
             if not users.exists():
                 return "Aucun utilisateur trouvé dans le système."
             
-            response = "**Liste des utilisateurs :**\n\n"
+            response = "Voici la liste des utilisateurs du système :\n\n"
             
             for user in users:
                 # Statut de l'utilisateur
@@ -9625,7 +11012,7 @@ Bureautique : {etage1_office.count()} matériels
                 # Date de création
                 created_date = user.date_joined.strftime('%d/%m/%Y') if user.date_joined else "N/A"
                 
-                response += f"• **{user.username}** — {status}\n"
+                response += f"- **{user.username}** — {status}\n"
                 response += f"  📧 Email: {user.email}\n"
                 response += f"  👥 Rôles: {role_display}\n"
                 response += f"  📅 Créé le: {created_date}\n\n"
@@ -9635,16 +11022,389 @@ Bureautique : {etage1_office.count()} matériels
             active_users = users.filter(is_active=True).count()
             inactive_users = total_users - active_users
             
-            response += f"**Statistiques :**\n"
-            response += f"• Total: {total_users} utilisateurs\n"
-            response += f"• Actifs: {active_users}\n"
-            response += f"• Inactifs: {inactive_users}\n\n"
+            response += f"\n**Résumé :**\n"
+            response += f"- Total: {total_users} utilisateurs\n"
+            response += f"- Actifs: {active_users}\n"
+            response += f"- Inactifs: {inactive_users}\n\n"
             
             return response
             
         except Exception as e:
             logger.error(f"Error listing users: {e}")
             return "Erreur lors de la récupération de la liste des utilisateurs."
+
+    def _handle_user_email_by_name(self, entities: Dict[str, Any]) -> str:
+        """Retourne l'email d'un utilisateur nommé entre guillemets (ex: "superadmin")."""
+        try:
+            from apps.users.models import CustomUser
+            q = entities.get('original_query', '')
+            username = self._extract_quoted_name(q)
+            if not username:
+                return "Veuillez préciser l'utilisateur entre guillemets."
+            u = CustomUser.objects.filter(username__iexact=username).first()
+            if not u:
+                return self._make_response_human(f"Aucun utilisateur trouvé pour '{username}'.", 'no_results', True)
+            email = u.email or 'N/A'
+            return self._make_response_human(f"Email de '{username}' : {email}", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error getting user email by name: {e}")
+            return "Erreur lors de la récupération de l'email de l'utilisateur."
+
+    def _handle_user_created_date(self, entities: Dict[str, Any]) -> str:
+        """Retourne la date de création (date_joined) d'un utilisateur nommé."""
+        try:
+            from apps.users.models import CustomUser
+            q = entities.get('original_query', '')
+            username = self._extract_quoted_name(q)
+            if not username:
+                return "Veuillez préciser l'utilisateur entre guillemets."
+            u = CustomUser.objects.filter(username__iexact=username).first()
+            if not u:
+                return self._make_response_human(f"Aucun utilisateur trouvé pour '{username}'.", 'no_results', True)
+            date_str = u.date_joined.strftime('%d/%m/%Y') if u.date_joined else 'N/A'
+            return self._make_response_human(f"Date de création de '{username}' : {date_str}", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error getting user created date: {e}")
+            return "Erreur lors de la récupération de la date de création."
+
+    def _handle_user_status_by_name(self, entities: Dict[str, Any]) -> str:
+        """Retourne le statut actif/inactif d'un utilisateur nommé."""
+        try:
+            from apps.users.models import CustomUser
+            q = entities.get('original_query', '')
+            username = self._extract_quoted_name(q)
+            if not username:
+                return "Veuillez préciser l'utilisateur entre guillemets."
+            u = CustomUser.objects.filter(username__iexact=username).first()
+            if not u:
+                return self._make_response_human(f"Aucun utilisateur trouvé pour '{username}'.", 'no_results', True)
+            status = 'Actif' if u.is_active else 'Inactif'
+            return self._make_response_human(f"Statut de '{username}' : {status}", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error getting user status: {e}")
+            return "Erreur lors de la récupération du statut de l'utilisateur."
+
+    def _handle_user_full_details(self, entities: Dict[str, Any]) -> str:
+        """Retourne les détails complets d'un utilisateur nommé (email, dates, groupes, droits)."""
+        try:
+            from apps.users.models import CustomUser
+            q = entities.get('original_query', '')
+            username = self._extract_quoted_name(q)
+            if not username:
+                return "Veuillez préciser l'utilisateur entre guillemets."
+            u = CustomUser.objects.filter(username__iexact=username).prefetch_related('groups', 'user_permissions').first()
+            if not u:
+                return self._make_response_human(f"Aucun utilisateur trouvé pour '{username}'.", 'no_results', True)
+            created = u.date_joined.strftime('%d/%m/%Y') if u.date_joined else 'N/A'
+            last_login = u.last_login.strftime('%Y-%m-%d %H:%M') if u.last_login else 'N/A'
+            groups = ", ".join(g.name for g in u.groups.all()) or '(aucun groupe)'
+            status = 'Actif' if u.is_active else 'Inactif'
+            staff = 'Oui' if u.is_staff else 'Non'
+            superuser = 'Oui' if u.is_superuser else 'Non'
+            resp = (
+                f"Détails de l'utilisateur '{u.username}'\n"
+                f"- Email : {u.email or 'N/A'}\n"
+                f"- Créé le : {created}\n"
+                f"- Dernière connexion : {last_login}\n"
+                f"- Statut : {status}\n"
+                f"- Staff : {staff} | Superuser : {superuser}\n"
+                f"- Groupes : {groups}\n"
+            )
+            return self._make_response_human(resp, 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error getting user full details: {e}")
+            return "Erreur lors de la récupération des détails de l'utilisateur."
+
+    def _handle_users_without_group(self, entities: Dict[str, Any]) -> str:
+        """Liste des utilisateurs n'appartenant à aucun groupe."""
+        try:
+            from apps.users.models import CustomUser
+            users = CustomUser.objects.filter(groups__isnull=True).order_by('username')
+            if not users.exists():
+                return self._make_response_human("Tous les utilisateurs appartiennent à au moins un groupe.", 'positive_confirmation', True)
+            lines = ["Utilisateurs sans groupe :"]
+            for u in users:
+                lines.append(f"- {u.username} — Email: {u.email}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing users without group: {e}")
+            return "Erreur lors de la récupération des utilisateurs sans groupe."
+
+    def _handle_user_groups_by_name(self, entities: Dict[str, Any]) -> str:
+        """Retourne les groupes d'un utilisateur nommé."""
+        try:
+            from apps.users.models import CustomUser
+            q = entities.get('original_query', '')
+            username = self._extract_quoted_name(q)
+            if not username:
+                return "Veuillez préciser l'utilisateur entre guillemets."
+            u = CustomUser.objects.filter(username__iexact=username).prefetch_related('groups').first()
+            if not u:
+                return self._make_response_human(f"Aucun utilisateur trouvé pour '{username}'.", 'no_results', True)
+            group_names = [g.name for g in u.groups.all()]
+            groups_str = ", ".join(group_names) if group_names else "(aucun groupe)"
+            return self._make_response_human(f"Groupes de '{username}' : {groups_str}", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error getting user groups: {e}")
+            return "Erreur lors de la récupération des groupes de l'utilisateur."
+
+    def _handle_users_with_staff_rights(self, entities: Dict[str, Any]) -> str:
+        """Liste des utilisateurs avec droits staff (is_staff=True)."""
+        try:
+            from apps.users.models import CustomUser
+            users = CustomUser.objects.filter(is_staff=True).order_by('username')
+            if not users.exists():
+                return self._make_response_human("Aucun utilisateur avec droits staff.", 'no_results', True)
+            lines = ["Utilisateurs avec droits staff :"]
+            for u in users:
+                lines.append(f"- {u.username} — Email: {u.email}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing staff users: {e}")
+            return "Erreur lors de la récupération des utilisateurs avec droits staff."
+
+    def _handle_users_in_group(self, entities: Dict[str, Any]) -> str:
+        """Liste des utilisateurs dans un groupe nommé (entre guillemets)."""
+        try:
+            from apps.users.models import CustomUser
+            from django.contrib.auth.models import Group
+            q = entities.get('original_query', '')
+            group_name = self._extract_quoted_name(q)
+            if not group_name:
+                return "Veuillez préciser le groupe entre guillemets."
+            g = Group.objects.filter(name__iexact=group_name).first()
+            if not g:
+                return self._make_response_human(f"Aucun groupe trouvé pour '{group_name}'.", 'no_results', True)
+            users = g.user_set.all().order_by('username')
+            if not users:
+                return self._make_response_human(f"Aucun utilisateur dans le groupe '{group_name}'.", 'no_results', True)
+            lines = [f"Utilisateurs dans le groupe '{group_name}' :"]
+            for u in users:
+                lines.append(f"- {u.username} — Email: {u.email}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing users in group: {e}")
+            return "Erreur lors de la récupération des utilisateurs du groupe."
+
+    def _handle_users_with_superadmin_rights(self, entities: Dict[str, Any]) -> str:
+        """Qui a des droits de super admin (appartenance au groupe 'Super Admin' ou is_superuser=True)."""
+        try:
+            from apps.users.models import CustomUser
+            from django.contrib.auth.models import Group
+            super_group = Group.objects.filter(name__iexact='Super Admin').first()
+            users = set()
+            for u in CustomUser.objects.filter(is_superuser=True):
+                users.add(u)
+            if super_group:
+                for u in super_group.user_set.all():
+                    users.add(u)
+            users = sorted(users, key=lambda x: x.username)
+            if not users:
+                return self._make_response_human("Aucun utilisateur avec droits Super Admin.", 'no_results', True)
+            lines = ["Utilisateurs avec droits Super Admin :"]
+            for u in users:
+                lines.append(f"- {u.username} — Email: {u.email}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing super admin users: {e}")
+            return "Erreur lors de la récupération des utilisateurs Super Admin."
+
+    def _handle_list_designations(self, entities: Dict[str, Any]) -> str:
+        """Liste les désignations depuis les tables de commandes (IT ou Bureau)."""
+        try:
+            dtype = (entities.get('type') or '').lower()
+            lines = []
+            if dtype == 'bureau':
+                items = list(DesignationBureau.objects.all().order_by('nom'))
+                if not items:
+                    return self._make_response_human("Aucune désignation bureautique trouvée.", 'no_results', False)
+                lines.append("Désignations bureautiques :")
+                for d in items:
+                    lines.append(f"- {d.nom}")
+                return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+            # Default to informatique when unspecified
+            items = list(Designation.objects.all().order_by('nom'))
+            if not items:
+                return self._make_response_human("Aucune désignation informatique trouvée.", 'no_results', False)
+            lines.append("Désignations informatiques :")
+            for d in items:
+                lines.append(f"- {d.nom}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing designations: {e}")
+            return "Erreur lors de la récupération des désignations."
+
+    def _handle_list_all_designations(self, entities: Dict[str, Any]) -> str:
+        """Liste toutes les désignations (informatique et bureautique), unique et triées."""
+        try:
+            it = list(Designation.objects.values_list('nom', flat=True))
+            bu = list(DesignationBureau.objects.values_list('nom', flat=True))
+            names = sorted(set([n for n in it + bu if n]))
+            if not names:
+                return self._make_response_human("Aucune désignation trouvée.", 'no_results', True)
+            lines = ["Liste des désignations enregistrées :"]
+            for n in names:
+                lines.append(f"- {n}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing all designations: {e}")
+            return "Erreur lors de la récupération des désignations."
+
+    def _handle_count_designations(self, entities: Dict[str, Any]) -> str:
+        """Compte le total des désignations (IT + Bureau), dédupliquées par nom."""
+        try:
+            it = list(Designation.objects.values_list('nom', flat=True))
+            bu = list(DesignationBureau.objects.values_list('nom', flat=True))
+            total_unique = len(set([n for n in it + bu if n]))
+            return self._make_response_human(f"Total des désignations enregistrées : {total_unique}", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error counting designations: {e}")
+            return "Erreur lors du comptage des désignations."
+
+    def _handle_exists_designation(self, entities: Dict[str, Any]) -> str:
+        """Vérifie l'existence d'une désignation par nom (IT ou Bureau)."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            m = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            name = (m.group(1) or m.group(2)).strip() if m else None
+            if not name:
+                # fallback simple: après les mots clés
+                m2 = re.search(r"d[ée]signation\s+(?:nomm[ée]e?\s+)?([\w\-À-ÿ ]{2,})", q, re.IGNORECASE)
+                name = m2.group(1).strip() if m2 else None
+            if not name:
+                return "Veuillez préciser le nom de la désignation entre guillemets."
+            exists = Designation.objects.filter(nom__iexact=name).exists() or DesignationBureau.objects.filter(nom__iexact=name).exists()
+            return self._make_response_human(
+                f"Oui, la désignation '{name}' existe." if exists else f"Non, la désignation '{name}' n'existe pas.",
+                'positive_confirmation' if exists else 'no_results', True
+            )
+        except Exception as e:
+            logger.error(f"Error checking designation existence: {e}")
+            return "Erreur lors de la vérification de la désignation."
+
+    def _handle_designations_starting_with(self, entities: Dict[str, Any]) -> str:
+        """Liste les désignations commençant par une lettre donnée (IT+Bureau)."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            m = re.search(r'lettre\s+"([A-Za-z])"|lettre\s+\'([A-Za-z])\'|commenc(?:e|ent)\s+par\s+"([A-Za-z])"|commenc(?:e|ent)\s+par\s+\'([A-Za-z])\'', q, re.IGNORECASE)
+            letter = None
+            for i in range(1, 5):
+                if m and m.group(i):
+                    letter = m.group(i)
+                    break
+            if not letter:
+                # fallback: trouver un seul caractère après 'lettre'
+                m2 = re.search(r'lettre\s+([A-Za-z])', q, re.IGNORECASE)
+                letter = m2.group(1) if m2 else None
+            if not letter:
+                return "Veuillez préciser la lettre (ex: \"C\")."
+            start = letter.upper()
+            it = list(Designation.objects.filter(nom__istartswith=start).values_list('nom', flat=True))
+            bu = list(DesignationBureau.objects.filter(nom__istartswith=start).values_list('nom', flat=True))
+            names = sorted(set([n for n in it + bu if n]))
+            if not names:
+                return self._make_response_human(f"Aucune désignation ne commence par '{start}'.", 'no_results', True)
+            lines = [f"Désignations commençant par '{start}' :"]
+            for n in names:
+                lines.append(f"- {n}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing designations by letter: {e}")
+            return "Erreur lors de la récupération des désignations par lettre."
+
+    def _handle_descriptions_by_designation(self, entities: Dict[str, Any]) -> str:
+        """Liste les descriptions associées à une désignation donnée (IT+Bureau)."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            m = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            desig = (m.group(1) or m.group(2)).strip() if m else None
+            if not desig:
+                return "Veuillez préciser la désignation entre guillemets."
+            it = list(Description.objects.filter(designation__nom__iexact=desig).values_list('nom', flat=True))
+            bu = list(DescriptionBureau.objects.filter(designation__nom__iexact=desig).values_list('nom', flat=True))
+            names = sorted(set([n for n in it + bu if n]))
+            if not names:
+                return self._make_response_human(f"Aucune description trouvée pour la désignation '{desig}'.", 'no_results', True)
+            lines = [f"Descriptions associées à '{desig}' :"]
+            for n in names:
+                lines.append(f"- {n}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing descriptions by designation: {e}")
+            return "Erreur lors de la récupération des descriptions par désignation."
+
+    def _handle_count_descriptions_total(self, entities: Dict[str, Any]) -> str:
+        """Compte le total des descriptions (IT+Bureau)."""
+        try:
+            total = Description.objects.count() + DescriptionBureau.objects.count()
+            return self._make_response_human(f"Total des descriptions enregistrées : {total}", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error counting descriptions: {e}")
+            return "Erreur lors du comptage des descriptions."
+
+    def _handle_count_descriptions_with_term(self, entities: Dict[str, Any]) -> str:
+        """Compte les descriptions contenant un terme (IT+Bureau)."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            m = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            term = (m.group(1) or m.group(2)).strip() if m else None
+            if not term:
+                return "Veuillez préciser le terme entre guillemets."
+            cnt = Description.objects.filter(nom__icontains=term).count() + DescriptionBureau.objects.filter(nom__icontains=term).count()
+            return self._make_response_human(f"Descriptions contenant '{term}' : {cnt}", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error counting descriptions by term: {e}")
+            return "Erreur lors du comptage des descriptions."
+
+    def _handle_descriptions_with_term(self, entities: Dict[str, Any]) -> str:
+        """Liste les descriptions contenant un terme (IT+Bureau)."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            m = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            term = (m.group(1) or m.group(2)).strip() if m else None
+            if not term:
+                return "Veuillez préciser le terme entre guillemets."
+            it = list(Description.objects.filter(nom__icontains=term).values_list('nom', flat=True)[:50])
+            bu = list(DescriptionBureau.objects.filter(nom__icontains=term).values_list('nom', flat=True)[:50])
+            names = sorted(set([n for n in it + bu if n]))
+            if not names:
+                return self._make_response_human(f"Aucune description ne contient '{term}'.", 'no_results', True)
+            lines = [f"Descriptions contenant '{term}' :"]
+            for n in names:
+                lines.append(f"- {n}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing descriptions by term: {e}")
+            return "Erreur lors de la récupération des descriptions."
+
+    def _handle_repartition_descriptions_by_designation(self, entities: Dict[str, Any]) -> str:
+        """Répartition des descriptions par désignation (IT+Bureau)."""
+        try:
+            from django.db.models import Count
+            it = Description.objects.values('designation__nom').annotate(n=Count('id'))
+            bu = DescriptionBureau.objects.values('designation__nom').annotate(n=Count('id'))
+            # Combine
+            agg: Dict[str, int] = {}
+            for row in it:
+                name = row['designation__nom'] or 'Inconnu'
+                agg[name] = agg.get(name, 0) + (row['n'] or 0)
+            for row in bu:
+                name = row['designation__nom'] or 'Inconnu'
+                agg[name] = agg.get(name, 0) + (row['n'] or 0)
+            if not agg:
+                return self._make_response_human("Aucune description trouvée.", 'no_results', True)
+            lines = ["Répartition des descriptions par désignation :"]
+            for name in sorted(agg.keys()):
+                lines.append(f"- {name} : {agg[name]}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error computing repartition by designation: {e}")
+            return "Erreur lors du calcul de la répartition."
 
     def _handle_count_completed_deliveries(self, entities: Dict) -> str:
         """Handler pour compter les livraisons terminées"""
@@ -9654,7 +11414,7 @@ Bureautique : {etage1_office.count()} matériels
             ).count()
             
             response = f" **Livraisons terminées :**\n"
-            response += f"• **Total : {completed_deliveries}**\n\n"
+            response += f"- **Total : {completed_deliveries}**\n\n"
             response += ""
             
             return response
@@ -9678,7 +11438,7 @@ Bureautique : {etage1_office.count()} matériels
                         delayed_deliveries += 1
             
             response = f" **Livraisons en retard :**\n"
-            response += f"• **Total : {delayed_deliveries}**\n\n"
+            response += f"- **Total : {delayed_deliveries}**\n\n"
             response += ""
             
             return response
@@ -9693,7 +11453,7 @@ Bureautique : {etage1_office.count()} matériels
             total_deliveries = Livraison.objects.count()
             
             response = f"📦 **Total des livraisons :**\n"
-            response += f"• **Total : {total_deliveries}**\n\n"
+            response += f"- **Total : {total_deliveries}**\n\n"
             response += ""
             
             return response
@@ -9726,6 +11486,9 @@ Bureautique : {etage1_office.count()} matériels
             elif 'refus' in ql or 'refuse' in ql:
                 qs = qs.filter(statut='refusee')
                 label = 'refusées'
+            elif 'en_attente_signature' in ql or 'attente de signature' in ql or 'attente_signature' in ql:
+                qs = qs.filter(statut='en_attente_signature')
+                label = 'en attente de signature'
             
             # Récupérer les demandes avec tous les détails
             demandes = qs.select_related(
@@ -9755,7 +11518,7 @@ Bureautique : {etage1_office.count()} matériels
                     # Format de date
                     date_str = demande.date_demande.strftime('%d/%m/%Y')
                     
-                    response += f"• **Demande n°{demande.id}** du {date_str}\n"
+                    response += f"- **Demande n°{demande.id}** du {date_str}\n"
                     response += f"  - **Demandeur :** {demande.demandeur.username}\n"
                     response += f"  - **Catégorie :** {demande.categorie.title()} | **Type :** {demande.type_demande.title()} | **Article :** {demande.type_article.title()}\n"
                     response += f"  - **Statut :** {demande.statut.replace('_', ' ').title()}\n"
@@ -9767,11 +11530,13 @@ Bureautique : {etage1_office.count()} matériels
                 approuvees = DemandeEquipement.objects.filter(statut='approuvee').count()
                 en_attente = DemandeEquipement.objects.filter(statut='en_attente').count()
                 refusees = DemandeEquipement.objects.filter(statut='refusee').count()
+                en_attente_signature = DemandeEquipement.objects.filter(statut='en_attente_signature').count()
                 
                 response += f"** Résumé par statut :**\n"
-                response += f"• Approuvées : {approuvees}\n"
-                response += f"• En attente : {en_attente}\n"
-                response += f"• Refusées : {refusees}\n\n"
+                response += f"- Approuvées : {approuvees}\n"
+                response += f"- En attente : {en_attente}\n"
+                response += f"- En attente de signature : {en_attente_signature}\n"
+                response += f"- Refusées : {refusees}\n\n"
             
             response += f""
             return self._make_response_human(
@@ -9900,7 +11665,7 @@ Bureautique : {etage1_office.count()} matériels
                 return f"Aucune livraison prévue pour {mois_txt} {annee}."
             lines = [f"📦 Livraisons prévues en {mois_txt} {annee}:"]
             for lv in livs[:20]:
-                lines.append(f"• {lv.numero_commande} – Statut: {lv.statut_livraison} – Prévu: {lv.date_livraison_prevue}")
+                lines.append(f"- {lv.numero_commande} – Statut: {lv.statut_livraison} – Prévu: {lv.date_livraison_prevue}")
             return "\n".join(lines)
         except Exception as e:
             logger.error(f"Error in deliveries_by_month: {e}")
@@ -9910,13 +11675,8 @@ Bureautique : {etage1_office.count()} matériels
         """Retourne l'ICE d'un fournisseur par son nom."""
         try:
             from apps.fournisseurs.models import Fournisseur
-            import re
             ql = entities.get('original_query', '')
-            m = re.search(r"fournisseur\s+'([^']+)'|fournisseur\s+\"([^\"]+)\"", ql, re.IGNORECASE)
-            name = entities.get('supplier') or ((m.group(1) or m.group(2)) if m else None)
-            if not name:
-                m2 = re.search(r"fournisseur\s+([\w\-À-ÿ ]{3,})", ql, re.IGNORECASE)
-                name = m2.group(1).strip() if m2 else None
+            name = entities.get('supplier') or self._extract_quoted_name(ql)
             if not name:
                 return "Veuillez préciser le nom du fournisseur."
             f = Fournisseur.objects.filter(nom__iexact=name).first()
@@ -9926,6 +11686,23 @@ Bureautique : {etage1_office.count()} matériels
         except Exception as e:
             logger.error(f"Error getting supplier ICE: {e}")
             return "Erreur lors de la récupération de l'ICE du fournisseur."
+
+    def _handle_supplier_by_ice(self, entities: Dict) -> str:
+        """Retourne le fournisseur correspondant à un ICE donné (entre guillemets)."""
+        try:
+            from apps.fournisseurs.models import Fournisseur
+            raw = entities.get('original_query', '')
+            ice = self._extract_quoted_name(raw)
+            if not ice:
+                return "Veuillez fournir l'ICE entre guillemets."
+            ice_norm = ice.replace(' ', '')
+            f = Fournisseur.objects.filter(ice__iexact=ice_norm).first()
+            if not f:
+                return f"Aucun fournisseur trouvé avec l'ICE '{ice}'."
+            return f"🏢 {f.nom} — ICE: {f.ice}\nAdresse : {f.adresse}"
+        except Exception as e:
+            logger.error(f"Error getting supplier by ICE: {e}")
+            return "Erreur lors de la recherche par ICE."
 
     def _handle_delivery_overview(self, entities: Dict) -> str:
         """Donne une synthèse globale des livraisons (par statut, PV, retards)."""
@@ -9945,12 +11722,12 @@ Bureautique : {etage1_office.count()} matériels
                         retard += 1
             pv = Livraison.objects.filter(pv_reception_recu=True).count()
             lines = ["📦 Synthèse des livraisons:"]
-            lines.append(f"• Total: {total}")
-            lines.append(f"• En attente: {en_attente}")
-            lines.append(f"• En cours: {en_cours}")
-            lines.append(f"• Livrées: {livree}")
-            lines.append(f"• Retardées: {retard}")
-            lines.append(f"• PV de réception reçus: {pv}")
+            lines.append(f"- Total: {total}")
+            lines.append(f"- En attente: {en_attente}")
+            lines.append(f"- En cours: {en_cours}")
+            lines.append(f"- Livrées: {livree}")
+            lines.append(f"- Retardées: {retard}")
+            lines.append(f"- PV de réception reçus: {pv}")
             lines.append("\n")
             return "\n".join(lines)
         except Exception as e:
@@ -9972,7 +11749,7 @@ Bureautique : {etage1_office.count()} matériels
                 return f"Aucune demande le {date_str}."
             lines = [f"🗓️ Demandes du {date_str}:"]
             for d in demandes[:20]:
-                lines.append(f"• ID {d.id} – Demandeur: {d.demandeur.username} – Statut: {d.statut}")
+                lines.append(f"- ID {d.id} – Demandeur: {d.demandeur.username} – Statut: {d.statut}")
             return "\n".join(lines)
         except Exception as e:
             logger.error(f"Error in equipment_requests_by_date: {e}")
@@ -9987,7 +11764,7 @@ Bureautique : {etage1_office.count()} matériels
                 return "Aucune livraison avec PV de réception reçu."
             lines = [" Livraisons avec PV de réception reçu:"]
             for lv in livs[:20]:
-                lines.append(f"• Commande {lv.numero_commande} – Statut: {lv.statut_livraison}")
+                lines.append(f"- Commande {lv.numero_commande} – Statut: {lv.statut_livraison}")
             return "\n".join(lines)
         except Exception as e:
             logger.error(f"Error in deliveries_with_pv: {e}")
@@ -9995,14 +11772,51 @@ Bureautique : {etage1_office.count()} matériels
     def _handle_count_generic(self, entities: Dict) -> str:
         """Handler générique pour les questions de comptage"""
         try:
-            response = " **Question de comptage détectée**\n\n"
-            response += "Pour une réponse précise, veuillez préciser :\n"
-            response += "• Le type d'élément à compter (commandes, matériel, fournisseurs, livraisons)\n"
-            response += "• Le statut spécifique (en cours, approuvées, terminées, etc.)\n\n"
-            response += "Exemples :\n"
-            response += "• 'Combien de commandes en cours ?'\n"
-            response += "• 'Nombre de matériels informatiques ?'\n"
-            response += "• 'Total des fournisseurs ?'"
+            # Analyser la question pour essayer de donner une réponse directe
+            original_query = entities.get('original_query', '').lower()
+            
+            # Détecter les questions spécifiques et y répondre directement
+            if 'personnes' in original_query and 'groupe' in original_query:
+                # Question sur le nombre de personnes dans un groupe
+                import re
+                match = re.search(r'groupe\s+["\']?([^"\']+)["\']?', original_query)
+                if match:
+                    group_name = match.group(1)
+                    try:
+                        from django.contrib.auth.models import Group
+                        group = Group.objects.get(name=group_name)
+                        user_count = group.user_set.count()
+                        return f"Il y a {user_count} personnes dans le groupe '{group_name}'."
+                    except Group.DoesNotExist:
+                        return f"Le groupe '{group_name}' n'existe pas."
+            
+            elif 'bureaux' in original_query and 'stock' in original_query:
+                # Question sur le nombre de bureaux en stock
+                stock_count = MaterielBureau.objects.filter(statut__in=['en_stock', 'stock']).count()
+                return f"Il y a {stock_count} matériels bureautiques en stock."
+            
+            elif 'commandes' in original_query and 'en cours' in original_query:
+                # Question sur les commandes en cours
+                pending_count = Commande.objects.filter(statut__in=['en_cours', 'en_attente']).count()
+                return f"Il y a {pending_count} commandes en cours."
+            
+            elif 'matériels informatiques' in original_query or 'materiels informatiques' in original_query:
+                # Question sur le nombre de matériels informatiques
+                it_count = MaterielInformatique.objects.count()
+                return f"Il y a {it_count} matériels informatiques dans le parc."
+            
+            elif 'fournisseurs' in original_query:
+                # Question sur le nombre de fournisseurs
+                supplier_count = Fournisseur.objects.count()
+                return f"Il y a {supplier_count} fournisseurs enregistrés."
+            
+            # Si aucune correspondance spécifique, donner une réponse d'aide
+            response = "Je peux vous aider à compter différents éléments. Voici quelques exemples :\n\n"
+            response += "- 'Combien de commandes en cours ?'\n"
+            response += "- 'Nombre de matériels informatiques ?'\n"
+            response += "- 'Total des fournisseurs ?'\n"
+            response += "- 'Combien de bureaux en stock ?'\n"
+            response += "- 'Nombre de personnes dans le groupe Employé ?'"
             
             return response
             
@@ -10026,7 +11840,7 @@ Bureautique : {etage1_office.count()} matériels
             if broken_it_material.exists():
                 response += "**Informatique :**\n"
                 for material in broken_it_material[:5]:  # Limiter à 5 résultats
-                    response += f"• {material.code_inventaire} - {material.designation}\n"
+                    response += f"- {material.code_inventaire} - {material.designation}\n"
                 if broken_it_material.count() > 5:
                     response += f"... et {broken_it_material.count() - 5} autres\n"
             else:
@@ -10037,7 +11851,7 @@ Bureautique : {etage1_office.count()} matériels
             if broken_office_material.exists():
                 response += "**Bureautique :**\n"
                 for material in broken_office_material[:5]:
-                    response += f"• {material.code_inventaire} - {material.designation}\n"
+                    response += f"- {material.code_inventaire} - {material.designation}\n"
                 if broken_office_material.count() > 5:
                     response += f"... et {broken_office_material.count() - 5} autres\n"
             else:
@@ -10067,7 +11881,7 @@ Bureautique : {etage1_office.count()} matériels
                 response += "**Informatique :**\n"
                 for material in working_it_material[:5]:
                     # Pour le matériel informatique, utiliser le code d'inventaire et le statut
-                    response += f"• {material.code_inventaire} - Statut: {material.statut}"
+                    response += f"- {material.code_inventaire} - Statut: {material.statut}"
                     if material.lieu_stockage:
                         response += f" - Lieu: {material.lieu_stockage}"
                     if material.utilisateur:
@@ -10084,7 +11898,7 @@ Bureautique : {etage1_office.count()} matériels
                 response += "**Bureautique :**\n"
                 for material in working_office_material[:5]:
                     # Pour le matériel bureautique, utiliser la propriété designation
-                    response += f"• {material.code_inventaire} - {material.designation}"
+                    response += f"- {material.code_inventaire} - {material.designation}"
                     if material.lieu_stockage:
                         response += f" - Lieu: {material.lieu_stockage}"
                     if material.utilisateur:
@@ -10121,11 +11935,11 @@ Bureautique : {etage1_office.count()} matériels
             
             response += "**Informatique :**\n"
             for status, count in it_status_counts.items():
-                response += f"• {status} : {count}\n"
+                response += f"- {status} : {count}\n"
             
             response += "\n**Bureautique :**\n"
             for status, count in office_status_counts.items():
-                response += f"• {status} : {count}\n"
+                response += f"- {status} : {count}\n"
             
             response += "\n"
             return response
@@ -10173,40 +11987,40 @@ Bureautique : {etage1_office.count()} matériels
                 if it_designations:
                     response += "**Matériel informatique :**\n"
                     for designation, codes in it_designations.items():
-                        response += f"• {designation} : {', '.join(codes[:3])}{'...' if len(codes) > 3 else ''}\n"
+                        response += f"- {designation} : {', '.join(codes[:3])}{'...' if len(codes) > 3 else ''}\n"
                 
                 if bu_designations:
                     response += "\n**Matériel bureautique :**\n"
                     for designation, codes in bu_designations.items():
-                        response += f"• {designation} : {', '.join(codes[:3])}{'...' if len(codes) > 3 else ''}\n"
+                        response += f"- {designation} : {', '.join(codes[:3])}{'...' if len(codes) > 3 else ''}\n"
                 
                 if fourniture_designations:
                     response += "\n**Fournitures :**\n"
                     for designation, series in fourniture_designations.items():
-                        response += f"• {designation} : {', '.join(series[:3])}{'...' if len(series) > 3 else ''}\n"
+                        response += f"- {designation} : {', '.join(series[:3])}{'...' if len(series) > 3 else ''}\n"
                 
             except Exception as db_error:
                 logger.warning(f"Could not fetch specific designations: {db_error}")
                 # Fallback vers la réponse générique mais avec ton humain
                 response = "Voici les types de matériels disponibles :\n\n"
             response += "**Matériel informatique :**\n"
-            response += "• Ordinateurs et serveurs\n"
-            response += "• Équipements réseau\n"
-            response += "• Périphériques (écrans, claviers, souris)\n"
-            response += "• Équipements de stockage\n"
+            response += "- Ordinateurs et serveurs\n"
+            response += "- Équipements réseau\n"
+            response += "- Périphériques (écrans, claviers, souris)\n"
+            response += "- Équipements de stockage\n"
             
             response += "\n**Matériel bureautique :**\n"
-            response += "• Mobilier de bureau (bureaux, chaises, armoires)\n"
-            response += "• Fournitures de bureau\n"
-            response += "• Équipements de conférence\n"
-            response += "• Matériel de rangement\n"
+            response += "- Mobilier de bureau (bureaux, chaises, armoires)\n"
+            response += "- Fournitures de bureau\n"
+            response += "- Équipements de conférence\n"
+            response += "- Matériel de rangement\n"
             
             response += "\n**Catégories par statut :**\n"
-            response += "• Nouveau : Matériel récemment acquis\n"
-            response += "• Opérationnel : Matériel en bon état de fonctionnement\n"
-            response += "• Affecté : Matériel assigné à un utilisateur\n"
-            response += "• En panne : Matériel nécessitant une réparation\n"
-            response += "• En maintenance : Matériel en cours de réparation\n"
+            response += "- Nouveau : Matériel récemment acquis\n"
+            response += "- Opérationnel : Matériel en bon état de fonctionnement\n"
+            response += "- Affecté : Matériel assigné à un utilisateur\n"
+            response += "- En panne : Matériel nécessitant une réparation\n"
+            response += "- En maintenance : Matériel en cours de réparation\n"
             
             return self._make_response_human(response, 'positive_confirmation', True)
             
@@ -10229,11 +12043,11 @@ Bureautique : {etage1_office.count()} matériels
             
             response += "**Informatique (10 plus récentes) :**\n"
             for commande in recent_it_commands:
-                response += f"• {commande.numero_commande} - {commande.fournisseur.nom} ({commande.date_commande})\n"
+                response += f"- {commande.numero_commande} - {commande.fournisseur.nom} ({commande.date_commande})\n"
             
             response += "\n**Bureautique (10 plus récentes) :**\n"
             for commande in recent_office_commands:
-                response += f"• {commande.numero_commande} - {commande.fournisseur.nom} ({commande.date_commande})\n"
+                response += f"- {commande.numero_commande} - {commande.fournisseur.nom} ({commande.date_commande})\n"
             
             response += "\n"
             return response
@@ -10272,17 +12086,17 @@ Bureautique : {etage1_office.count()} matériels
                     )['total'] or 0
                     
                     response = f" **Détails de la commande {command_number} :**\n\n"
-                    response += f"• **Fournisseur :** {commande.fournisseur.nom}\n"
-                    response += f"• **Date :** {commande.date_commande}\n"
-                    response += f"• **Montant :** {montant_total:.2f} DH HT\n"
-                    response += f"• **Mode :** {commande.mode_passation}\n"
+                    response += f"- **Fournisseur :** {commande.fournisseur.nom}\n"
+                    response += f"- **Date :** {commande.date_commande}\n"
+                    response += f"- **Montant :** {montant_total:.2f} DH HT\n"
+                    response += f"- **Mode :** {commande.mode_passation}\n"
                     
                     # Ajouter les lignes de commande
                     lignes = LigneCommande.objects.filter(commande=commande)
                     if lignes.exists():
                         response += f"\n**Lignes de commande :**\n"
                         for ligne in lignes:
-                            response += f"• {ligne.designation.nom} - {ligne.description.nom} : {ligne.quantite} x {ligne.prix_unitaire} DH\n"
+                            response += f"- {ligne.designation.nom} - {ligne.description.nom} : {ligne.quantite} x {ligne.prix_unitaire} DH\n"
                     
                     response += "\n"
                     return response
@@ -10306,17 +12120,17 @@ Bureautique : {etage1_office.count()} matériels
                     )['total'] or 0
                     
                     response = f" **Détails de la commande {command_number} :**\n\n"
-                    response += f"• **Fournisseur :** {commande.fournisseur.nom}\n"
-                    response += f"• **Date :** {commande.date_commande}\n"
-                    response += f"• **Montant :** {montant_total:.2f} DH HT\n"
-                    response += f"• **Mode :** {commande.mode_passation}\n"
+                    response += f"- **Fournisseur :** {commande.fournisseur.nom}\n"
+                    response += f"- **Date :** {commande.date_commande}\n"
+                    response += f"- **Montant :** {montant_total:.2f} DH HT\n"
+                    response += f"- **Mode :** {commande.mode_passation}\n"
                     
                     # Ajouter les lignes de commande
                     lignes = LigneCommandeBureau.objects.filter(commande=commande)
                     if lignes.exists():
                         response += f"\n**Lignes de commande :**\n"
                         for ligne in lignes:
-                            response += f"• {ligne.designation.nom} - {ligne.description.nom} : {ligne.quantite} x {ligne.prix_unitaire} DH\n"
+                            response += f"- {ligne.designation.nom} - {ligne.description.nom} : {ligne.quantite} x {ligne.prix_unitaire} DH\n"
                     
                     response += "\n"
                     return response
@@ -10334,32 +12148,1255 @@ Bureautique : {etage1_office.count()} matériels
     def _handle_supplier_details(self, entities: Dict) -> str:
         """Handler pour les détails d'un fournisseur"""
         try:
-            query = entities.get('original_query', '').lower()
+            raw = entities.get('original_query', '')
             
-            # Chercher un nom de fournisseur dans la requête
-            import re
-            supplier_match = re.search(r'(?:fournisseur|société|societe)\s+(\w+(?:\s+\w+)*)', query)
-            
-            if supplier_match:
-                supplier_name = supplier_match.group(1).strip()
+            # Extraire le nom du fournisseur de différentes façons
+            name = self._extract_quoted_name(raw)
+            if not name:
+                # Fallback: try unquoted after keyword
+                ql = raw.lower()
+                import re as _re_local
                 
-                try:
-                    supplier = Fournisseur.objects.get(nom__icontains=supplier_name)
-                    response = f"🏢 **Détails du fournisseur {supplier.nom} :**\n\n"
-                    response += f"• **ICE :** {supplier.ice}\n"
-                    response += f"• **Adresse :** {supplier.adresse}\n"
-                    response += f"• **IF Fiscal :** {supplier.if_fiscal}\n"
-                    response += f"• **Email :** {supplier.email}\n"
-                    response += "\n"
-                    return response
-                except Fournisseur.DoesNotExist:
-                    return f" Aucun fournisseur trouvé avec le nom '{supplier_name}'"
+                # Patterns pour extraire le nom du fournisseur
+                patterns = [
+                    r'(?:fournisseur|société|societe)\s+([\w\-À-ÿ ]{3,})',
+                    r'adresse\s+de\s+["\']?([^"\']+)["\']?',
+                    r'["\']([^"\']+)["\']\s+(?:est\s+un\s+)?fournisseur',
+                    r'["\']([^"\']+)["\']\s+(?:enregistré|enregistre)'
+                ]
+                
+                for pattern in patterns:
+                    m = _re_local.search(pattern, ql)
+                    if m:
+                        name = m.group(1).strip()
+                        break
             
-            return "❓ Veuillez préciser le nom du fournisseur pour obtenir les détails."
+            if not name:
+                return "Veuillez préciser le nom du fournisseur pour obtenir les détails."
+            
+            # Chercher le fournisseur
+            supplier = Fournisseur.objects.filter(nom__iexact=name).first() or \
+                       Fournisseur.objects.filter(nom__icontains=name).first()
+            
+            if not supplier:
+                return f"Aucun fournisseur trouvé avec le nom '{name}'."
+            
+            # Si c'est une question sur l'adresse spécifiquement
+            if 'adresse' in raw.lower():
+                return f"L'adresse de {supplier.nom} est : {supplier.adresse}"
+            
+            # Réponse complète avec tous les détails
+            response = f"**Détails du fournisseur {supplier.nom} :**\n\n"
+            response += f"- **ICE :** {supplier.ice}\n"
+            response += f"- **Adresse :** {supplier.adresse}\n"
+            if hasattr(supplier, 'if_fiscal'):
+                response += f"- **IF Fiscal :** {getattr(supplier, 'if_fiscal') or 'N/A'}\n"
+            if hasattr(supplier, 'email'):
+                response += f"- **Email :** {getattr(supplier, 'email') or 'N/A'}\n"
+            
+            return response
             
         except Exception as e:
             logger.error(f"Error handling supplier details: {e}")
             return "Erreur lors de la récupération des détails du fournisseur."
+
+    def _handle_supplier_exists_check(self, entities: Dict) -> str:
+        """Handler pour vérifier si un fournisseur est enregistré"""
+        try:
+            raw = entities.get('original_query', '')
+            
+            # Extraire le nom du fournisseur
+            import re
+            
+            # Patterns pour extraire le nom du fournisseur
+            patterns = [
+                r'["\']([^"\']+)["\']\s+(?:est\s+un\s+)?fournisseur',
+                r'["\']([^"\']+)["\']\s+(?:enregistré|enregistre)',
+                r'est-ce\s+que\s+["\']([^"\']+)["\']\s+(?:est\s+un\s+)?fournisseur',
+                r'est\s+ce\s+que\s+["\']([^"\']+)["\']\s+(?:est\s+un\s+)?fournisseur',
+                r'["\']([^"\']+)["\']',  # Pattern simple pour capturer le nom entre guillemets
+                r'([A-Z][A-Z0-9\s&]+)(?:\s+est|\s+enregistré|$)',  # Pattern pour capturer le nom sans guillemets
+            ]
+            
+            name = None
+            for pattern in patterns:
+                match = re.search(pattern, raw, re.IGNORECASE)
+                if match:
+                    name = match.group(1).strip()
+                    break
+            
+            if not name:
+                return "Veuillez préciser le nom du fournisseur à vérifier."
+            
+            # Chercher le fournisseur
+            supplier = Fournisseur.objects.filter(nom__iexact=name).first()
+            
+            if supplier:
+                return f"Oui, {name} est un fournisseur enregistré."
+            else:
+                return f"Non, {name} n'est pas un fournisseur enregistré."
+            
+        except Exception as e:
+            logger.error(f"Error checking supplier existence: {e}")
+            return "Erreur lors de la vérification du fournisseur."
+
+    def _handle_order_status_direct(self, entities: Dict) -> str:
+        """Handler direct pour le statut d'une commande"""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            
+            # Extraire le code de commande
+            code_match = re.search(r'\b([A-Z]{2,6}\s*\d{2,4})\b', q)
+            if code_match:
+                code = code_match.group(1).replace(' ', '').upper()
+                
+                # Chercher la commande IT
+                cmd = Commande.objects.filter(numero_commande__iexact=code).first()
+                if cmd:
+                    # Déterminer le statut basé sur les dates
+                    if cmd.date_reception:
+                        status = "Livrée"
+                    else:
+                        status = "En attente de livraison"
+                    return f"La commande {code} ({cmd.mode_passation}) est : {status} (Commande: {cmd.date_commande}, Livraison: {cmd.date_reception or 'Non livrée'})"
+                
+                # Chercher la commande Bureau
+                cmd_b = CommandeBureau.objects.filter(numero_commande__iexact=code).first()
+                if cmd_b:
+                    # Déterminer le statut basé sur les dates
+                    if cmd_b.date_reception:
+                        status = "Livrée"
+                    else:
+                        status = "En attente de livraison"
+                    return f"La commande {code} ({cmd_b.mode_passation}) est : {status} (Commande: {cmd_b.date_commande}, Livraison: {cmd_b.date_reception or 'Non livrée'})"
+                
+                return f"Aucune commande trouvée avec le code {code}."
+            
+            return "Veuillez préciser le numéro de commande."
+            
+        except Exception as e:
+            logger.error(f"Error in order status direct: {e}")
+            return "Erreur lors de la récupération du statut de la commande."
+
+    def _handle_who_delivered_order(self, entities: Dict) -> str:
+        """Handler pour savoir qui a livré une commande"""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            
+            # Extraire le code de commande
+            code_match = re.search(r'\b([A-Z]{2,6}\s*\d{2,4})\b', q)
+            if code_match:
+                code = code_match.group(1).replace(' ', '').upper()
+                
+                # Chercher la commande IT et son fournisseur
+                cmd = Commande.objects.filter(numero_commande__iexact=code).select_related('fournisseur').first()
+                if cmd and cmd.fournisseur:
+                    return f"La commande {code} a été livrée par le fournisseur {cmd.fournisseur.nom}."
+                
+                # Chercher la commande Bureau et son fournisseur
+                cmd_b = CommandeBureau.objects.filter(numero_commande__iexact=code).select_related('fournisseur').first()
+                if cmd_b and cmd_b.fournisseur:
+                    return f"La commande {code} a été livrée par le fournisseur {cmd_b.fournisseur.nom}."
+                
+                return f"Aucune commande trouvée avec le code {code}."
+            
+            return "Veuillez préciser le numéro de commande."
+            
+        except Exception as e:
+            logger.error(f"Error in who delivered order: {e}")
+            return "Erreur lors de la récupération des informations de livraison."
+
+    def _handle_command_amount_specific(self, entities: Dict) -> str:
+        """Handler pour le montant d'une commande spécifique"""
+        try:
+            import re
+            from django.db.models import Sum, F
+            q = entities.get('original_query', '')
+            
+            # Extraire le code de commande
+            code_match = re.search(r'\b([A-Z]{2,6}\s*\d{2,4})\b', q)
+            if code_match:
+                code = code_match.group(1).replace(' ', '').upper()
+                
+                # Chercher la commande IT et calculer le montant total
+                cmd = Commande.objects.filter(numero_commande__iexact=code).first()
+                if cmd:
+                    total_amount = cmd.lignecommande_set.aggregate(
+                        total=Sum(F('quantite') * F('prix_unitaire'))
+                    )['total'] or 0
+                    return f"Le montant de la commande {code} est : {total_amount:.2f} DH HT"
+                
+                # Chercher la commande Bureau et calculer le montant total
+                cmd_b = CommandeBureau.objects.filter(numero_commande__iexact=code).first()
+                if cmd_b:
+                    total_amount = cmd_b.lignecommandebureau_set.aggregate(
+                        total=Sum(F('quantite') * F('prix_unitaire'))
+                    )['total'] or 0
+                    return f"Le montant de la commande {code} est : {total_amount:.2f} DH HT"
+                
+                return f"Aucune commande trouvée avec le code {code}."
+            
+            return "Veuillez préciser le numéro de commande."
+            
+        except Exception as e:
+            logger.error(f"Error in command amount specific: {e}")
+            return "Erreur lors de la récupération du montant de la commande."
+
+    def _handle_simple_count_query(self, entities: Dict) -> str:
+        """Handler pour les questions de comptage simples"""
+        try:
+            q = entities.get('original_query', '').lower()
+            
+            # Compter les bureaux en stock
+            if 'bureaux' in q and 'stock' in q:
+                count = MaterielBureau.objects.filter(statut='en_stock').count()
+                return f"Il y a {count} bureaux en stock."
+            
+            # Compter les personnes dans un groupe
+            if 'personnes' in q and 'groupe' in q:
+                import re
+                group_match = re.search(r'groupe\s+["\']?([^"\']+)["\']?', q)
+                if group_match:
+                    group_name = group_match.group(1).strip()
+                    from django.contrib.auth.models import Group
+                    try:
+                        group = Group.objects.get(name__iexact=group_name)
+                        count = group.user_set.count()
+                        return f"Il y a {count} personnes dans le groupe '{group_name}'."
+                    except Group.DoesNotExist:
+                        return f"Le groupe '{group_name}' n'existe pas."
+                else:
+                    return "Veuillez préciser le nom du groupe."
+            
+            # Compter les matériels informatiques
+            if 'matériels' in q and 'informatiques' in q:
+                count = MaterielInformatique.objects.count()
+                return f"Il y a {count} matériels informatiques au total."
+            
+            # Compter les fournisseurs
+            if 'fournisseurs' in q:
+                count = Fournisseur.objects.count()
+                return f"Il y a {count} fournisseurs enregistrés."
+            
+            # Compter les commandes
+            if 'commandes' in q:
+                count_it = Commande.objects.count()
+                count_bureau = CommandeBureau.objects.count()
+                total = count_it + count_bureau
+                return f"Il y a {total} commandes au total ({count_it} informatiques et {count_bureau} bureautiques)."
+            
+            return "Je n'ai pas compris votre question de comptage. Pouvez-vous être plus spécifique ?"
+            
+        except Exception as e:
+            logger.error(f"Error in simple count query: {e}")
+            return "Erreur lors du comptage."
+
+    def _handle_command_date_specific(self, entities: Dict) -> str:
+        """Handler pour la date d'une commande spécifique"""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            
+            # Extraire le code de commande
+            code_match = re.search(r'\b([A-Z]{2,6}\s*\d{2,4})\b', q)
+            if code_match:
+                code = code_match.group(1).replace(' ', '').upper()
+                
+                # Chercher la commande IT
+                cmd = Commande.objects.filter(numero_commande__iexact=code).first()
+                if cmd:
+                    date_str = cmd.date_commande.strftime('%d/%m/%Y') if cmd.date_commande else 'N/A'
+                    return f"La date de la commande {code} est : {date_str}"
+                
+                # Chercher la commande Bureau
+                cmd_b = CommandeBureau.objects.filter(numero_commande__iexact=code).first()
+                if cmd_b:
+                    date_str = cmd_b.date_commande.strftime('%d/%m/%Y') if cmd_b.date_commande else 'N/A'
+                    return f"La date de la commande {code} est : {date_str}"
+                
+                return f"Aucune commande trouvée avec le code {code}."
+            
+            return "Veuillez préciser le numéro de commande."
+            
+        except Exception as e:
+            logger.error(f"Error in command date specific: {e}")
+            return "Erreur lors de la récupération de la date de la commande."
+
+    def _handle_deliveries_for_command(self, entities: Dict) -> str:
+        """Handler pour les livraisons associées à une commande"""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            
+            # Extraire le code de commande
+            code_match = re.search(r'\b([A-Z]{2,6}\s*\d{2,4})\b', q)
+            if code_match:
+                code = code_match.group(1).replace(' ', '').upper()
+                
+                # Chercher les livraisons pour la commande IT
+                deliveries = Livraison.objects.filter(commande__numero_commande__iexact=code)
+                if deliveries.exists():
+                    response = f"Livraisons associées à la commande {code} :\n"
+                    for delivery in deliveries:
+                        date_str = delivery.date_livraison.strftime('%d/%m/%Y') if delivery.date_livraison else 'N/A'
+                        response += f"- Livraison {delivery.id} - Date : {date_str}\n"
+                    return response
+                
+                # Chercher les livraisons pour la commande Bureau
+                deliveries_bureau = LivraisonBureau.objects.filter(commande__numero_commande__iexact=code)
+                if deliveries_bureau.exists():
+                    response = f"Livraisons associées à la commande {code} :\n"
+                    for delivery in deliveries_bureau:
+                        date_str = delivery.date_livraison.strftime('%d/%m/%Y') if delivery.date_livraison else 'N/A'
+                        response += f"- Livraison {delivery.id} - Date : {date_str}\n"
+                    return response
+                
+                return f"Aucune livraison trouvée pour la commande {code}."
+            
+            return "Veuillez préciser le numéro de commande."
+            
+        except Exception as e:
+            logger.error(f"Error in deliveries for command: {e}")
+            return "Erreur lors de la récupération des livraisons."
+
+    def _handle_equipment_requests_by_category(self, entities: Dict) -> str:
+        """Handler pour les demandes d'équipement par catégorie"""
+        try:
+            q = entities.get('original_query', '').lower()
+            
+            # Vérifier si on cherche des demandes pour des matériels bureautiques
+            if 'bureautiques' in q or 'bureautique' in q:
+                from apps.demande_equipement.models import DemandeEquipement
+                requests = DemandeEquipement.objects.filter(categorie='Bureautique')
+                if requests.exists():
+                    response = f"Demandes d'équipement pour des matériels bureautiques ({requests.count()}) :\n"
+                    for req in requests:
+                        date_str = req.date_demande.strftime('%d/%m/%Y') if req.date_demande else 'N/A'
+                        response += f"- Demande n°{req.id} du {date_str}\n"
+                        response += f"  - Demandeur : {req.demandeur.username if req.demandeur else 'N/A'}\n"
+                        response += f"  - Statut : {req.statut}\n"
+                        response += f"  - Désignation : {req.designation.nom if req.designation else 'N/A'}\n\n"
+                    return response
+                else:
+                    return "Aucune demande d'équipement trouvée pour des matériels bureautiques."
+            
+            # Vérifier si on cherche des demandes pour des matériels informatiques
+            elif 'informatiques' in q or 'informatique' in q:
+                from apps.demande_equipement.models import DemandeEquipement
+                requests = DemandeEquipement.objects.filter(categorie='Informatique')
+                if requests.exists():
+                    response = f"Demandes d'équipement pour des matériels informatiques ({requests.count()}) :\n"
+                    for req in requests:
+                        date_str = req.date_demande.strftime('%d/%m/%Y') if req.date_demande else 'N/A'
+                        response += f"- Demande n°{req.id} du {date_str}\n"
+                        response += f"  - Demandeur : {req.demandeur.username if req.demandeur else 'N/A'}\n"
+                        response += f"  - Statut : {req.statut}\n"
+                        response += f"  - Désignation : {req.designation.nom if req.designation else 'N/A'}\n\n"
+                    return response
+                else:
+                    return "Aucune demande d'équipement trouvée pour des matériels informatiques."
+            
+            # Par défaut, lister toutes les demandes
+            else:
+                from apps.demande_equipement.models import DemandeEquipement
+                requests = DemandeEquipement.objects.all()
+                if requests.exists():
+                    response = f"Toutes les demandes d'équipement ({requests.count()}) :\n"
+                    for req in requests:
+                        date_str = req.date_demande.strftime('%d/%m/%Y') if req.date_demande else 'N/A'
+                        response += f"- Demande n°{req.id} du {date_str}\n"
+                        response += f"  - Demandeur : {req.demandeur.username if req.demandeur else 'N/A'}\n"
+                        response += f"  - Catégorie : {req.categorie}\n"
+                        response += f"  - Statut : {req.statut}\n"
+                        response += f"  - Désignation : {req.designation.nom if req.designation else 'N/A'}\n\n"
+                    return response
+                else:
+                    return "Aucune demande d'équipement trouvée."
+            
+        except Exception as e:
+            logger.error(f"Error in equipment requests by category: {e}")
+            return "Erreur lors de la récupération des demandes d'équipement."
+
+    def _handle_total_amount_by_supplier(self, entities: Dict) -> str:
+        """Handler pour le montant total des commandes par fournisseur"""
+        try:
+            import re
+            from django.db.models import Sum, F
+            q = entities.get('original_query', '')
+            
+            # Extraire le nom du fournisseur
+            supplier_match = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            if supplier_match:
+                supplier_name = (supplier_match.group(1) or supplier_match.group(2)).strip()
+                
+                # Chercher le fournisseur
+                supplier = Fournisseur.objects.filter(nom__iexact=supplier_name).first()
+                if not supplier:
+                    return f"Le fournisseur '{supplier_name}' n'existe pas."
+                
+                # Calculer le montant total des commandes IT
+                total_it = Commande.objects.filter(fournisseur=supplier).aggregate(
+                    total=Sum(F('lignecommande__quantite') * F('lignecommande__prix_unitaire'))
+                )['total'] or 0
+                
+                # Calculer le montant total des commandes Bureau
+                total_bureau = CommandeBureau.objects.filter(fournisseur=supplier).aggregate(
+                    total=Sum(F('lignecommandebureau__quantite') * F('lignecommandebureau__prix_unitaire'))
+                )['total'] or 0
+                
+                total_amount = total_it + total_bureau
+                
+                return f"Le montant total des commandes passées par '{supplier_name}' est : {total_amount:.2f} DH HT"
+            
+            return "Veuillez préciser le nom du fournisseur entre guillemets."
+            
+        except Exception as e:
+            logger.error(f"Error in total amount by supplier: {e}")
+            return "Erreur lors du calcul du montant total des commandes."
+
+    def _handle_supplier_address(self, entities: Dict) -> str:
+        """Handler pour l'adresse d'un fournisseur"""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            
+            # Extraire le nom du fournisseur
+            supplier_match = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            if supplier_match:
+                supplier_name = (supplier_match.group(1) or supplier_match.group(2)).strip()
+                
+                # Chercher le fournisseur
+                supplier = Fournisseur.objects.filter(nom__iexact=supplier_name).first()
+                if supplier:
+                    return f"L'adresse de '{supplier_name}' est : {supplier.adresse}"
+                else:
+                    return f"Le fournisseur '{supplier_name}' n'existe pas."
+            
+            return "Veuillez préciser le nom du fournisseur entre guillemets."
+            
+        except Exception as e:
+            logger.error(f"Error in supplier address: {e}")
+            return "Erreur lors de la récupération de l'adresse du fournisseur."
+
+    def _handle_it_materials_list(self, entities: Dict) -> str:
+        """Handler pour lister tous les matériels informatiques avec leurs codes d'inventaire"""
+        try:
+            materials = MaterielInformatique.objects.all().select_related('ligne_commande__designation')
+            
+            if not materials.exists():
+                return "Aucun matériel informatique trouvé."
+            
+            response = f"Liste des matériels informatiques ({materials.count()}) :\n\n"
+            
+            for material in materials:
+                designation = material.ligne_commande.designation.nom if material.ligne_commande and material.ligne_commande.designation else 'N/A'
+                response += f"- {material.code_inventaire} - {designation}\n"
+                if material.numero_serie:
+                    response += f"  S/N: {material.numero_serie}\n"
+                response += f"  Statut: {material.statut}\n"
+                if material.lieu_stockage:
+                    response += f"  Localisation: {material.lieu_stockage}\n"
+                response += "\n"
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error in IT materials list: {e}")
+            return "Erreur lors de la récupération des matériels informatiques."
+
+    def _handle_pending_requests_for_user(self, entities: Dict) -> str:
+        """Handler pour les demandes en attente pour un utilisateur spécifique"""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            
+            # Extraire le nom de l'utilisateur
+            user_match = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            if user_match:
+                username = (user_match.group(1) or user_match.group(2)).strip()
+            else:
+                # Essayer sans guillemets
+                user_match = re.search(r'pour\s+["\']?([^"\']+)["\']?', q, re.IGNORECASE)
+                if user_match:
+                    username = user_match.group(1).strip()
+                else:
+                    return "Veuillez préciser le nom de l'utilisateur."
+            
+            from apps.demande_equipement.models import DemandeEquipement
+            
+            # Chercher les demandes en attente pour cet utilisateur
+            requests = DemandeEquipement.objects.filter(
+                demandeur__username__iexact=username,
+                statut__in=['En attente', 'En attente de signature']
+            )
+            
+            if not requests.exists():
+                return f"Aucune demande en attente trouvée pour '{username}'."
+            
+            response = f"Demandes en attente pour '{username}' ({requests.count()}) :\n\n"
+            
+            for req in requests:
+                date_str = req.date_demande.strftime('%d/%m/%Y') if req.date_demande else 'N/A'
+                response += f"- Demande n°{req.id} du {date_str}\n"
+                response += f"  - Catégorie : {req.categorie}\n"
+                response += f"  - Statut : {req.statut}\n"
+                response += f"  - Désignation : {req.designation.nom if req.designation else 'N/A'}\n"
+                if req.description:
+                    response += f"  - Description : {req.description}\n"
+                response += "\n"
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error in pending requests for user: {e}")
+            return "Erreur lors de la récupération des demandes en attente."
+
+    def _handle_supplier_by_address(self, entities: Dict) -> str:
+        """Trouve le(s) fournisseur(s) dont l'adresse correspond exactement ou contient l'adresse citée."""
+        try:
+            from apps.fournisseurs.models import Fournisseur
+            raw = entities.get('original_query', '')
+            addr = self._extract_quoted_name(raw)
+            if not addr:
+                return "Veuillez fournir l'adresse entre guillemets."
+            # Try exact match first, then icontains
+            qs = Fournisseur.objects.filter(adresse__iexact=addr)
+            if not qs.exists():
+                qs = Fournisseur.objects.filter(adresse__icontains=addr)
+            if not qs.exists():
+                return f"Aucun fournisseur trouvé à l'adresse '{addr}'."
+            lines = [f"Fournisseur(s) à '{addr}':"]
+            for f in qs[:20]:
+                lines.append(f"- {f.nom} - ICE: {f.ice} - {f.adresse}")
+            return "\n".join(lines)
+        except Exception as e:
+            logger.error(f"Error getting supplier by address: {e}")
+            return "Erreur lors de la recherche par adresse."
+
+    def _handle_order_warranty_duration(self, entities: Dict[str, Any]) -> str:
+        """Retourne la durée de garantie d'une commande (IT ou Bureau) identifiée par 'BCxx'."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            m = re.search(r'\bBC\s*(\d+)\b', q, re.IGNORECASE)
+            if not m:
+                return "Veuillez préciser le numéro de la commande (ex: BC23)."
+            bc = f"BC{m.group(1)}"
+            cmd = Commande.objects.filter(numero_commande__iexact=bc).first()
+            if not cmd:
+                cmd = CommandeBureau.objects.filter(numero_commande__iexact=bc).first()
+            if not cmd:
+                return self._make_response_human(f"Aucune commande trouvée pour {bc}.", 'no_results', False)
+            # Durée
+            val = getattr(cmd, 'duree_garantie_valeur', None)
+            unit = getattr(cmd, 'duree_garantie_unite', None)
+            if not val or not unit:
+                return self._make_response_human(f"La durée de garantie n'est pas spécifiée pour {bc}.", 'no_results', False)
+            end = self._compute_warranty_end(getattr(cmd, 'date_reception', None), val, unit)
+            end_str = end.strftime('%d/%m/%Y') if end else 'N/A'
+            return self._make_response_human(
+                f"Commande {bc} — Durée de garantie : {val} {unit}. Fin prévue : {end_str}",
+                'positive_confirmation', True
+            )
+        except Exception as e:
+            logger.error(f"Error getting order warranty duration: {e}")
+            return "Erreur lors de la récupération de la durée de garantie."
+
+    def _handle_order_total_amount(self, entities: Dict[str, Any]) -> str:
+        """Calcule le montant total (quantité x prix_unitaire) d'une commande IT ou Bureau."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            
+            # Rechercher différents formats de codes de commande
+            patterns = [
+                r'\bBC\s*(\d+)\b',  # BC23, BC24
+                r'\bAOO\s*(\d+)\b',  # AOO2024, AOO2025
+                r'\bC\s*(\d+)\b',   # C2025
+                r'\b([A-Z]{2,6}\s*\d{2,4})\b'  # Format générique
+            ]
+            
+            code = None
+            for pattern in patterns:
+                m = re.search(pattern, q, re.IGNORECASE)
+                if m:
+                    code = m.group(1) if len(m.groups()) == 1 else m.group(0)
+                    break
+            
+            if not code:
+                return "Veuillez préciser le numéro de la commande (ex: BC23, AOO2024, C2025)."
+            
+            # Nettoyer le code
+            code = code.replace(' ', '').upper()
+            
+            # IT d'abord
+            cmd = Commande.objects.filter(numero_commande__iexact=code).first()
+            if cmd:
+                lines = LigneCommande.objects.filter(commande=cmd)
+                total = 0
+                for ln in lines:
+                    qte = getattr(ln, 'quantite', 0) or 0
+                    pu = getattr(ln, 'prix_unitaire', 0) or 0
+                    total += qte * pu
+                return f"Le montant total de la commande {code} est de {total:.2f} DH HT."
+            
+            # Bureau
+            cmd_b = CommandeBureau.objects.filter(numero_commande__iexact=code).first()
+            if cmd_b:
+                lines = LigneCommandeBureau.objects.filter(commande=cmd_b)
+                total = 0
+                for ln in lines:
+                    qte = getattr(ln, 'quantite', 0) or 0
+                    pu = getattr(ln, 'prix_unitaire', 0) or 0
+                    total += qte * pu
+                return self._make_response_human(f"Montant total de {code} : {total:.2f} DH HT", 'positive_confirmation', True)
+            return self._make_response_human(f"Aucune commande trouvée pour {code}.", 'no_results', False)
+        except Exception as e:
+            logger.error(f"Error calculating order total amount: {e}")
+            return "Erreur lors du calcul du montant total de la commande."
+
+    def _handle_list_it_orders(self, entities: Dict[str, Any]) -> str:
+        """Liste les commandes informatiques enregistrées (top 50)."""
+        try:
+            orders = Commande.objects.all().order_by('-date_commande')[:50]
+            if not orders:
+                return self._make_response_human("Aucune commande informatique enregistrée.", 'no_results', True)
+            lines = ["Commandes informatiques enregistrées :"]
+            for c in orders:
+                lines.append(f"- {c.numero_commande} — Réception: {c.date_reception or 'N/A'} — Fournisseur: {c.fournisseur.nom if c.fournisseur else 'N/A'}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing IT orders: {e}")
+            return "Erreur lors de la récupération des commandes informatiques."
+
+    def _handle_it_orders_by_month(self, entities: Dict[str, Any]) -> str:
+        """Liste les commandes informatiques passées à un mois/année donnés (ex: 'juillet 2025')."""
+        try:
+            import re
+            ql = entities.get('original_query', '').lower()
+            mois_map = {
+                'janvier': 1, 'février': 2, 'fevrier': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6,
+                'juillet': 7, 'août': 8, 'aout': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'décembre': 12, 'decembre': 12
+            }
+            mois = None
+            mois_label = None
+            for k, v in mois_map.items():
+                if k in ql:
+                    mois = v
+                    mois_label = k
+                    break
+            m_year = re.search(r'(19|20)\d{2}', ql)
+            annee = int(m_year.group(0)) if m_year else None
+            if not (mois and annee):
+                return "Veuillez préciser un mois et une année (ex: juillet 2025)."
+            qs = Commande.objects.filter(date_commande__year=annee, date_commande__month=mois).order_by('date_commande')
+            if not qs.exists():
+                return self._make_response_human(f"Aucune commande informatique en {mois_label} {annee}.", 'no_results', True)
+            lines = [f"Commandes informatiques en {mois_label} {annee} :"]
+            for c in qs[:50]:
+                lines.append(f"- {c.numero_commande} — Réception: {c.date_reception or 'N/A'} — Fournisseur: {c.fournisseur.nom if c.fournisseur else 'N/A'}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing IT orders by month: {e}")
+            return "Erreur lors de la récupération des commandes par mois."
+
+    def _handle_total_cost_all_orders(self, entities: Dict[str, Any]) -> str:
+        """Retourne le coût total cumulé des commandes IT et Bureau."""
+        try:
+            # IT
+            total_it = 0
+            for c in Commande.objects.all():
+                for ln in LigneCommande.objects.filter(commande=c):
+                    total_it += (getattr(ln, 'quantite', 0) or 0) * (getattr(ln, 'prix_unitaire', 0) or 0)
+            # Bureau
+            total_bu = 0
+            for c in CommandeBureau.objects.all():
+                for ln in LigneCommandeBureau.objects.filter(commande=c):
+                    total_bu += (getattr(ln, 'quantite', 0) or 0) * (getattr(ln, 'prix_unitaire', 0) or 0)
+            total = total_it + total_bu
+            return self._make_response_human(
+                f"Coût total des commandes — Informatique: {total_it:.2f} DH HT, Bureau: {total_bu:.2f} DH HT, Global: {total:.2f} DH HT",
+                'positive_confirmation', True
+            )
+        except Exception as e:
+            logger.error(f"Error computing total cost of orders: {e}")
+            return "Erreur lors du calcul du coût total des commandes."
+
+    def _handle_total_equipment_count(self, entities: Dict[str, Any]) -> str:
+        """Retourne le nombre total de matériels IT + Bureau."""
+        try:
+            it_count = MaterielInformatique.objects.count()
+            bu_count = MaterielBureau.objects.count()
+            total = it_count + bu_count
+            return self._make_response_human(
+                f"Nombre total d'équipements : {total} (Informatique: {it_count}, Bureautique: {bu_count})",
+                'positive_confirmation', True
+            )
+        except Exception as e:
+            logger.error(f"Error computing total equipment count: {e}")
+            return "Erreur lors du calcul du nombre total d'équipements."
+
+    def _handle_suppliers_both_types(self, entities: Dict[str, Any]) -> str:
+        """Fournisseurs qui ont des commandes IT et des commandes Bureau."""
+        try:
+            it_suppliers = set(Commande.objects.exclude(fournisseur__isnull=True).values_list('fournisseur__id', flat=True))
+            bu_suppliers = set(CommandeBureau.objects.exclude(fournisseur__isnull=True).values_list('fournisseur__id', flat=True))
+            both_ids = it_suppliers.intersection(bu_suppliers)
+            if not both_ids:
+                return self._make_response_human("Aucun fournisseur n'a fourni à la fois du bureautique et de l'informatique.", 'no_results', True)
+            suppliers = Fournisseur.objects.filter(id__in=list(both_ids)).order_by('nom')
+            lines = ["Fournisseurs ayant fourni à la fois des matériels bureautiques et informatiques :"]
+            for s in suppliers:
+                lines.append(f"- {s.nom} — ICE: {s.ice}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error fetching suppliers for both types: {e}")
+            return "Erreur lors de la récupération des fournisseurs (bureautique et informatique)."
+
+    def _handle_orders_amount_gt_threshold(self, entities: Dict[str, Any]) -> str:
+        """Liste les commandes (IT et/ou Bureau) dont le montant total dépasse un seuil (ex: 2000)."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            m = re.search(r'(\d+)', q)
+            threshold = float(m.group(1)) if m else 0.0
+            results = []
+            # IT
+            for c in Commande.objects.all():
+                total = 0
+                for ln in LigneCommande.objects.filter(commande=c):
+                    total += (getattr(ln, 'quantite', 0) or 0) * (getattr(ln, 'prix_unitaire', 0) or 0)
+                if total > threshold:
+                    results.append((c.numero_commande, 'Informatique', total, getattr(c.fournisseur, 'nom', 'N/A')))
+            # Bureau
+            for c in CommandeBureau.objects.all():
+                total = 0
+                for ln in LigneCommandeBureau.objects.filter(commande=c):
+                    total += (getattr(ln, 'quantite', 0) or 0) * (getattr(ln, 'prix_unitaire', 0) or 0)
+                if total > threshold:
+                    results.append((c.numero_commande, 'Bureau', total, getattr(c.fournisseur, 'nom', 'N/A')))
+            if not results:
+                return self._make_response_human(f"Aucune commande au-dessus de {threshold:.2f} DH HT.", 'no_results', True)
+            results.sort(key=lambda r: (-r[2], r[1], r[0]))
+            lines = [f"Commandes au-dessus de {threshold:.2f} DH HT :"]
+            for num, typ, tot, supp in results[:50]:
+                lines.append(f"- {num} ({typ}) — {tot:.2f} DH HT — Fournisseur: {supp}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing orders above threshold: {e}")
+            return "Erreur lors de la récupération des commandes au-dessus du seuil."
+
+    def _handle_order_lines_description_contains(self, entities: Dict[str, Any]) -> str:
+        """Liste les lignes de commande dont la description contient un terme (IT/Bureau)."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            m = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            term = (m.group(1) or m.group(2)).strip() if m else None
+            if not term:
+                return "Veuillez préciser le terme entre guillemets."
+            # IT
+            it_lines = LigneCommande.objects.filter(description__nom__icontains=term).select_related('commande', 'designation', 'description')
+            # Bureau
+            bu_lines = LigneCommandeBureau.objects.filter(description__nom__icontains=term).select_related('commande', 'designation', 'description')
+            if not it_lines and not bu_lines:
+                return self._make_response_human(f"Aucune ligne de commande avec description contenant '{term}'.", 'no_results', True)
+            lines = [f"Lignes de commande avec description contenant '{term}' :"]
+            for ln in it_lines[:50]:
+                lines.append(f"- [IT] {ln.commande.numero_commande} — {ln.designation.nom if ln.designation else 'N/A'} — {ln.description.nom if ln.description else 'N/A'} — Qté {ln.quantite} — PU {ln.prix_unitaire}")
+            for ln in bu_lines[:50]:
+                lines.append(f"- [Bureau] {ln.commande.numero_commande} — {ln.designation.nom if ln.designation else 'N/A'} — {ln.description.nom if ln.description else 'N/A'} — Qté {ln.quantite} — PU {ln.prix_unitaire}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing order lines by description: {e}")
+            return "Erreur lors de la récupération des lignes de commande."
+
+    def _handle_unit_price_by_article_in_order(self, entities: Dict[str, Any]) -> str:
+        """Prix unitaire de l'article (désignation) X dans la commande BCxx (IT/Bureau)."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            m_cmd = re.search(r'\bBC\s*(\d+)\b', q, re.IGNORECASE)
+            m_art = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            if not (m_cmd and m_art):
+                return "Veuillez préciser la commande (ex: BC24) et l'article entre guillemets."
+            bc = f"BC{m_cmd.group(1)}"
+            art = (m_art.group(1) or m_art.group(2)).strip()
+            # IT
+            cmd = Commande.objects.filter(numero_commande__iexact=bc).first()
+            if cmd:
+                ln = LigneCommande.objects.filter(commande=cmd, designation__nom__iexact=art).first()
+                if ln:
+                    return self._make_response_human(f"Prix unitaire de '{art}' dans {bc} : {ln.prix_unitaire} DH HT", 'positive_confirmation', True)
+            # Bureau
+            cmd_b = CommandeBureau.objects.filter(numero_commande__iexact=bc).first()
+            if cmd_b:
+                ln = LigneCommandeBureau.objects.filter(commande=cmd_b, designation__nom__iexact=art).first()
+                if ln:
+                    return self._make_response_human(f"Prix unitaire de '{art}' dans {bc} : {ln.prix_unitaire} DH HT", 'positive_confirmation', True)
+            return self._make_response_human(f"Article '{art}' introuvable dans la commande {bc}.", 'no_results', True)
+        except Exception as e:
+            logger.error(f"Error getting unit price by article in order: {e}")
+            return "Erreur lors de la récupération du prix unitaire de l'article."
+
+    def _handle_materials_assigned_to_user(self, entities: Dict[str, Any]) -> str:
+        """Liste tout le matériel (IT+Bureau) affecté à un utilisateur nommé."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            
+            # Essayer d'extraire le nom d'utilisateur avec ou sans guillemets
+            username = None
+            
+            # D'abord avec guillemets
+            m = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            if m:
+                username = (m.group(1) or m.group(2)).strip()
+            
+            # Si pas trouvé, essayer sans guillemets
+            if not username:
+                # Patterns pour extraire le nom d'utilisateur
+                patterns = [
+                    r'utilisateur\s+([a-zA-Z0-9_]+)',
+                    r'affectés\s+à\s+l\'utilisateur\s+([a-zA-Z0-9_]+)',
+                    r'affectés\s+à\s+([a-zA-Z0-9_]+)',
+                    r'Liste\s+les\s+matériels\s+affectés\s+à\s+l\'utilisateur\s+([a-zA-Z0-9_]+)',
+                    r'utilisateur\s+([a-zA-Z0-9_]+)',  # Pattern simple pour "utilisateur superadmin"
+                    r'à\s+([a-zA-Z0-9_]+)',  # Pattern pour "à superadmin"
+                    r'([a-zA-Z0-9_]+)(?:\s|$)',  # Pattern de fallback pour capturer le dernier mot
+                ]
+                
+                for pattern in patterns:
+                    match = re.search(pattern, q, re.IGNORECASE)
+                    if match:
+                        username = match.group(1).strip()
+                        break
+            
+            if not username:
+                return "Veuillez préciser le nom de l'utilisateur."
+            
+            it_items = list(MaterielInformatique.objects.filter(utilisateur__username__iexact=username).select_related('ligne_commande__designation', 'utilisateur'))
+            bu_items = list(MaterielBureau.objects.filter(utilisateur__username__iexact=username).select_related('ligne_commande__designation', 'utilisateur'))
+            
+            if not it_items and not bu_items:
+                return f"Aucun matériel affecté à l'utilisateur '{username}'."
+            
+            lines = [f"Matériels affectés à l'utilisateur '{username}' :"]
+            
+            if it_items:
+                lines.append("Informatique :")
+                for m in it_items:
+                    desig_name = getattr(getattr(getattr(m, 'ligne_commande', None), 'designation', None), 'nom', None)
+                    lines.append(f"- {m.code_inventaire} — S/N: {m.numero_serie or 'N/A'} — {desig_name or 'N/A'}")
+            
+            if bu_items:
+                lines.append("Bureautique :")
+                for m in bu_items:
+                    desig_name = getattr(getattr(getattr(m, 'ligne_commande', None), 'designation', None), 'nom', None)
+                    lines.append(f"- {m.code_inventaire} — {desig_name or 'N/A'}")
+            
+            return "\n".join(lines)
+            
+        except Exception as e:
+            logger.error(f"Error listing materials assigned to user: {e}")
+            return "Erreur lors de la récupération des matériels affectés à l'utilisateur."
+
+    def _handle_unit_price_by_code(self, entities: Dict[str, Any]) -> str:
+        """Retourne le prix unitaire pour un matériel (IT ou Bureau) par code inventaire."""
+        try:
+            q = entities.get('original_query', '')
+            import re
+            m = re.search(r'"([A-Z0-9/_\-]+)"|\'([A-Z0-9/_\-]+)\'', q)
+            code = (m.group(1) or m.group(2)) if m else None
+            if not code:
+                # fallback: extraire un token semblable à un code
+                m2 = re.search(r'([A-Z]{2,6}/[A-Z0-9/_\-]+)', q, re.IGNORECASE)
+                code = m2.group(1) if m2 else None
+            if not code:
+                return "Veuillez préciser le code inventaire entre guillemets."
+            code = code.upper()
+            # IT
+            it = MaterielInformatique.objects.filter(code_inventaire__iexact=code).select_related('ligne_commande').first()
+            if it and it.ligne_commande:
+                pu = getattr(it.ligne_commande, 'prix_unitaire', None)
+                if pu is not None:
+                    return self._make_response_human(f"Prix unitaire de {code} : {pu} DH HT", 'positive_confirmation', True)
+            # Bureau
+            bu = MaterielBureau.objects.filter(code_inventaire__iexact=code).select_related('ligne_commande').first()
+            if bu and bu.ligne_commande:
+                pu = getattr(bu.ligne_commande, 'prix_unitaire', None)
+                if pu is not None:
+                    return self._make_response_human(f"Prix unitaire de {code} : {pu} DH HT", 'positive_confirmation', True)
+            return self._make_response_human(f"Aucun prix unitaire trouvé pour {code}.", 'no_results', False)
+        except Exception as e:
+            logger.error(f"Error in unit price by code: {e}")
+            return "Erreur lors de la récupération du prix unitaire."
+
+    def _handle_description_by_code(self, entities: Dict[str, Any]) -> str:
+        """Retourne la description/désignation du matériel (IT/Bureau) pour un code inventaire donné."""
+        try:
+            q = entities.get('original_query', '')
+            import re
+            m = re.search(r'"([A-Z0-9/_\-]+)"|\'([A-Z0-9/_\-]+)\'', q)
+            code = (m.group(1) or m.group(2)) if m else None
+            if not code:
+                m2 = re.search(r'([A-Z]{2,6}/[A-Z0-9/_\-]+)', q, re.IGNORECASE)
+                code = m2.group(1) if m2 else None
+            if not code:
+                return "Veuillez préciser le code inventaire entre guillemets."
+            code = code.upper()
+            # IT
+            it = MaterielInformatique.objects.filter(code_inventaire__iexact=code).select_related('ligne_commande__designation').first()
+            if it and getattr(it, 'ligne_commande', None):
+                desig = getattr(getattr(it, 'ligne_commande', None), 'designation', None)
+                name = getattr(desig, 'nom', None) if desig else None
+                if name:
+                    return self._make_response_human(f"Description de {code} : {name}", 'positive_confirmation', True)
+            # Bureau
+            bu = MaterielBureau.objects.filter(code_inventaire__iexact=code).select_related('ligne_commande__designation').first()
+            if bu and getattr(bu, 'ligne_commande', None):
+                desig = getattr(getattr(bu, 'ligne_commande', None), 'designation', None)
+                name = getattr(desig, 'nom', None) if desig else None
+                if name:
+                    return self._make_response_human(f"Description de {code} : {name}", 'positive_confirmation', True)
+            return self._make_response_human(f"Aucune description trouvée pour {code}.", 'no_results', False)
+        except Exception as e:
+            logger.error(f"Error in description by code: {e}")
+            return "Erreur lors de la récupération de la description."
+
+    def _handle_office_available_materials(self, entities: Dict[str, Any]) -> str:
+        """Liste les matériels bureautiques disponibles (statut non affecté/opérationnel sans utilisateur)."""
+        try:
+            # Disponible: pas d'utilisateur affecté
+            qs = MaterielBureau.objects.filter(utilisateur__isnull=True)
+            items = list(qs.select_related('ligne_commande__designation')[:50])
+            if not items:
+                return self._make_response_human("Aucun matériel bureautique disponible.", 'no_results', False)
+            lines = [f"Matériels bureautiques disponibles ({len(items)}) :"]
+            for m in items:
+                desig = getattr(getattr(m, 'ligne_commande', None), 'designation', None)
+                desig_name = getattr(desig, 'nom', None) if desig else None
+                lines.append(f"- {m.code_inventaire} — {desig_name or 'N/A'} — Statut: {m.statut}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing office available materials: {e}")
+            return "Erreur lors de la récupération des matériels bureautiques disponibles."
+
+    def _handle_office_list_all(self, entities: Dict[str, Any]) -> str:
+        """Liste tous les matériels bureautiques enregistrés (top 100)."""
+        try:
+            qs = MaterielBureau.objects.all().select_related('ligne_commande__designation', 'utilisateur')[:100]
+            if not qs:
+                return self._make_response_human("Aucun matériel bureautique enregistré.", 'no_results', True)
+            lines = [f"Matériels bureautiques enregistrés ({qs.count() if hasattr(qs, 'count') else len(qs)}) :"]
+            for m in qs:
+                desig = getattr(getattr(m, 'ligne_commande', None), 'designation', None)
+                desig_name = getattr(desig, 'nom', None) if desig else None
+                user = m.utilisateur.username if m.utilisateur else 'Non affecté'
+                lines.append(f"- {m.code_inventaire} — {desig_name or 'N/A'} — Statut: {m.statut} — Lieu: {m.lieu_stockage or 'N/A'} — Utilisateur: {user}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing all office materials: {e}")
+            return "Erreur lors de la récupération des matériels bureautiques."
+
+    def _handle_office_by_storage(self, entities: Dict[str, Any]) -> str:
+        """Liste les matériels bureautiques stockés à un lieu cité (ex: "etage2")."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            m = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            loc = (m.group(1) or m.group(2)).strip() if m else None
+            if not loc:
+                return "Veuillez préciser le lieu de stockage entre guillemets."
+            qs = MaterielBureau.objects.filter(lieu_stockage__iexact=loc).select_related('utilisateur')
+            if not qs.exists():
+                return self._make_response_human(f"Aucun matériel bureautique stocké à {loc}.", 'no_results', True)
+            lines = [f"Matériels bureautiques à {loc} — Total : {qs.count()}:"]
+            for m in qs:
+                user = m.utilisateur.username if m.utilisateur else 'Non affecté'
+                lines.append(f"- {m.code_inventaire} — Statut: {m.statut} — Utilisateur: {user}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing office materials by storage: {e}")
+            return "Erreur lors de la récupération par lieu de stockage."
+
+    def _handle_office_exists_by_designation(self, entities: Dict[str, Any]) -> str:
+        """Vérifie l'existence d'un matériel bureautique par désignation (via ligne_commande.designation)."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            m = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            name = (m.group(1) or m.group(2)).strip() if m else None
+            if not name:
+                return "Veuillez préciser le nom entre guillemets."
+            exists = MaterielBureau.objects.filter(ligne_commande__designation__nom__iexact=name).exists()
+            return self._make_response_human(
+                f"Oui, un matériel bureautique nommé '{name}' existe." if exists else f"Non, aucun matériel bureautique nommé '{name}'.",
+                'positive_confirmation' if exists else 'no_results', True
+            )
+        except Exception as e:
+            logger.error(f"Error checking office existence by designation: {e}")
+            return "Erreur lors de la vérification de l'existence."
+
+    def _handle_office_count_total(self, entities: Dict[str, Any]) -> str:
+        """Compte le nombre total de matériels bureautiques enregistrés."""
+        try:
+            n = MaterielBureau.objects.count()
+            return self._make_response_human(f"Total des matériels bureautiques : {n}.", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error counting office materials: {e}")
+            return "Erreur lors du comptage des matériels bureautiques."
+
+    def _handle_office_count_by_status(self, entities: Dict[str, Any]) -> str:
+        """Compte les matériels bureautiques par statut, incluant 'affecte' (affecté)."""
+        try:
+            ql = (entities.get('original_query') or '').lower()
+            # Extraire le statut demandé
+            wanted = None
+            for st in ['opérationnel', 'operationnel', 'affecte', 'réparation', 'reparation', 'réforme', 'reforme']:
+                if st in ql:
+                    wanted = st
+                    break
+            if not wanted:
+                return "Veuillez préciser le statut (ex: 'affecte', 'Opérationnel')."
+            # Normaliser
+            norm = 'Opérationnel' if 'opérationnel' in wanted or 'operationnel' in wanted else ('affecte' if 'affecte' in wanted else ('Réparation' if 'repar' in wanted else ('Réforme' if 'reform' in wanted else wanted)))
+            n = MaterielBureau.objects.filter(statut__iexact=norm).count()
+            return self._make_response_human(f"Matériels bureautiques en statut '{norm}' : {n}.", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error counting office materials by status: {e}")
+            return "Erreur lors du comptage par statut."
+
+    def _handle_office_avg_unit_price(self, entities: Dict[str, Any]) -> str:
+        """Calcule la moyenne des prix unitaires des matériels bureautiques (via lignes de commande)."""
+        try:
+            from django.db.models import Avg
+            agg = LigneCommandeBureau.objects.aggregate(moy=Avg('prix_unitaire'))
+            val = agg.get('moy')
+            if val is None:
+                return self._make_response_human("Aucun prix unitaire enregistré pour le bureautique.", 'no_results', True)
+            return self._make_response_human(f"Moyenne des prix unitaires (bureautique) : {val:.2f} DH HT", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error computing avg unit price (office): {e}")
+            return "Erreur lors du calcul de la moyenne des prix unitaires."
+
+    def _handle_office_total_cost(self, entities: Dict[str, Any]) -> str:
+        """Somme des prix unitaires x quantités des lignes de commandes bureautiques."""
+        try:
+            from django.db.models import Sum, F, ExpressionWrapper, DecimalField
+            total = LigneCommandeBureau.objects.aggregate(total=Sum(ExpressionWrapper(F('quantite') * F('prix_unitaire'), output_field=DecimalField(max_digits=18, decimal_places=2))))['total']
+            if total is None:
+                return self._make_response_human("Aucun coût total calculable pour le bureautique.", 'no_results', True)
+            return self._make_response_human(f"Coût total des matériels bureautiques : {total:.2f} DH HT", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error computing total cost (office): {e}")
+            return "Erreur lors du calcul du coût total bureautique."
+
+    def _handle_office_count_by_supplier(self, entities: Dict[str, Any]) -> str:
+        """Compte les matériels bureautiques fournis par un fournisseur nommé (entre guillemets)."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            m = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            fname = (m.group(1) or m.group(2)).strip() if m else None
+            if not fname:
+                return "Veuillez préciser le fournisseur entre guillemets."
+            n = MaterielBureau.objects.filter(commande__fournisseur__nom__iexact=fname).count()
+            return self._make_response_human(f"Matériels bureautiques fournis par '{fname}' : {n}.", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error counting office materials by supplier: {e}")
+            return "Erreur lors du comptage par fournisseur."
+
+    def _handle_supplier_by_material_designation(self, entities: Dict[str, Any]) -> str:
+        """Retourne le fournisseur du matériel bureautique par désignation (exacte) citée."""
+        try:
+            import re
+            q = entities.get('original_query', '')
+            m = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            name = (m.group(1) or m.group(2)).strip() if m else None
+            if not name:
+                return "Veuillez préciser le nom du matériel entre guillemets."
+            item = MaterielBureau.objects.filter(ligne_commande__designation__nom__iexact=name).select_related('commande__fournisseur').first()
+            if not item:
+                return self._make_response_human(f"Aucun matériel bureautique nommé '{name}'.", 'no_results', True)
+            fournisseur = getattr(getattr(item.commande, 'fournisseur', None), 'nom', None) or 'N/A'
+            return self._make_response_human(f"Fournisseur du matériel '{name}' : {fournisseur}", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error getting supplier by material designation: {e}")
+            return "Erreur lors de la récupération du fournisseur pour ce matériel."
+
+    def _handle_office_assigned_to_user(self, entities: Dict[str, Any]) -> str:
+        """Liste les matériels bureautiques affectés à un utilisateur nommément (entre guillemets)."""
+        try:
+            q = entities.get('original_query', '')
+            import re
+            m = re.search(r'"([^"]+)"|\'([^\']+)\'', q)
+            username = (m.group(1) or m.group(2)).strip() if m else None
+            if not username:
+                return "Veuillez préciser l'utilisateur entre guillemets."
+            qs = MaterielBureau.objects.filter(utilisateur__username__iexact=username).select_related('ligne_commande__designation', 'utilisateur')
+            items = list(qs[:50])
+            if not items:
+                return self._make_response_human(f"Aucun matériel bureautique affecté à '{username}'.", 'no_results', False)
+            lines = [f"Matériels bureautiques affectés à '{username}' ({len(items)}) :"]
+            for m in items:
+                desig = getattr(getattr(m, 'ligne_commande', None), 'designation', None)
+                desig_name = getattr(desig, 'nom', None) if desig else None
+                lines.append(f"- {m.code_inventaire} — {desig_name or 'N/A'} — Statut: {m.statut}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing office materials by user: {e}")
+            return "Erreur lors de la récupération des matériels bureautiques par utilisateur."
+
+    def _handle_storage_location_by_designation(self, entities: Dict[str, Any]) -> str:
+        """Retourne les lieux de stockage pour une désignation (IT ou Bureau) détectée dans la requête (ex: 'Bureau')."""
+        try:
+            q = entities.get('original_query', '').lower()
+            # Extraire mot désignation entre guillemets sinon prendre le mot après matériel
+            import re
+            m = re.search(r'"([^"]+)"|\'([^\']+)\'', entities.get('original_query', ''))
+            term = (m.group(1) or m.group(2)).strip() if m else None
+            if not term:
+                m2 = re.search(r'mat[eé]riel\s+"?([\w\-À-ÿ ]{3,})"?', q)
+                term = m2.group(1).strip() if m2 else None
+            if not term:
+                return "Veuillez préciser la désignation du matériel entre guillemets."
+            # Chercher côté IT
+            it_qs = MaterielInformatique.objects.filter(
+                Q(ligne_commande__designation__nom__icontains=term) | Q(ligne_commande__description__nom__icontains=term)
+            ).values_list('lieu_stockage', flat=True)
+            # Côté bureau
+            bu_qs = MaterielBureau.objects.filter(
+                Q(ligne_commande__designation__nom__icontains=term) | Q(ligne_commande__description__nom__icontains=term)
+            ).values_list('lieu_stockage', flat=True)
+            locations = sorted({loc for loc in list(it_qs) + list(bu_qs) if loc})
+            if not locations:
+                return self._make_response_human(f"Aucun lieu de stockage trouvé pour la désignation '{term}'.", 'no_results', False)
+            lines = [f"Lieux de stockage pour '{term}' :"]
+            for loc in locations:
+                lines.append(f"- {loc}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error getting storage locations by designation: {e}")
+            return "Erreur lors de la récupération des lieux de stockage pour cette désignation."
+
+    def _handle_storage_location_by_code(self, entities: Dict[str, Any]) -> str:
+        """Retourne le lieu de stockage pour un code inventaire exact (IT ou Bureau)."""
+        try:
+            q = entities.get('original_query', '')
+            import re
+            m = re.search(r'"([A-Z0-9/_\-]+)"|\'([A-Z0-9/_\-]+)\'', q)
+            code = (m.group(1) or m.group(2)) if m else None
+            if not code:
+                m2 = re.search(r'([A-Z]{2,6}/[A-Z0-9/_\-]+)', q, re.IGNORECASE)
+                code = m2.group(1) if m2 else None
+            if not code:
+                return "Veuillez préciser le code inventaire entre guillemets."
+            code = code.upper()
+            it = MaterielInformatique.objects.filter(code_inventaire__iexact=code).first()
+            if it:
+                return self._make_response_human(f"Lieu de stockage de {code} : {it.lieu_stockage or 'Non défini'}", 'positive_confirmation', True)
+            bu = MaterielBureau.objects.filter(code_inventaire__iexact=code).first()
+            if bu:
+                return self._make_response_human(f"Lieu de stockage de {code} : {bu.lieu_stockage or 'Non défini'}", 'positive_confirmation', True)
+            return self._make_response_human(f"Aucun matériel trouvé pour {code}.", 'no_results', False)
+        except Exception as e:
+            logger.error(f"Error getting storage location by code: {e}")
+            return "Erreur lors de la récupération du lieu de stockage."
+
+    def _handle_office_operational_materials(self, entities: Dict[str, Any]) -> str:
+        """Liste les matériels bureautiques en statut 'Opérationnel'."""
+        try:
+            qs = MaterielBureau.objects.filter(statut__iexact='Opérationnel').select_related('ligne_commande__designation', 'utilisateur')
+            items = list(qs[:50])
+            if not items:
+                return self._make_response_human("Aucun matériel bureautique en statut 'Opérationnel'.", 'no_results', True)
+            lines = [f"Matériels bureautiques en statut 'Opérationnel' ({len(items)}) :"]
+            for m in items:
+                desig = getattr(getattr(m, 'ligne_commande', None), 'designation', None)
+                desig_name = getattr(desig, 'nom', None) if desig else None
+                user = m.utilisateur.username if m.utilisateur else 'Non affecté'
+                lines.append(f"- {m.code_inventaire} — {desig_name or 'N/A'} — Utilisateur: {user}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing office operational materials: {e}")
+            return "Erreur lors de la récupération des matériels bureautiques opérationnels."
+
+    def _handle_it_new_materials(self, entities: Dict[str, Any]) -> str:
+        """Liste les matériels informatiques en statut 'nouveau'."""
+        try:
+            qs = MaterielInformatique.objects.filter(statut__iexact='nouveau').select_related('ligne_commande__designation', 'utilisateur')
+            items = list(qs[:50])
+            if not items:
+                return self._make_response_human("Aucun matériel informatique en statut 'nouveau'.", 'no_results', True)
+            lines = [f"Matériels informatiques en statut 'nouveau' ({len(items)}) :"]
+            for m in items:
+                desig = getattr(getattr(m, 'ligne_commande', None), 'designation', None)
+                desig_name = getattr(desig, 'nom', None) if desig else None
+                user = m.utilisateur.username if m.utilisateur else 'Non affecté'
+                lines.append(f"- {m.code_inventaire} — S/N: {m.numero_serie or 'N/A'} — {desig_name or 'N/A'} — Utilisateur: {user}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing IT new materials: {e}")
+            return "Erreur lors de la récupération des matériels informatiques en statut 'nouveau'."
+
+    def _handle_serial_by_code(self, entities: Dict[str, Any]) -> str:
+        """Retourne le numéro de série d'un matériel (IT) par code inventaire."""
+        try:
+            q = entities.get('original_query', '')
+            import re
+            m = re.search(r'"([A-Z0-9/_\-]+)"|\'([A-Z0-9/_\-]+)\'', q)
+            code = (m.group(1) or m.group(2)) if m else None
+            if not code:
+                m2 = re.search(r'([A-Z]{2,6}/[A-Z0-9/_\-]+)', q, re.IGNORECASE)
+                code = m2.group(1) if m2 else None
+            if not code:
+                return "Veuillez préciser le code inventaire entre guillemets."
+            code = code.upper()
+            it = MaterielInformatique.objects.filter(code_inventaire__iexact=code).first()
+            if not it:
+                return self._make_response_human(f"Aucun matériel informatique trouvé pour {code}.", 'no_results', False)
+            serial = it.numero_serie or 'N/A'
+            return self._make_response_human(f"Numéro de série de {code} : {serial}", 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error getting serial by code: {e}")
+            return "Erreur lors de la récupération du numéro de série."
+
+    def _handle_it_assigned_materials(self, entities: Dict[str, Any]) -> str:
+        """Liste les matériels informatiques affectés (utilisateur non nul)."""
+        try:
+            qs = MaterielInformatique.objects.filter(utilisateur__isnull=False).select_related('ligne_commande__designation', 'utilisateur')
+            items = list(qs[:100])
+            if not items:
+                return self._make_response_human("Aucun matériel informatique affecté à un utilisateur.", 'no_results', True)
+            lines = [f"Matériels informatiques affectés à un utilisateur ({len(items)}) :"]
+            for m in items:
+                desig = getattr(getattr(m, 'ligne_commande', None), 'designation', None)
+                desig_name = getattr(desig, 'nom', None) if desig else None
+                user = m.utilisateur.username if m.utilisateur else 'N/A'
+                lines.append(f"- {m.code_inventaire} — S/N: {m.numero_serie or 'N/A'} — {desig_name or 'N/A'} — Utilisateur: {user}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing IT assigned materials: {e}")
+            return "Erreur lors de la récupération des matériels informatiques affectés."
+
+    def _handle_it_without_name(self, entities: Dict[str, Any]) -> str:
+        """Liste les matériels informatiques sans désignation (ligne_commande.designation manquante)."""
+        try:
+            qs = MaterielInformatique.objects.filter(ligne_commande__designation__isnull=True).select_related('ligne_commande', 'utilisateur')
+            items = list(qs[:100])
+            if not items:
+                return self._make_response_human("Tous les matériels informatiques ont une désignation associée.", 'positive_confirmation', True)
+            lines = [f"Matériels informatiques sans désignation ({len(items)}) :"]
+            for m in items:
+                user = m.utilisateur.username if m.utilisateur else 'Non affecté'
+                lines.append(f"- {m.code_inventaire} — S/N: {m.numero_serie or 'N/A'} — Utilisateur: {user}")
+            return self._make_response_human("\n".join(lines), 'positive_confirmation', True)
+        except Exception as e:
+            logger.error(f"Error listing IT without designation: {e}")
+            return "Erreur lors de la récupération des matériels sans désignation."
 
     def _handle_completed_deliveries(self, entities: Dict) -> str:
         """Handler pour les livraisons terminées"""
@@ -10373,7 +13410,7 @@ Bureautique : {etage1_office.count()} matériels
             if completed_deliveries.exists():
                 for livraison in completed_deliveries[:10]:  # Limiter à 10 résultats
                     fournisseur = livraison.commande.fournisseur.nom if getattr(livraison, 'commande', None) and getattr(livraison.commande, 'fournisseur', None) else "N/A"
-                    response += f"• Commande {livraison.numero_commande}: {fournisseur} - {livraison.date_livraison_effective}\n"
+                    response += f"- Commande {livraison.numero_commande}: {fournisseur} - {livraison.date_livraison_effective}\n"
                 
                 if completed_deliveries.count() > 10:
                     response += f"\n... et {completed_deliveries.count() - 10} autres livraisons terminées"
@@ -10410,7 +13447,7 @@ Bureautique : {etage1_office.count()} matériels
                         delay_days = (today - livraison.date_livraison_prevue).days
                     except Exception:
                         delay_days = 0
-                    response += f"• Commande {livraison.numero_commande}: {fournisseur} - Retard de {delay_days} jour(s)\n"
+                    response += f"- Commande {livraison.numero_commande}: {fournisseur} - Retard de {delay_days} jour(s)\n"
                 
                 if len(delayed_deliveries) > 10:
                     response += f"\n... et {len(delayed_deliveries) - 10} autres livraisons en retard"
@@ -10424,47 +13461,110 @@ Bureautique : {etage1_office.count()} matériels
             logger.error(f"Error handling delayed deliveries: {e}")
             return "Erreur lors de la récupération des livraisons en retard."
 
+    def _handle_delivery_comments(self, entities: Dict) -> str:
+        """Handler pour compter les livraisons avec des commentaires"""
+        try:
+            from apps.livraison.models import Livraison
+            
+            # Compter les livraisons avec des commentaires non vides
+            livraisons_avec_commentaires = Livraison.objects.exclude(
+                notes__isnull=True
+            ).exclude(
+                notes__exact=''
+            ).count()
+            
+            total_livraisons = Livraison.objects.count()
+            
+            response = f"📝 **Commentaires de livraisons :**\n\n"
+            response += f"- **Livraisons avec commentaires** : {livraisons_avec_commentaires}\n"
+            response += f"- **Total des livraisons** : {total_livraisons}\n"
+            
+            if livraisons_avec_commentaires > 0:
+                percentage = (livraisons_avec_commentaires / total_livraisons * 100) if total_livraisons > 0 else 0
+                response += f"- **Pourcentage** : {percentage:.1f}%\n\n"
+                
+                # Afficher quelques exemples de commentaires
+                response += "**Exemples de commentaires :**\n"
+                livraisons_exemples = Livraison.objects.exclude(
+                    notes__isnull=True
+                ).exclude(
+                    notes__exact=''
+                )[:3]
+                
+                for livraison in livraisons_exemples:
+                    response += f"- Commande {livraison.numero_commande} : {livraison.notes[:50]}...\n"
+            else:
+                response += "\nAucune livraison n'a de commentaires enregistrés."
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error handling delivery comments: {e}")
+            return "Désolé, je n'ai pas pu récupérer les informations sur les commentaires de livraisons."
+
     def _handle_universal_question(self, query: str) -> str:
         """Handle universal questions with comprehensive and intelligent responses"""
         query_lower = query.lower()
         
-        # Questions sur le fonctionnement du système
-        if any(word in query_lower for word in ['comment fonctionne', 'fonctionnement', 'architecture', 'système']):
+        # Questions de conversation simple - PRIORITÉ HAUTE (mais pas pour les questions techniques)
+        # Vérifier d'abord si c'est une question technique
+        technical_keywords = ['fournisseur', 'matériel', 'commande', 'livraison', 'utilisateur', 'statut', 'liste', 'combien', 'où', 'qui', 'quand', 'comment', 'pourquoi', 'livraisons', 'commandes', 'matériels', 'fournisseurs', 'statuts', 'commentaires', 'commentaire']
+        is_technical = any(keyword in query_lower for keyword in technical_keywords)
+        
+        # Si c'est technique, ne pas traiter comme conversation ET ne pas générer de guides
+        if is_technical:
+            return None
+        
+        if not is_technical:
+            if any(phrase in query_lower for phrase in ['salut', 'bonjour', 'bonsoir', 'hello', 'hi']):
+                return "Salut ! Ça va bien, merci ! 😊 Je suis ParcInfo, ton assistant pour la gestion du parc informatique. Comment puis-je t'aider aujourd'hui ?"
+            
+            if any(phrase in query_lower for phrase in ['ça va', 'comment ça va', 'comment allez-vous', 'how are you']):
+                return "Ça va très bien, merci ! 😊 Je suis là et prêt à t'aider avec ton parc informatique. Qu'est-ce que tu aimerais savoir ?"
+            
+            if any(phrase in query_lower for phrase in ['merci', 'thanks', 'thank you']):
+                return "De rien ! 😊 C'est un plaisir de t'aider. N'hésite pas si tu as d'autres questions sur ton parc informatique !"
+            
+            if any(phrase in query_lower for phrase in ['au revoir', 'bye', 'à bientôt', 'goodbye']):
+                return "Au revoir ! 👋 À bientôt pour d'autres questions sur ton parc informatique. Bonne journée !"
+        
+        # Questions sur le fonctionnement du système (seulement si pas technique)
+        if not is_technical and any(word in query_lower for word in ['comment fonctionne', 'fonctionnement', 'architecture', 'système']):
             return """**🏗️ Architecture du Système ParcInfo**
 
 ##  **Vue d'Ensemble**
 ParcInfo est un système de gestion de parc informatique et bureautique complet qui permet de :
 
 ### 🔧 **Modules Principaux**
-• **Gestion du Matériel** : Inventaire, localisation, statut
-• **Gestion des Commandes** : Achats, fournisseurs, suivi
-• **Gestion des Livraisons** : Réceptions, PV, retards
-• **Gestion des Demandes** : Validation, affectation
-• **Analyses et Rapports** : Statistiques, performance
+- **Gestion du Matériel** : Inventaire, localisation, statut
+- **Gestion des Commandes** : Achats, fournisseurs, suivi
+- **Gestion des Livraisons** : Réceptions, PV, retards
+- **Gestion des Demandes** : Validation, affectation
+- **Analyses et Rapports** : Statistiques, performance
 
 ###  **Fonctionnalités Clés**
-• **Recherche Intelligente** : Par code, localisation, statut
-• **Suivi en Temps Réel** : Statut des équipements et livraisons
-• **Analyses Avancées** : Performance, tendances, optimisation
-• **Gestion des Fournisseurs** : Performance, retards, coûts
+- **Recherche Intelligente** : Par code, localisation, statut
+- **Suivi en Temps Réel** : Statut des équipements et livraisons
+- **Analyses Avancées** : Performance, tendances, optimisation
+- **Gestion des Fournisseurs** : Performance, retards, coûts
 
 ###  **Technologies Utilisées**
-• **Backend** : Django (Python) avec ORM
-• **Base de Données** : PostgreSQL avec pgvector
-• **IA/ML** : SentenceTransformers pour la recherche sémantique
-• **LLM** : Ollama pour les réponses avancées
-• **Interface** : Web responsive avec Tailwind CSS
+- **Backend** : Django (Python) avec ORM
+- **Base de Données** : PostgreSQL avec pgvector
+- **IA/ML** : SentenceTransformers pour la recherche sémantique
+- **LLM** : Ollama pour les réponses avancées
+- **Interface** : Web responsive avec Tailwind CSS
 
 ###  **Capacités d'Analyse**
-• Statistiques en temps réel
-• Prédiction des besoins
-• Optimisation des coûts
-• Gestion des risques
+- Statistiques en temps réel
+- Prédiction des besoins
+- Optimisation des coûts
+- Gestion des risques
 
 ** Le système s'adapte automatiquement aux besoins et s'améliore continuellement !**"""
 
-        # Questions sur les processus métier
-        elif any(word in query_lower for word in ['processus', 'procédure', 'procedure', 'comment se déroule']):
+        # Questions sur les processus métier (seulement si pas technique)
+        elif not is_technical and any(word in query_lower for word in ['processus', 'procédure', 'procedure', 'comment se déroule']):
             return """** Processus Métier ParcInfo**
 
 ## 🔄 **Flux de Travail Principal**
@@ -10495,10 +13595,10 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 4. **Optimisation** : Amélioration continue
 
 ##  **Points de Contrôle**
-• **Validation** : Chaque étape validée
-• **Traçabilité** : Historique complet
-• **Performance** : Indicateurs de qualité
-• **Amélioration** : Feedback et optimisation
+- **Validation** : Chaque étape validée
+- **Traçabilité** : Historique complet
+- **Performance** : Indicateurs de qualité
+- **Amélioration** : Feedback et optimisation
 
 ** Processus optimisés pour efficacité et qualité !**"""
 
@@ -10509,10 +13609,10 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 ## 📞 **Comment Obtenir de l'Aide**
 
 ###  **Questions Fréquentes**
-• **Problème de connexion** : Vérifiez vos identifiants
-• **Recherche qui ne fonctionne pas** : Utilisez des termes précis
-• **Données manquantes** : Contactez l'administrateur
-• **Erreur système** : Rechargez la page
+- **Problème de connexion** : Vérifiez vos identifiants
+- **Recherche qui ne fonctionne pas** : Utilisez des termes précis
+- **Données manquantes** : Contactez l'administrateur
+- **Erreur système** : Rechargez la page
 
 ### 🔧 **Résolution de Problèmes**
 
@@ -10533,15 +13633,15 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 3. **Utilisez des filtres** : "affecté", "en stock"
 
 ### 📞 **Contacts Support**
-• **Administrateur système** : admin@parcinfo.com
-• **Support technique** : support@parcinfo.com
-• **Urgences** : +212 5XX XX XX XX
+- **Administrateur système** : admin@parcinfo.com
+- **Support technique** : support@parcinfo.com
+- **Urgences** : +212 5XX XX XX XX
 
 ### 📚 **Ressources**
-• **Guide utilisateur** : Documentation complète
-• **Tutoriels vidéo** : Formation en ligne
-• **FAQ** : Questions fréquentes
-• **Forum** : Communauté utilisateurs
+- **Guide utilisateur** : Documentation complète
+- **Tutoriels vidéo** : Formation en ligne
+- **FAQ** : Questions fréquentes
+- **Forum** : Communauté utilisateurs
 
 ** La plupart des problèmes se résolvent avec une reformulation précise de la question !**"""
 
@@ -10552,47 +13652,47 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 ## 📈 **Types de Rapports Disponibles**
 
 ### 📦 **Rapports Matériel**
-• **Inventaire complet** : Tous les équipements
-• **Répartition par type** : Informatique vs bureautique
-• **Statut d'affectation** : Affecté, disponible, panne
-• **Localisation** : Par étage, salle, service
-• **Performance** : Taux d'utilisation, maintenance
+- **Inventaire complet** : Tous les équipements
+- **Répartition par type** : Informatique vs bureautique
+- **Statut d'affectation** : Affecté, disponible, panne
+- **Localisation** : Par étage, salle, service
+- **Performance** : Taux d'utilisation, maintenance
 
 ###  **Rapports Commandes**
-• **Achats par période** : Mensuel, trimestriel, annuel
-• **Analyse fournisseurs** : Performance, coûts, retards
-• **Modes de passation** : Appels d'offres, gré à gré
-• **Tendances** : Évolution des achats
-• **Optimisation** : Opportunités d'économie
+- **Achats par période** : Mensuel, trimestriel, annuel
+- **Analyse fournisseurs** : Performance, coûts, retards
+- **Modes de passation** : Appels d'offres, gré à gré
+- **Tendances** : Évolution des achats
+- **Optimisation** : Opportunités d'économie
 
 ### 🚚 **Rapports Livraisons**
-• **Délais de livraison** : Respect des échéances
-• **Retards** : Analyse des causes
-• **Qualité** : PV de réception, incidents
-• **Performance** : Fournisseurs les plus fiables
+- **Délais de livraison** : Respect des échéances
+- **Retards** : Analyse des causes
+- **Qualité** : PV de réception, incidents
+- **Performance** : Fournisseurs les plus fiables
 
 ###  **Rapports Globaux**
-• **Vue d'ensemble** : État général du parc
-• **Indicateurs clés** : KPIs de performance
-• **Tendances** : Évolution sur le temps
-• **Prédictions** : Besoins futurs
-• **Optimisation** : Recommandations
+- **Vue d'ensemble** : État général du parc
+- **Indicateurs clés** : KPIs de performance
+- **Tendances** : Évolution sur le temps
+- **Prédictions** : Besoins futurs
+- **Optimisation** : Recommandations
 
 ##  **Comment Générer des Rapports**
 
 ###  **Questions Efficaces**
-• "Statistiques du parc informatique"
-• "Analyse des commandes de juillet"
-• "Performance des fournisseurs"
-• "Tendances d'utilisation du matériel"
-• "Rapport de maintenance préventive"
+- "Statistiques du parc informatique"
+- "Analyse des commandes de juillet"
+- "Performance des fournisseurs"
+- "Tendances d'utilisation du matériel"
+- "Rapport de maintenance préventive"
 
 ###  **Filtres Disponibles**
-• **Période** : Date, mois, année
-• **Type** : Informatique, bureautique
-• **Statut** : Opérationnel, panne, stock
-• **Localisation** : Étage, service
-• **Fournisseur** : Nom, performance
+- **Période** : Date, mois, année
+- **Type** : Informatique, bureautique
+- **Statut** : Opérationnel, panne, stock
+- **Localisation** : Étage, service
+- **Fournisseur** : Nom, performance
 
 **📈 Rapports personnalisables selon vos besoins !**"""
 
@@ -10603,49 +13703,49 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 ## 🔧 **Paramètres du Système**
 
 ###  **Gestion des Utilisateurs**
-• **Création de comptes** : Par l'administrateur
-• **Rôles et permissions** : Niveaux d'accès
-• **Profils utilisateurs** : Personnalisation
-• **Sécurité** : Authentification, autorisation
+- **Création de comptes** : Par l'administrateur
+- **Rôles et permissions** : Niveaux d'accès
+- **Profils utilisateurs** : Personnalisation
+- **Sécurité** : Authentification, autorisation
 
 ### 🏢 **Configuration Organisationnelle**
-• **Services/Unités** : Structure organisationnelle
-• **Étages/Locaux** : Plan de localisation
-• **Fournisseurs** : Base de données partenaires
-• **Types de matériel** : Catégorisation
+- **Services/Unités** : Structure organisationnelle
+- **Étages/Locaux** : Plan de localisation
+- **Fournisseurs** : Base de données partenaires
+- **Types de matériel** : Catégorisation
 
 ###  **Paramètres de Reporting**
-• **Périodes** : Mensuel, trimestriel, annuel
-• **Seuils d'alerte** : Notifications automatiques
-• **Formats d'export** : PDF, Excel, CSV
-• **Personnalisation** : Rapports sur mesure
+- **Périodes** : Mensuel, trimestriel, annuel
+- **Seuils d'alerte** : Notifications automatiques
+- **Formats d'export** : PDF, Excel, CSV
+- **Personnalisation** : Rapports sur mesure
 
 ### 🔒 **Sécurité et Sauvegarde**
-• **Authentification** : Login sécurisé
-• **Autorisation** : Droits d'accès
-• **Audit trail** : Traçabilité des actions
-• **Sauvegarde** : Données protégées
-• **Chiffrement** : Sécurité des données
+- **Authentification** : Login sécurisé
+- **Autorisation** : Droits d'accès
+- **Audit trail** : Traçabilité des actions
+- **Sauvegarde** : Données protégées
+- **Chiffrement** : Sécurité des données
 
 ##  **Fonctions Administratives**
 
 ###  **Gestion des Données**
-• **Import/Export** : Données en masse
-• **Validation** : Contrôle qualité
-• **Archivage** : Conservation historique
-• **Nettoyage** : Maintenance des données
+- **Import/Export** : Données en masse
+- **Validation** : Contrôle qualité
+- **Archivage** : Conservation historique
+- **Nettoyage** : Maintenance des données
 
 ### 🔔 **Notifications et Alertes**
-• **Seuils** : Définition des limites
-• **Notifications** : Email, SMS, interface
-• **Escalade** : Procédures d'urgence
-• **Rapports** : Résumés automatiques
+- **Seuils** : Définition des limites
+- **Notifications** : Email, SMS, interface
+- **Escalade** : Procédures d'urgence
+- **Rapports** : Résumés automatiques
 
 ### 📈 **Optimisation**
-• **Performance** : Optimisation système
-• **Utilisation** : Analyse des patterns
-                • **Amélioration** : Réponses directes et précises
-• **Maintenance** : Planification préventive
+- **Performance** : Optimisation système
+- **Utilisation** : Analyse des patterns
+                - **Amélioration** : Réponses directes et précises
+- **Maintenance** : Planification préventive
 
 **🔧 Configuration flexible adaptée à vos besoins !**"""
 
@@ -10656,59 +13756,59 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 ## 🎓 **Ressources de Formation**
 
 ### 📖 **Documentation Complète**
-• **Guide utilisateur** : Manuel détaillé
-• **Guide administrateur** : Configuration avancée
-• **API documentation** : Intégrations techniques
-• **FAQ** : Questions fréquentes
-• **Glossaire** : Termes techniques
+- **Guide utilisateur** : Manuel détaillé
+- **Guide administrateur** : Configuration avancée
+- **API documentation** : Intégrations techniques
+- **FAQ** : Questions fréquentes
+- **Glossaire** : Termes techniques
 
 ### 🎥 **Tutoriels Vidéo**
-• **Démarrage rapide** : Premiers pas
-• **Fonctionnalités avancées** : Utilisation expert
-• **Cas d'usage** : Exemples pratiques
-• **Dépannage** : Résolution de problèmes
-• **Bonnes pratiques** : Conseils d'utilisation
+- **Démarrage rapide** : Premiers pas
+- **Fonctionnalités avancées** : Utilisation expert
+- **Cas d'usage** : Exemples pratiques
+- **Dépannage** : Résolution de problèmes
+- **Bonnes pratiques** : Conseils d'utilisation
 
 ### 🏫 **Formation Interactive**
-• **Modules e-learning** : Apprentissage progressif
-• **Exercices pratiques** : Mise en situation
-• **Évaluations** : Tests de compétence
-• **Certification** : Validation des acquis
-• **Support** : Accompagnement personnalisé
+- **Modules e-learning** : Apprentissage progressif
+- **Exercices pratiques** : Mise en situation
+- **Évaluations** : Tests de compétence
+- **Certification** : Validation des acquis
+- **Support** : Accompagnement personnalisé
 
 ##  **Programme de Formation**
 
 ###  **Niveau Débutant**
-• **Interface utilisateur** : Navigation de base
-• **Recherche simple** : Trouver des informations
-• **Consultation** : Lire les données
-• **Rapports basiques** : Statistiques simples
+- **Interface utilisateur** : Navigation de base
+- **Recherche simple** : Trouver des informations
+- **Consultation** : Lire les données
+- **Rapports basiques** : Statistiques simples
 
 ###  **Niveau Intermédiaire**
-• **Recherche avancée** : Filtres et critères
-• **Analyses** : Interprétation des données
-• **Rapports personnalisés** : Création de vues
-• **Gestion des données** : Saisie et modification
+- **Recherche avancée** : Filtres et critères
+- **Analyses** : Interprétation des données
+- **Rapports personnalisés** : Création de vues
+- **Gestion des données** : Saisie et modification
 
 ###  **Niveau Expert**
-• **Administration** : Configuration système
-• **Intégrations** : API et connecteurs
-• **Optimisation** : Performance et efficacité
-• **Formation** : Accompagnement utilisateurs
+- **Administration** : Configuration système
+- **Intégrations** : API et connecteurs
+- **Optimisation** : Performance et efficacité
+- **Formation** : Accompagnement utilisateurs
 
 ##  **Bonnes Pratiques**
 
 ###  **Utilisation Efficace**
-• **Formulation précise** : Questions claires
-• **Utilisation des filtres** : Affinage des résultats
-• **Sauvegarde des recherches** : Favoris et historique
-• **Partage d'informations** : Collaboration
+- **Formulation précise** : Questions claires
+- **Utilisation des filtres** : Affinage des résultats
+- **Sauvegarde des recherches** : Favoris et historique
+- **Partage d'informations** : Collaboration
 
 ### 🔄 **Amélioration Continue**
-• **Feedback** : Retours d'expérience
-• **Formation continue** : Mise à jour des compétences
-• **Communauté** : Partage de bonnes pratiques
-• **Innovation** : Nouvelles fonctionnalités
+- **Feedback** : Retours d'expérience
+- **Formation continue** : Mise à jour des compétences
+- **Communauté** : Partage de bonnes pratiques
+- **Innovation** : Nouvelles fonctionnalités
 
 **📚 Formation continue pour une utilisation optimale !**"""
 
@@ -10719,24 +13819,24 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 ## 🛠️ **Types de Maintenance**
 
 ### 🔄 **Maintenance Préventive**
-• **Surveillance continue** : Monitoring automatique
-• **Mises à jour** : Versions et correctifs
-• **Optimisation** : Performance système
-• **Sauvegarde** : Protection des données
-• **Audit** : Vérification périodique
+- **Surveillance continue** : Monitoring automatique
+- **Mises à jour** : Versions et correctifs
+- **Optimisation** : Performance système
+- **Sauvegarde** : Protection des données
+- **Audit** : Vérification périodique
 
 ### ⚡ **Maintenance Corrective**
-• **Détection incidents** : Alertes automatiques
-• **Diagnostic** : Analyse des problèmes
-• **Résolution** : Correction rapide
-• **Validation** : Tests post-intervention
-• **Documentation** : Historique des incidents
+- **Détection incidents** : Alertes automatiques
+- **Diagnostic** : Analyse des problèmes
+- **Résolution** : Correction rapide
+- **Validation** : Tests post-intervention
+- **Documentation** : Historique des incidents
 
 ### 📈 **Maintenance Évolutive**
-• **Nouvelles fonctionnalités** : Améliorations
-• **Intégrations** : Connecteurs externes
-• **Optimisations** : Performance et efficacité
-• **Sécurité** : Renforcement protection
+- **Nouvelles fonctionnalités** : Améliorations
+- **Intégrations** : Connecteurs externes
+- **Optimisations** : Performance et efficacité
+- **Sécurité** : Renforcement protection
 
 ## 🚨 **Gestion des Incidents**
 
@@ -10749,114 +13849,114 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 6. **Documentation** : Rapport d'incident
 
 ###  **Types d'Incidents**
-• **Performance** : Lenteur, timeouts
-• **Données** : Corruption, perte
-• **Sécurité** : Intrusion, vulnérabilité
-• **Intégration** : Connecteurs, API
-• **Utilisateur** : Erreurs, blocages
+- **Performance** : Lenteur, timeouts
+- **Données** : Corruption, perte
+- **Sécurité** : Intrusion, vulnérabilité
+- **Intégration** : Connecteurs, API
+- **Utilisateur** : Erreurs, blocages
 
 ### 📞 **Support Technique**
-• **Hotline** : Support 24/7
-• **Ticket** : Suivi des demandes
-• **Chat** : Assistance en ligne
-• **Documentation** : Base de connaissances
-• **Formation** : Prévention incidents
+- **Hotline** : Support 24/7
+- **Ticket** : Suivi des demandes
+- **Chat** : Assistance en ligne
+- **Documentation** : Base de connaissances
+- **Formation** : Prévention incidents
 
 ##  **Indicateurs de Maintenance**
 
 ### ⚡ **Performance**
-• **Temps de réponse** : Réactivité système
-• **Disponibilité** : Uptime et fiabilité
-• **Charge** : Utilisation des ressources
-• **Erreurs** : Taux d'incidents
+- **Temps de réponse** : Réactivité système
+- **Disponibilité** : Uptime et fiabilité
+- **Charge** : Utilisation des ressources
+- **Erreurs** : Taux d'incidents
 
 ### 🔒 **Sécurité**
-• **Vulnérabilités** : Correctifs appliqués
-• **Accès** : Tentatives d'intrusion
-• **Données** : Intégrité et confidentialité
-• **Conformité** : Respect des normes
+- **Vulnérabilités** : Correctifs appliqués
+- **Accès** : Tentatives d'intrusion
+- **Données** : Intégrité et confidentialité
+- **Conformité** : Respect des normes
 
 ### 📈 **Qualité**
-• **Satisfaction** : Retours utilisateurs
-• **Efficacité** : Résolution incidents
-• **Innovation** : Nouvelles fonctionnalités
-• **Optimisation** : Amélioration continue
+- **Satisfaction** : Retours utilisateurs
+- **Efficacité** : Résolution incidents
+- **Innovation** : Nouvelles fonctionnalités
+- **Optimisation** : Amélioration continue
 
 **🔧 Maintenance proactive pour une disponibilité optimale !**"""
 
-        # Questions générales sur les fonctionnalités
-        else:
+        # Questions générales sur les fonctionnalités (seulement si pas technique)
+        elif not is_technical:
             return """**🌟 Fonctionnalités Principales ParcInfo**
 
 ##  **Vue d'Ensemble des Capacités**
 
 ### 📦 **Gestion Intelligente du Matériel**
-• **Inventaire complet** : Tous les équipements en temps réel
-• **Recherche avancée** : Par code, localisation, statut
-• **Localisation précise** : Étage, salle, utilisateur
-• **Statut dynamique** : Opérationnel, panne, maintenance
-• **Analyse prédictive** : Maintenance préventive
+- **Inventaire complet** : Tous les équipements en temps réel
+- **Recherche avancée** : Par code, localisation, statut
+- **Localisation précise** : Étage, salle, utilisateur
+- **Statut dynamique** : Opérationnel, panne, maintenance
+- **Analyse prédictive** : Maintenance préventive
 
 ###  **Gestion Optimisée des Commandes**
-• **Suivi complet** : De la demande à la réception
-• **Analyse fournisseurs** : Performance, coûts, délais
-• **Optimisation achats** : Meilleurs prix et conditions
-• **Gestion budgétaire** : Contrôle des dépenses
-• **Conformité** : Respect des procédures
+- **Suivi complet** : De la demande à la réception
+- **Analyse fournisseurs** : Performance, coûts, délais
+- **Optimisation achats** : Meilleurs prix et conditions
+- **Gestion budgétaire** : Contrôle des dépenses
+- **Conformité** : Respect des procédures
 
 ### 🚚 **Suivi Avancé des Livraisons**
-• **Statut temps réel** : Suivi en direct
-• **Gestion retards** : Alertes et escalade
-• **PV réception** : Contrôle qualité
-• **Analyse performance** : Fournisseurs fiables
-• **Optimisation logistique** : Planification efficace
+- **Statut temps réel** : Suivi en direct
+- **Gestion retards** : Alertes et escalade
+- **PV réception** : Contrôle qualité
+- **Analyse performance** : Fournisseurs fiables
+- **Optimisation logistique** : Planification efficace
 
 ###  **Analyses et Rapports Intelligents**
-• **Statistiques détaillées** : KPIs de performance
-• **Tendances prédictives** : Besoins futurs
-• **Optimisation continue** : Recommandations IA
-• **Rapports personnalisés** : Sur mesure
-• **Tableaux de bord** : Vue d'ensemble
+- **Statistiques détaillées** : KPIs de performance
+- **Tendances prédictives** : Besoins futurs
+- **Optimisation continue** : Recommandations IA
+- **Rapports personnalisés** : Sur mesure
+- **Tableaux de bord** : Vue d'ensemble
 
 ##  **Fonctionnalités Avancées**
 
 ### 🤖 **Intelligence Artificielle**
-• **Recherche sémantique** : Compréhension naturelle
-• **Prédiction** : Besoins et tendances
-                • **Optimisation** : Réponses directes et précises
-• **Automatisation** : Tâches répétitives
+- **Recherche sémantique** : Compréhension naturelle
+- **Prédiction** : Besoins et tendances
+                - **Optimisation** : Réponses directes et précises
+- **Automatisation** : Tâches répétitives
 
 ###  **Recherche Intelligente**
-• **Reconnaissance d'intention** : Questions naturelles
-                • **Réponses contextuelles** : Aide intelligente
-• **Filtres avancés** : Affinage précis
-• **Historique** : Recherches précédentes
+- **Reconnaissance d'intention** : Questions naturelles
+                - **Réponses contextuelles** : Aide intelligente
+- **Filtres avancés** : Affinage précis
+- **Historique** : Recherches précédentes
 
 ###  **Interface Moderne**
-• **Responsive design** : Tous les appareils
-• **Navigation intuitive** : Facile d'utilisation
-• **Personnalisation** : Interface adaptée
-• **Accessibilité** : Tous les utilisateurs
+- **Responsive design** : Tous les appareils
+- **Navigation intuitive** : Facile d'utilisation
+- **Personnalisation** : Interface adaptée
+- **Accessibilité** : Tous les utilisateurs
 
 ##  **Avantages Clés**
 
 ###  **Efficacité**
-• **Gain de temps** : Automatisation
-• **Précision** : Données fiables
-• **Réactivité** : Temps réel
-• **Optimisation** : Performance maximale
+- **Gain de temps** : Automatisation
+- **Précision** : Données fiables
+- **Réactivité** : Temps réel
+- **Optimisation** : Performance maximale
 
 ### 🔒 **Sécurité**
-• **Protection données** : Chiffrement
-• **Contrôle accès** : Permissions
-• **Audit trail** : Traçabilité
-• **Conformité** : Normes respectées
+- **Protection données** : Chiffrement
+- **Contrôle accès** : Permissions
+- **Audit trail** : Traçabilité
+- **Conformité** : Normes respectées
 
 ### 📈 **Performance**
-• **Scalabilité** : Croissance adaptée
-• **Fiabilité** : Disponibilité élevée
-• **Rapidité** : Réponse instantanée
-• **Flexibilité** : Adaptation continue
+- **Scalabilité** : Croissance adaptée
+- **Fiabilité** : Disponibilité élevée
+- **Rapidité** : Réponse instantanée
+- **Flexibilité** : Adaptation continue
 
 **🌟 Système complet et intelligent pour une gestion optimale !**"""
 
@@ -10930,9 +14030,9 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
             material = item['material']
             similarity = item['similarity']
             response += f"{i}. **{material.code_inventaire}**\n"
-            response += f"   • Numéro de série: {material.numero_serie}\n"
-            response += f"   • Lieu: {material.lieu_stockage}\n"
-            response += f"   • Similarité: {similarity:.2%}\n\n"
+            response += f"   - Numéro de série: {material.numero_serie}\n"
+            response += f"   - Lieu: {material.lieu_stockage}\n"
+            response += f"   - Similarité: {similarity:.2%}\n\n"
         
         response += " *Analyse basée sur les embeddings sémantiques (sentence-transformers)*"
         return response
@@ -10979,9 +14079,9 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
             supplier = item['supplier']
             similarity = item['similarity']
             response += f"{i}. **{supplier.nom}**\n"
-            response += f"   • ICE: {supplier.ice}\n"
-            response += f"   • Adresse: {supplier.adresse}\n"
-            response += f"   • Similarité: {similarity:.2%}\n\n"
+            response += f"   - ICE: {supplier.ice}\n"
+            response += f"   - Adresse: {supplier.adresse}\n"
+            response += f"   - Similarité: {similarity:.2%}\n\n"
         
         response += " *Analyse basée sur les embeddings sémantiques (sentence-transformers)*"
         return response
@@ -11057,9 +14157,9 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
             ratio = item['ratio']
             match_type = item['match_type']
             response += f"{i}. **{material.code_inventaire}**\n"
-            response += f"   • Numéro de série: {material.numero_serie}\n"
-            response += f"   • Lieu: {material.lieu_stockage}\n"
-            response += f"   • Correspondance: {ratio}% ({match_type})\n\n"
+            response += f"   - Numéro de série: {material.numero_serie}\n"
+            response += f"   - Lieu: {material.lieu_stockage}\n"
+            response += f"   - Correspondance: {ratio}% ({match_type})\n\n"
         
         response += " *Recherche basée sur rapidfuzz (correspondance approximative)*"
         return response
@@ -11104,9 +14204,9 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
             ratio = item['ratio']
             match_type = item['match_type']
             response += f"{i}. **{supplier.nom}**\n"
-            response += f"   • ICE: {supplier.ice}\n"
-            response += f"   • Adresse: {supplier.adresse}\n"
-            response += f"   • Correspondance: {ratio}% ({match_type})\n\n"
+            response += f"   - ICE: {supplier.ice}\n"
+            response += f"   - Adresse: {supplier.adresse}\n"
+            response += f"   - Correspondance: {ratio}% ({match_type})\n\n"
         
         response += " *Recherche basée sur rapidfuzz (correspondance approximative)*"
         return response
@@ -11161,10 +14261,10 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
                 montant_total = 0
             
             response += f"{i}. **{command.numero_commande}**\n"
-            response += f"   • Fournisseur: {command.fournisseur.nom}\n"
-            response += f"   • Date: {command.date_commande}\n"
-            response += f"   • Montant: {montant_total:.2f} DH HT\n"
-            response += f"   • Correspondance: {ratio}%\n\n"
+            response += f"   - Fournisseur: {command.fournisseur.nom}\n"
+            response += f"   - Date: {command.date_commande}\n"
+            response += f"   - Montant: {montant_total:.2f} DH HT\n"
+            response += f"   - Correspondance: {ratio}%\n\n"
         
         response += " *Recherche basée sur rapidfuzz (correspondance approximative)*"
         return response
@@ -11180,30 +14280,30 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 ##  **Étapes pour Trouver un Matériel**
 
 ### 1️⃣ **Ouvrir la Recherche**
-• Cliquez sur l'icône de recherche 
-• Ou utilisez la barre de recherche en haut
+- Cliquez sur l'icône de recherche 
+- Ou utilisez la barre de recherche en haut
 
 ### 2️⃣ **Choisir le Type de Recherche**
-• **Recherche par code** : Entrez le code exact (ex: PC-123)
-• **Recherche par nom** : Tapez le nom du matériel
-• **Recherche par localisation** : Entrez l'étage ou la salle
+- **Recherche par code** : Entrez le code exact (ex: PC-123)
+- **Recherche par nom** : Tapez le nom du matériel
+- **Recherche par localisation** : Entrez l'étage ou la salle
 
 ### 3️⃣ **Lancer la Recherche**
-• Appuyez sur Entrée ou cliquez sur "Rechercher"
-• Le système affiche les résultats
+- Appuyez sur Entrée ou cliquez sur "Rechercher"
+- Le système affiche les résultats
 
 ### 4️⃣ **Consulter les Résultats**
-• **Code inventaire** : Identifiant unique
-• **Numéro de série** : Référence fabricant
-• **Localisation** : Où se trouve le matériel
-• **Statut** : Opérationnel, en panne, en stock
+- **Code inventaire** : Identifiant unique
+- **Numéro de série** : Référence fabricant
+- **Localisation** : Où se trouve le matériel
+- **Statut** : Opérationnel, en panne, en stock
 
 ##  **Conseils Pratiques**
 
 ###  **Recherche Efficace**
-• Utilisez des termes précis
-• Vérifiez l'orthographe
-• Essayez des synonymes si nécessaire
+- Utilisez des termes précis
+- Vérifiez l'orthographe
+- Essayez des synonymes si nécessaire
 
 ### 🔄 **Si Aucun Résultat**
 1. Vérifiez l'orthographe
@@ -11220,37 +14320,37 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 ##  **Étapes pour Trouver un Fournisseur**
 
 ### 1️⃣ **Accéder à la Liste**
-• Cliquez sur "Fournisseurs" dans le menu
-• Ou tapez "liste fournisseurs" dans la recherche
+- Cliquez sur "Fournisseurs" dans le menu
+- Ou tapez "liste fournisseurs" dans la recherche
 
 ### 2️⃣ **Rechercher un Fournisseur**
-• **Par nom** : Tapez le nom complet ou partiel
-• **Par ICE** : Entrez le numéro ICE
-• **Par localisation** : Ville ou région
+- **Par nom** : Tapez le nom complet ou partiel
+- **Par ICE** : Entrez le numéro ICE
+- **Par localisation** : Ville ou région
 
 ### 3️⃣ **Filtrer les Résultats**
-• **Tous les fournisseurs** : Vue complète
-• **Fournisseurs actifs** : Avec commandes récentes
-• **Par performance** : Meilleurs fournisseurs
+- **Tous les fournisseurs** : Vue complète
+- **Fournisseurs actifs** : Avec commandes récentes
+- **Par performance** : Meilleurs fournisseurs
 
 ### 4️⃣ **Consulter les Détails**
-• **Nom et ICE** : Informations légales
-• **Adresse** : Localisation
-• **Contact** : Téléphone et email
-• **Performance** : Historique des commandes
+- **Nom et ICE** : Informations légales
+- **Adresse** : Localisation
+- **Contact** : Téléphone et email
+- **Performance** : Historique des commandes
 
 ##  **Conseils Pratiques**
 
 ###  **Recherche Efficace**
-• Commencez par le nom
-• Utilisez l'ICE pour une recherche précise
-• Vérifiez l'orthographe
+- Commencez par le nom
+- Utilisez l'ICE pour une recherche précise
+- Vérifiez l'orthographe
 
 ###  **Informations Disponibles**
-• Historique des commandes
-• Délais de livraison
-• Qualité des services
-• Contact principal
+- Historique des commandes
+- Délais de livraison
+- Qualité des services
+- Contact principal
 
 ** Facile ! Tapez simplement le nom du fournisseur.**"""
 
@@ -11261,43 +14361,43 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 ##  **Étapes pour Créer une Commande**
 
 ### 1️⃣ **Préparer la Demande**
-• Identifier les besoins en matériel
-• Définir les spécifications
-• Estimer le budget
+- Identifier les besoins en matériel
+- Définir les spécifications
+- Estimer le budget
 
 ### 2️⃣ **Choisir le Fournisseur**
-• Consulter la liste des fournisseurs
-• Vérifier les prix et délais
-• Sélectionner le meilleur fournisseur
+- Consulter la liste des fournisseurs
+- Vérifier les prix et délais
+- Sélectionner le meilleur fournisseur
 
 ### 3️⃣ **Remplir le Formulaire**
-• **Numéro de commande** : Généré automatiquement
-• **Fournisseur** : Sélectionner dans la liste
-• **Date de commande** : Date actuelle
-• **Délai de livraison** : Spécifié par le fournisseur
+- **Numéro de commande** : Généré automatiquement
+- **Fournisseur** : Sélectionner dans la liste
+- **Date de commande** : Date actuelle
+- **Délai de livraison** : Spécifié par le fournisseur
 
 ### 4️⃣ **Ajouter les Articles**
-• **Code article** : Référence du matériel
-• **Description** : Détails du produit
-• **Quantité** : Nombre d'unités
-• **Prix unitaire** : Coût par article
+- **Code article** : Référence du matériel
+- **Description** : Détails du produit
+- **Quantité** : Nombre d'unités
+- **Prix unitaire** : Coût par article
 
 ### 5️⃣ **Valider la Commande**
-• Vérifier tous les détails
-• Calculer le montant total
-• Soumettre la commande
+- Vérifier tous les détails
+- Calculer le montant total
+- Soumettre la commande
 
 ##  **Conseils Pratiques**
 
 ###  **Commande Optimale**
-• Comparez les prix entre fournisseurs
-• Vérifiez les délais de livraison
-• Précisez bien les spécifications
+- Comparez les prix entre fournisseurs
+- Vérifiez les délais de livraison
+- Précisez bien les spécifications
 
 ###  **Suivi de Commande**
-• Numéro de commande pour le suivi
-• Statut en temps réel
-• Notifications automatiques
+- Numéro de commande pour le suivi
+- Statut en temps réel
+- Notifications automatiques
 
 ** Simple ! Suivez les étapes et remplissez les informations demandées.**"""
 
@@ -11311,10 +14411,10 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 **Réponse obtenue :**
 ```
  Matériel trouvé : PC-123
-• Numéro de série: SN123456
-• Localisation: Étage 2, Salle 205
-• Statut: Opérationnel
-• Utilisateur: Jean Dupont
+- Numéro de série: SN123456
+- Localisation: Étage 2, Salle 205
+- Statut: Opérationnel
+- Utilisateur: Jean Dupont
 ```
 
 ## 🏢 **Exemple 2 : Trouver un Fournisseur**
@@ -11334,10 +14434,10 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 **Réponse obtenue :**
 ```
  Commande créée : BC-2025-001
-• Fournisseur: TECHNICOVIGILE
-• Articles: 5 PC de bureau
-• Montant: 25,000 DH HT
-• Délai: 15 jours
+- Fournisseur: TECHNICOVIGILE
+- Articles: 5 PC de bureau
+- Montant: 25,000 DH HT
+- Délai: 15 jours
 ```
 
 ##  **Exemple 4 : Statistiques**
@@ -11346,24 +14446,24 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 **Réponse obtenue :**
 ```
  Statistiques du parc :
-• Total matériels: 150
-• Informatique: 100
-• Bureautique: 50
-• Opérationnels: 140
-• En panne: 10
+- Total matériels: 150
+- Informatique: 100
+- Bureautique: 50
+- Opérationnels: 140
+- En panne: 10
 ```
 
 ##  **Comment Utiliser**
 
 ###  **Questions Simples**
-• "Où est [code matériel] ?"
-• "Qui fournit [type matériel] ?"
-• "Combien de [type] avons-nous ?"
+- "Où est [code matériel] ?"
+- "Qui fournit [type matériel] ?"
+- "Combien de [type] avons-nous ?"
 
 ### 🔄 **Questions Avancées**
-• "Analyse les performances des fournisseurs"
-• "Optimise la répartition du matériel"
-• "Prédit les besoins futurs"
+- "Analyse les performances des fournisseurs"
+- "Optimise la répartition du matériel"
+- "Prédit les besoins futurs"
 
 ** Utilisez des questions naturelles, le système comprend !**"""
 
@@ -11374,46 +14474,46 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 ##  **Comment Faire une Recherche**
 
 ### 1️⃣ **Ouvrir la Recherche**
-• Cliquez sur la barre de recherche
-• Ou utilisez le raccourci Ctrl+F
+- Cliquez sur la barre de recherche
+- Ou utilisez le raccourci Ctrl+F
 
 ### 2️⃣ **Taper votre Question**
-• **Simple** : "Où est PC-123 ?"
-• **Générale** : "Liste des fournisseurs"
-• **Statistique** : "Combien de PC avons-nous ?"
+- **Simple** : "Où est PC-123 ?"
+- **Générale** : "Liste des fournisseurs"
+- **Statistique** : "Combien de PC avons-nous ?"
 
 ### 3️⃣ **Lancer la Recherche**
-• Appuyez sur Entrée
-• Le système analyse votre question
-• Les résultats s'affichent
+- Appuyez sur Entrée
+- Le système analyse votre question
+- Les résultats s'affichent
 
 ### 4️⃣ **Consulter les Résultats**
-• **Informations détaillées**
-• **Liens vers plus d'infos**
-• **Actions possibles**
+- **Informations détaillées**
+- **Liens vers plus d'infos**
+- **Actions possibles**
 
 ##  **Types de Questions**
 
 ###  **Questions Simples**
-• "Où est [matériel] ?"
-• "Qui fournit [produit] ?"
-• "Combien de [type] ?"
+- "Où est [matériel] ?"
+- "Qui fournit [produit] ?"
+- "Combien de [type] ?"
 
 ###  **Questions d'Analyse**
-• "Statistiques du parc"
-• "Performance des fournisseurs"
-• "Tendances d'utilisation"
+- "Statistiques du parc"
+- "Performance des fournisseurs"
+- "Tendances d'utilisation"
 
 ### 🔧 **Questions d'Aide**
-• "Comment faire..."
-• "Guide pour..."
-• "Exemples d'utilisation"
+- "Comment faire..."
+- "Guide pour..."
+- "Exemples d'utilisation"
 
 ##  **Conseils**
 
-• **Soyez naturel** : Posez la question comme à un humain
-• **Soyez précis** : Plus de détails = meilleure réponse
-• **Essayez plusieurs formulations** : Si ça ne marche pas
+- **Soyez naturel** : Posez la question comme à un humain
+- **Soyez précis** : Plus de détails = meilleure réponse
+- **Essayez plusieurs formulations** : Si ça ne marche pas
 
 ** C'est tout ! Tapez votre question et appuyez sur Entrée.**"""
 
@@ -11471,14 +14571,14 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 ##  **Vue d'Ensemble Générale**
 
 ### 📦 **Inventaire Total**
-• **Matériel Informatique** : {total_it} équipements
-• **Matériel Bureautique** : {total_bureau} équipements
-• **Total Parc** : {total_materials} équipements
+- **Matériel Informatique** : {total_it} équipements
+- **Matériel Bureautique** : {total_bureau} équipements
+- **Total Parc** : {total_materials} équipements
 
 ###  **État Opérationnel**
-• **Matériel Opérationnel** : {total_operational} équipements
-• **Taux de Disponibilité** : {(total_operational/total_materials)*100:.1f}%
-• **Matériel en Maintenance** : {total_materials - total_operational} équipements
+- **Matériel Opérationnel** : {total_operational} équipements
+- **Taux de Disponibilité** : {(total_operational/total_materials)*100:.1f}%
+- **Matériel en Maintenance** : {total_materials - total_operational} équipements
 
 ## 🏢 **Répartition par Localisation**
 
@@ -11488,37 +14588,37 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
             # Top 5 localisations
             sorted_locations = sorted(locations.items(), key=lambda x: x[1], reverse=True)[:5]
             for location, count in sorted_locations:
-                response += f"• **{location}** : {count} équipements\n"
+                response += f"- **{location}** : {count} équipements\n"
             
             response += f"""
 ## 🏢 **Infrastructure Fournisseurs**
-• **Nombre de Fournisseurs** : {suppliers} partenaires
-• **Commandes Total** : {recent_orders} transactions
-• **Couverture Fournisseurs** : Complète pour tous les types de matériel
+- **Nombre de Fournisseurs** : {suppliers} partenaires
+- **Commandes Total** : {recent_orders} transactions
+- **Couverture Fournisseurs** : Complète pour tous les types de matériel
 
 ## 📈 **Indicateurs de Performance**
 
 ### ⚡ **Performance Opérationnelle**
-• **Disponibilité** : {(total_operational/total_materials)*100:.1f}%
-• **Répartition Équilibrée** : {total_it} IT vs {total_bureau} Bureau
-• **Couverture Géographique** : {len(locations)} localisations
+- **Disponibilité** : {(total_operational/total_materials)*100:.1f}%
+- **Répartition Équilibrée** : {total_it} IT vs {total_bureau} Bureau
+- **Couverture Géographique** : {len(locations)} localisations
 
 ### 🔧 **Maintenance et Support**
-• **Matériel en Service** : {total_operational} équipements
-• **Matériel en Maintenance** : {total_materials - total_operational} équipements
-• **Taux de Maintenance** : {((total_materials - total_operational)/total_materials)*100:.1f}%
+- **Matériel en Service** : {total_operational} équipements
+- **Matériel en Maintenance** : {total_materials - total_operational} équipements
+- **Taux de Maintenance** : {((total_materials - total_operational)/total_materials)*100:.1f}%
 
 ##  **Recommandations**
 
 ###  **Points Forts**
-• Parc bien équilibré entre IT et Bureau
-• Couverture géographique étendue
-• Réseau fournisseurs diversifié
+- Parc bien équilibré entre IT et Bureau
+- Couverture géographique étendue
+- Réseau fournisseurs diversifié
 
 ### 🔧 **Améliorations Suggérées**
-• Optimiser la répartition géographique
-• Améliorer le taux de disponibilité
-• Renforcer la maintenance préventive
+- Optimiser la répartition géographique
+- Améliorer le taux de disponibilité
+- Renforcer la maintenance préventive
 
 ** Rapport généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')}**
 **  complète du système**"""
@@ -11549,9 +14649,9 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 ##  **Vue d'Ensemble**
 
 ### 🏢 **Portfolio Fournisseurs**
-• **Total Fournisseurs** : {total_suppliers} partenaires
-• **Fournisseurs Actifs** : {len([s for s in supplier_orders.values() if s > 0])} partenaires
-• **Couverture Complète** : Tous les types de matériel
+- **Total Fournisseurs** : {total_suppliers} partenaires
+- **Fournisseurs Actifs** : {len([s for s in supplier_orders.values() if s > 0])} partenaires
+- **Couverture Complète** : Tous les types de matériel
 
 ## 🏆 **Top 5 Fournisseurs par Commandes**
 
@@ -11560,37 +14660,37 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
             for i, (supplier_name, order_count) in enumerate(top_suppliers, 1):
                 supplier = Fournisseur.objects.get(nom=supplier_name)
                 response += f"""### {i}️⃣ **{supplier_name}**
-• **ICE** : {supplier.ice}
-• **Adresse** : {supplier.adresse}
-• **Commandes** : {order_count} transactions
-• **IF Fiscal** : {supplier.if_fiscal}
-• **Performance** : {'' * min(5, order_count)} ({order_count}/5)
+- **ICE** : {supplier.ice}
+- **Adresse** : {supplier.adresse}
+- **Commandes** : {order_count} transactions
+- **IF Fiscal** : {supplier.if_fiscal}
+- **Performance** : {'' * min(5, order_count)} ({order_count}/5)
 
 """
             
             response += f"""## 📈 **Analyse Détaillée**
 
 ###  **Répartition des Commandes**
-• **Fournisseurs Principaux** : {len([s for s in supplier_orders.values() if s >= 3])} partenaires
-• **Fournisseurs Occasionnels** : {len([s for s in supplier_orders.values() if 1 <= s < 3])} partenaires
-• **Fournisseurs Inactifs** : {len([s for s in supplier_orders.values() if s == 0])} partenaires
+- **Fournisseurs Principaux** : {len([s for s in supplier_orders.values() if s >= 3])} partenaires
+- **Fournisseurs Occasionnels** : {len([s for s in supplier_orders.values() if 1 <= s < 3])} partenaires
+- **Fournisseurs Inactifs** : {len([s for s in supplier_orders.values() if s == 0])} partenaires
 
 ###  **Indicateurs de Performance**
-• **Concentration** : {top_suppliers[0][1] if top_suppliers else 0} commandes pour le leader
-• **Diversification** : {len([s for s in supplier_orders.values() if s > 0])}/{total_suppliers} fournisseurs actifs
-• **Stabilité** : Réseau fournisseurs équilibré
+- **Concentration** : {top_suppliers[0][1] if top_suppliers else 0} commandes pour le leader
+- **Diversification** : {len([s for s in supplier_orders.values() if s > 0])}/{total_suppliers} fournisseurs actifs
+- **Stabilité** : Réseau fournisseurs équilibré
 
 ##  **Recommandations Stratégiques**
 
 ###  **Points Forts**
-• Réseau fournisseurs diversifié
-• Couverture complète des besoins
-• Performance équilibrée
+- Réseau fournisseurs diversifié
+- Couverture complète des besoins
+- Performance équilibrée
 
 ### 🔧 **Optimisations Suggérées**
-• Renforcer les partenariats avec les leaders
-• Développer les fournisseurs occasionnels
-• Maintenir la diversification
+- Renforcer les partenariats avec les leaders
+- Développer les fournisseurs occasionnels
+- Maintenir la diversification
 
 ** Analyse générée le {datetime.now().strftime('%d/%m/%Y à %H:%M')}**
 **  complète des fournisseurs**"""
@@ -11616,11 +14716,11 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
             
             for i, material in enumerate(it_materials, 1):
                 response += f"""### {i}️⃣ **{material.code_inventaire}**
-• **Numéro de série** : {material.numero_serie}
-• **Localisation** : {material.lieu_stockage}
-• **Statut** : {material.statut}
-• **Utilisateur** : {material.utilisateur.username if material.utilisateur else 'Non affecté'}
-• **Date d'acquisition** : {material.date_acquisition}
+- **Numéro de série** : {material.numero_serie}
+- **Localisation** : {material.lieu_stockage}
+- **Statut** : {material.statut}
+- **Utilisateur** : {material.utilisateur.username if material.utilisateur else 'Non affecté'}
+- **Date d'acquisition** : {material.date_acquisition}
 
 """
             
@@ -11630,36 +14730,36 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
             
             for i, material in enumerate(bureau_materials, 1):
                 response += f"""### {i}️⃣ **{material.code_inventaire}**
-• **Numéro de série** : {material.numero_serie}
-• **Localisation** : {material.lieu_stockage}
-• **Statut** : {material.statut}
-• **Utilisateur** : {material.utilisateur.username if material.utilisateur else 'Non affecté'}
-• **Date d'acquisition** : {material.date_acquisition}
+- **Numéro de série** : {material.numero_serie}
+- **Localisation** : {material.lieu_stockage}
+- **Statut** : {material.statut}
+- **Utilisateur** : {material.utilisateur.username if material.utilisateur else 'Non affecté'}
+- **Date d'acquisition** : {material.date_acquisition}
 
 """
             
             response += f"""##  **Statistiques d'Inventaire**
 
 ### 📦 **Répartition**
-• **Matériel Informatique** : {len(it_materials)} équipements affichés
-• **Matériel Bureautique** : {len(bureau_materials)} équipements affichés
-• **Total Affiché** : {len(it_materials) + len(bureau_materials)} équipements
+- **Matériel Informatique** : {len(it_materials)} équipements affichés
+- **Matériel Bureautique** : {len(bureau_materials)} équipements affichés
+- **Total Affiché** : {len(it_materials) + len(bureau_materials)} équipements
 
 ###  **État des Équipements**
-• **Opérationnels** : {len([m for m in it_materials + bureau_materials if m.statut == 'opérationnel'])} équipements
-• **En Maintenance** : {len([m for m in it_materials + bureau_materials if m.statut != 'opérationnel'])} équipements
+- **Opérationnels** : {len([m for m in it_materials + bureau_materials if m.statut == 'opérationnel'])} équipements
+- **En Maintenance** : {len([m for m in it_materials + bureau_materials if m.statut != 'opérationnel'])} équipements
 
 ##  **Informations Complémentaires**
 
 ###  **Recherche Avancée**
-• Utilisez les filtres pour affiner les résultats
-• Recherchez par localisation ou statut
-• Consultez l'historique des équipements
+- Utilisez les filtres pour affiner les résultats
+- Recherchez par localisation ou statut
+- Consultez l'historique des équipements
 
 ### 📈 **Maintenance**
-• Planification préventive disponible
-• Historique des interventions
-• Prédiction des besoins
+- Planification préventive disponible
+- Historique des interventions
+- Prédiction des besoins
 
 ** Inventaire généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')}**
 **  complète du parc**"""
@@ -11677,7 +14777,7 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
             
             # Récupérer les commandes avec calcul du montant total
             orders = list(Commande.objects.annotate(
-                montant_total=Sum(
+                montant_total_calc=Sum(
                     ExpressionWrapper(
                         F('lignes__quantite') * F('lignes__prix_unitaire'),
                         output_field=DecimalField(max_digits=18, decimal_places=2)
@@ -11691,9 +14791,9 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 ##  **Vue d'Ensemble**
 
 ###  **Commandes**
-• **Total Commandes** : {total_orders} transactions
-• **Commandes Analysées** : {len(orders)} (échantillon représentatif)
-• **Période d'Analyse** : Toutes les commandes
+- **Total Commandes** : {total_orders} transactions
+- **Commandes Analysées** : {len(orders)} (échantillon représentatif)
+- **Période d'Analyse** : Toutes les commandes
 
 ##  **Détail des Commandes (Top 10)**
 
@@ -11701,26 +14801,26 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
             
             for i, order in enumerate(orders, 1):
                 response += f"""### {i}️⃣ **{order.numero_commande}**
-• **Fournisseur** : {order.fournisseur.nom}
-• **Date** : {order.date_commande}
-• **Montant** : {order.montant_total or 0} DH HT
-• **Mode de passation** : {order.mode_passation}
+- **Fournisseur** : {order.fournisseur.nom}
+- **Date** : {order.date_commande}
+- **Montant** : {getattr(order, 'montant_total_calc', 0) or 0} DH HT
+- **Mode de passation** : {order.mode_passation}
 
 """
             
             response += f"""## 🚚 **Analyse des Livraisons**
 
 ### 📈 **Performance Livraison**
-• **Livraisons à temps** : {len([o for o in orders if hasattr(o, 'livraison') and o.livraison.statut_livraison == 'livree'])} commandes
-• **Livraisons en retard** : {len([o for o in orders if hasattr(o, 'livraison') and o.livraison.statut_livraison != 'livree'])} commandes
-• **Taux de satisfaction** : {(len([o for o in orders if hasattr(o, 'livraison') and o.livraison.statut_livraison == 'livree'])/len(orders))*100:.1f}%
+- **Livraisons à temps** : {len([o for o in orders if hasattr(o, 'livraison') and o.livraison.statut_livraison == 'livree'])} commandes
+- **Livraisons en retard** : {len([o for o in orders if hasattr(o, 'livraison') and o.livraison.statut_livraison != 'livree'])} commandes
+- **Taux de satisfaction** : {(len([o for o in orders if hasattr(o, 'livraison') and o.livraison.statut_livraison == 'livree'])/len(orders))*100:.1f}%
 
 ## 💰 **Analyse Financière**
 
 ###  **Montants**
-• **Montant total** : {sum(o.montant_total for o in orders)} DH HT
-• **Montant moyen** : {sum(o.montant_total for o in orders)/len(orders):.0f} DH HT par commande
-• **Plus grosse commande** : {max(o.montant_total for o in orders) if orders else 0} DH HT
+- **Montant total** : {sum((getattr(o, 'montant_total_calc', 0) or 0) for o in orders)} DH HT
+- **Montant moyen** : {(sum((getattr(o, 'montant_total_calc', 0) or 0) for o in orders)/len(orders)) if orders else 0:.0f} DH HT par commande
+- **Plus grosse commande** : {max(((getattr(o, 'montant_total_calc', 0) or 0) for o in orders), default=0) if orders else 0} DH HT
 
 ## 🏢 **Performance Fournisseurs**
 
@@ -11731,25 +14831,25 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
             supplier_amounts = {}
             for order in orders:
                 supplier_name = order.fournisseur.nom
-                supplier_amounts[supplier_name] = supplier_amounts.get(supplier_name, 0) + order.montant_total
+                supplier_amounts[supplier_name] = supplier_amounts.get(supplier_name, 0) + (getattr(order, 'montant_total_calc', 0) or 0)
             
             top_suppliers_by_amount = sorted(supplier_amounts.items(), key=lambda x: x[1], reverse=True)[:3]
             
             for supplier_name, amount in top_suppliers_by_amount:
-                response += f"• **{supplier_name}** : {amount} DH HT\n"
+                response += f"- **{supplier_name}** : {amount} DH HT\n"
             
             response += f"""
 ##  **Recommandations**
 
 ###  **Points Forts**
-• Diversité des fournisseurs
-• Montants équilibrés
-• Couverture complète des besoins
+- Diversité des fournisseurs
+- Montants équilibrés
+- Couverture complète des besoins
 
 ### 🔧 **Améliorations Suggérées**
-• Optimiser les délais de livraison
-• Renforcer le suivi des commandes
-• Améliorer la prévision des besoins
+- Optimiser les délais de livraison
+- Renforcer le suivi des commandes
+- Améliorer la prévision des besoins
 
 ** Analyse générée le {datetime.now().strftime('%d/%m/%Y à %H:%M')}**
 **  complète des commandes**"""
@@ -11768,84 +14868,84 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
 ##  **Indicateurs de Performance Globaux**
 
 ### 📦 **Gestion du Matériel**
-• **Taux de disponibilité** : 93.5%
-• **Temps de réponse** : < 2 secondes
-• **Précision des recherches** : 98.2%
-• **Couverture géographique** : 100%
+- **Taux de disponibilité** : 93.5%
+- **Temps de réponse** : < 2 secondes
+- **Précision des recherches** : 98.2%
+- **Couverture géographique** : 100%
 
 ### 🏢 **Gestion des Fournisseurs**
-• **Nombre de partenaires** : 15 fournisseurs actifs
-• **Taux de satisfaction** : 94.8%
-• **Délai moyen de livraison** : 12 jours
-• **Qualité des services** : Excellente
+- **Nombre de partenaires** : 15 fournisseurs actifs
+- **Taux de satisfaction** : 94.8%
+- **Délai moyen de livraison** : 12 jours
+- **Qualité des services** : Excellente
 
 ###  **Gestion des Commandes**
-• **Temps de traitement** : < 24 heures
-• **Taux d'approbation** : 96.3%
-• **Précision des estimations** : 97.1%
-• **Suivi en temps réel** : 100%
+- **Temps de traitement** : < 24 heures
+- **Taux d'approbation** : 96.3%
+- **Précision des estimations** : 97.1%
+- **Suivi en temps réel** : 100%
 
 ##  **Performance Technique**
 
 ### ⚡ **Vitesse et Réactivité**
-• **Temps de réponse moyen** : 0.03 secondes
-• **Capacité de traitement** : 1000+ requêtes simultanées
-• **Disponibilité système** : 99.9%
-• **Temps de maintenance** : < 2 heures/mois
+- **Temps de réponse moyen** : 0.03 secondes
+- **Capacité de traitement** : 1000+ requêtes simultanées
+- **Disponibilité système** : 99.9%
+- **Temps de maintenance** : < 2 heures/mois
 
 ###  **Recherche et Analyse**
-• **Recherche sémantique** : Opérationnelle
-• **Recherche floue** : 95% de précision
-• **Analyse prédictive** : Intégrée
-• **Rapports automatisés** : Disponibles
+- **Recherche sémantique** : Opérationnelle
+- **Recherche floue** : 95% de précision
+- **Analyse prédictive** : Intégrée
+- **Rapports automatisés** : Disponibles
 
 ## 📈 **Métriques d'Utilisation**
 
 ###  **Utilisateurs**
-• **Utilisateurs actifs** : 50+ utilisateurs
-• **Sessions quotidiennes** : 200+ sessions
-• **Taux d'adoption** : 98.5%
-• **Satisfaction utilisateur** : 4.8/5
+- **Utilisateurs actifs** : 50+ utilisateurs
+- **Sessions quotidiennes** : 200+ sessions
+- **Taux d'adoption** : 98.5%
+- **Satisfaction utilisateur** : 4.8/5
 
 ###  **Données**
-• **Matériels gérés** : 150+ équipements
-• **Commandes traitées** : 500+ transactions
-• **Fournisseurs** : 15 partenaires
-• **Historique complet** : 2+ années
+- **Matériels gérés** : 150+ équipements
+- **Commandes traitées** : 500+ transactions
+- **Fournisseurs** : 15 partenaires
+- **Historique complet** : 2+ années
 
 ##  **Recommandations d'Amélioration**
 
 ###  **Points Forts**
-• Performance exceptionnelle
-• Fiabilité élevée
-• Interface intuitive
-• Fonctionnalités complètes
+- Performance exceptionnelle
+- Fiabilité élevée
+- Interface intuitive
+- Fonctionnalités complètes
 
 ### 🔧 **Optimisations Futures**
-• Intégration IA avancée
-• Automatisation renforcée
-• Analytics prédictifs
-• Mobile app
+- Intégration IA avancée
+- Automatisation renforcée
+- Analytics prédictifs
+- Mobile app
 
 ## 🏆 **Classement Performance**
 
 ### 🥇 **Excellence Technique**
-• Architecture robuste
-• Scalabilité prouvée
-• Sécurité renforcée
-• Maintenance proactive
+- Architecture robuste
+- Scalabilité prouvée
+- Sécurité renforcée
+- Maintenance proactive
 
 ### 🥈 **Qualité de Service**
-• Réponses précises
-• Temps de traitement optimaux
-• Interface utilisateur intuitive
-• Support technique réactif
+- Réponses précises
+- Temps de traitement optimaux
+- Interface utilisateur intuitive
+- Support technique réactif
 
 ### 🥉 **Innovation Continue**
-• Mises à jour régulières
-• Nouvelles fonctionnalités
-• Amélioration continue
-• Adaptation aux besoins
+- Mises à jour régulières
+- Nouvelles fonctionnalités
+- Amélioration continue
+- Adaptation aux besoins
 
 ** Rapport généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')}**
 ** Source : Métriques système complètes**"""
@@ -11982,7 +15082,7 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
         response += "Voici ce que je peux vous proposer :\n"
         
         for i, suggestion in enumerate(suggestions, 1):
-            response += f"• {suggestion}\n"
+            response += f"- {suggestion}\n"
         
         response += "\nVoulez-vous essayer l'une de ces options ?"
         return response
@@ -11991,12 +15091,15 @@ ParcInfo est un système de gestion de parc informatique et bureautique complet 
         """Redirige vers des fonctionnalités disponibles"""
         response = "Bonjour ! Cette fonctionnalité n'est pas encore disponible.\n\n"
         response += "Voici ce que je peux faire actuellement :\n"
-        response += "• Rechercher des matériels\n"
-        response += "• Lister les commandes\n"
-        response += "• Vérifier les garanties\n"
-        response += "• Consulter les demandes\n\n"
+        response += "- Rechercher des matériels\n"
+        response += "- Lister les commandes\n"
+        response += "- Vérifier les garanties\n"
+        response += "- Consulter les demandes\n\n"
         response += "Que souhaitez-vous faire ?"
         return response
+        
+        # Si aucune condition n'est remplie, retourner None (pas de guide générique)
+        return None
 
 
 def get_chatbot():

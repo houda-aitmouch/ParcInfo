@@ -21,6 +21,62 @@ from apps.materiel_informatique.models import MaterielInformatique
 from apps.materiel_bureautique.models import MaterielBureau
 from apps.users.views import get_user_dashboard_url
 
+def get_materiels_disponibles_pour_demande(demande):
+    """
+    Récupère TOUS les matériels disponibles pour une demande donnée
+    (même désignation ET description, non affectés, en stock)
+    
+    Args:
+        demande: Instance de DemandeEquipement
+        
+    Returns:
+        QuerySet des matériels disponibles
+    """
+    if demande.type_article != 'materiel' or not demande.designation or not demande.description:
+        return []
+    
+    if demande.categorie == 'informatique':
+        # Récupérer TOUS les matériels informatiques avec même désignation ET description
+        # qui ne sont pas affectés et qui sont en stock (statut 'nouveau')
+        materiels = MaterielInformatique.objects.filter(
+            ligne_commande__designation=demande.designation_info,
+            ligne_commande__description=demande.description_info,
+            utilisateur__isnull=True,  # Pas encore affecté à un utilisateur
+            statut='nouveau'  # En stock
+        ).order_by('code_inventaire')
+        
+        # Exclure les matériels déjà utilisés par d'autres demandes en cours
+        materiels_ids_utilises = DemandeEquipement.objects.filter(
+            materiel_selectionne_id__in=[m.id for m in materiels],
+            statut__in=['approuvee', 'en_cours']
+        ).exclude(id=demande.id).values_list('materiel_selectionne_id', flat=True)
+        
+        materiels = materiels.exclude(id__in=materiels_ids_utilises)
+        
+        return materiels
+    
+    elif demande.categorie == 'bureau':
+        # Récupérer TOUS les matériels de bureau avec même désignation ET description
+        # qui ne sont pas affectés et qui sont en stock (statut 'Opérationnel')
+        materiels = MaterielBureau.objects.filter(
+            ligne_commande__designation=demande.designation_bureau,
+            ligne_commande__description=demande.description_bureau,
+            utilisateur__isnull=True,  # Pas encore affecté à un utilisateur
+            statut='Opérationnel'  # En stock
+        ).order_by('code_inventaire')
+        
+        # Exclure les matériels déjà utilisés par d'autres demandes en cours
+        materiels_ids_utilises = DemandeEquipement.objects.filter(
+            materiel_selectionne_id__in=[m.id for m in materiels],
+            statut__in=['approuvee', 'en_cours']
+        ).exclude(id=demande.id).values_list('materiel_selectionne_id', flat=True)
+        
+        materiels = materiels.exclude(id__in=materiels_ids_utilises)
+        
+        return materiels
+    
+    return []
+
 @login_required
 def liste_demandes(request):
     """Affiche la liste des demandes de l'utilisateur connecté"""
@@ -72,9 +128,37 @@ def nouvelle_demande(request):
             try:
                 demande = form.save(commit=False)
                 demande.demandeur = request.user
-                demande.statut = 'en_attente'
-                
+
+                # Déterminer si le stock existe pour cette demande
+                rupture = False
+                if demande.type_article == 'materiel':
+                    if demande.categorie == 'informatique' and demande.designation_info and demande.description_info:
+                        stock_disponible = MaterielInformatique.objects.filter(
+                            ligne_commande__designation=demande.designation_info,
+                            ligne_commande__description=demande.description_info,
+                            utilisateur__isnull=True,
+                            statut='nouveau'
+                        ).count()
+                        rupture = stock_disponible == 0
+                    elif demande.categorie == 'bureau' and demande.designation_bureau and demande.description_bureau:
+                        stock_disponible = MaterielBureau.objects.filter(
+                            ligne_commande__designation=demande.designation_bureau,
+                            ligne_commande__description=demande.description_bureau,
+                            utilisateur__isnull=True
+                        ).count()
+                        rupture = stock_disponible == 0
+
+                # Statut selon disponibilité
+                demande.statut = 'refusee' if rupture else 'en_attente'
+
                 demande.save()
+
+                # Message utilisateur en cas de rupture
+                from django.contrib import messages
+                if rupture:
+                    messages.error(request, "Demande refusée automatiquement: rupture de stock pour l'article demandé.")
+                else:
+                    messages.success(request, "Demande enregistrée avec succès et mise en attente de validation.")
                 
                 # Rediriger vers la liste des demandes
                 return redirect('demande_equipement:liste_demandes')
@@ -184,9 +268,10 @@ def supprimer_demande(request, pk):
 def get_designations(request):
     """API pour récupérer les désignations selon la catégorie"""
     categorie = request.GET.get('categorie')
-    
+
     if categorie == 'informatique':
-        designations = DesignationInfo.objects.all().values('id', 'nom')
+        # Pour le formulaire de demande, TOUS les utilisateurs voient seulement les désignations publiques
+        designations = DesignationInfo.objects.filter(descriptions__public=True).distinct().values('id', 'nom')
     elif categorie == 'bureau':
         designations = DesignationBureau.objects.all().values('id', 'nom')
     else:
@@ -200,14 +285,15 @@ def get_descriptions(request):
     """API pour récupérer les descriptions selon la catégorie et la désignation"""
     categorie = request.GET.get('categorie')
     designation_id = request.GET.get('designation_id')
-    
+
     if not designation_id:
         return JsonResponse({'descriptions': []})
     
     if categorie == 'informatique':
         try:
             designation = DesignationInfo.objects.get(id=designation_id)
-            descriptions = DescriptionInfo.objects.filter(designation=designation).values('id', 'nom')
+            # Pour le formulaire de demande, TOUS les utilisateurs voient seulement les descriptions publiques
+            descriptions = DescriptionInfo.objects.filter(designation=designation, public=True).values('id', 'nom')
         except DesignationInfo.DoesNotExist:
             descriptions = []
     elif categorie == 'bureau':
@@ -409,47 +495,117 @@ def approuver_demande(request, pk):
             demande.statut = 'approuvee'
             demande.date_approbation = timezone.now()
             demande.approuve_par = request.user
-            # Affecter un matériel si c'est une demande de matériel
+            
+            # Récupérer le matériel sélectionné par le gestionnaire
+            materiel_selectionne_id = request.POST.get('materiel_selectionne')
+            
+            # Affecter automatiquement le matériel sélectionné lors de l'approbation
             if demande.type_article == 'materiel' and demande.designation:
                 if demande.categorie == 'informatique':
-                    # Récupérer le matériel qui correspond au code inventaire affiché
-                    materiels_disponibles = list(MaterielInformatique.objects.filter(
-                        ligne_commande__designation=demande.designation_info,
-                        ligne_commande__description=demande.description_info,
-                        utilisateur__isnull=True,
-                        statut='nouveau'
-                    ).order_by('code_inventaire'))
-                    
-                    if materiels_disponibles:
-                        # Sélectionner le même matériel que celui affiché dans le code inventaire
-                        index_materiel = demande.id % len(materiels_disponibles)
-                        materiel = materiels_disponibles[index_materiel]
-                        materiel.statut = 'affecte'
-                        materiel.utilisateur = demande.demandeur
-                        materiel.save()
-                        demande.date_affectation = timezone.now()
-                        # Stocker l'ID du matériel affecté
-                        demande.materiel_selectionne_id = materiel.id
+                    if materiel_selectionne_id:
+                        try:
+                            materiel = MaterielInformatique.objects.get(
+                                id=materiel_selectionne_id,
+                                ligne_commande__designation=demande.designation_info,
+                                ligne_commande__description=demande.description_info,
+                                utilisateur__isnull=True,
+                                statut='nouveau'
+                            )
+                            
+                            # Vérifier qu'aucune autre demande n'utilise déjà ce matériel
+                            demandes_conflit = DemandeEquipement.objects.filter(
+                                materiel_selectionne_id=materiel.id,
+                                statut__in=['approuvee', 'en_cours']
+                            ).exclude(id=demande.id)
+                            
+                            if demandes_conflit.exists():
+                                from django.contrib import messages
+                                messages.error(request, f"Le matériel {materiel.code_inventaire} est déjà affecté à une autre demande en cours.")
+                                return redirect('demande_equipement:approuver_demande', pk=pk)
+                            # AFFECTER AUTOMATIQUEMENT le matériel
+                            materiel.statut = 'affecte'
+                            materiel.utilisateur = demande.demandeur
+                            materiel.save()
+                            demande.materiel_selectionne_id = materiel.id
+                            demande.date_affectation = timezone.now()
+                            from django.contrib import messages
+                            messages.success(request, f'Matériel {materiel.code_inventaire} automatiquement affecté à {demande.demandeur.get_full_name()}')
+                        except MaterielInformatique.DoesNotExist:
+                            from django.contrib import messages
+                            messages.error(request, "Le matériel sélectionné n'est plus disponible.")
+                            return redirect('demande_equipement:approuver_demande', pk=pk)
+                    else:
+                        # Fallback : sélectionner automatiquement le premier disponible
+                        # Utiliser la fonction utilitaire pour récupérer tous les matériels disponibles
+                        materiels_disponibles = get_materiels_disponibles_pour_demande(demande)
+                        
+                        if materiels_disponibles.exists():
+                            # Sélectionner et affecter automatiquement le premier matériel disponible
+                            materiel = materiels_disponibles.first()
+                            materiel.statut = 'affecte'
+                            materiel.utilisateur = demande.demandeur
+                            materiel.save()
+                            demande.materiel_selectionne_id = materiel.id
+                            demande.date_affectation = timezone.now()
+                            from django.contrib import messages
+                            messages.success(request, f'Matériel {materiel.code_inventaire} automatiquement affecté à {demande.demandeur.get_full_name()}')
+                        else:
+                            from django.contrib import messages
+                            messages.error(request, "Aucun matériel disponible en stock pour cette demande.")
+                            return redirect('demande_equipement:approuver_demande', pk=pk)
                         
                 elif demande.categorie == 'bureau':
-                    # Récupérer le matériel qui correspond au code inventaire affiché
-                    materiels_disponibles = list(MaterielBureau.objects.filter(
-                        ligne_commande__designation=demande.designation_bureau,
-                        ligne_commande__description=demande.description_bureau,
-                        utilisateur__isnull=True,
-                        statut='Opérationnel'
-                    ).order_by('code_inventaire'))
-                    
-                    if materiels_disponibles:
-                        # Sélectionner le même matériel que celui affiché dans le code inventaire
-                        index_materiel = demande.id % len(materiels_disponibles)
-                        materiel = materiels_disponibles[index_materiel]
-                        materiel.statut = 'Affecté'
-                        materiel.utilisateur = demande.demandeur
-                        materiel.save()
-                        demande.date_affectation = timezone.now()
-                        # Stocker l'ID du matériel affecté
-                        demande.materiel_selectionne_id = materiel.id
+                    if materiel_selectionne_id:
+                        try:
+                            materiel = MaterielBureau.objects.get(
+                                id=materiel_selectionne_id,
+                                ligne_commande__designation=demande.designation_bureau,
+                                ligne_commande__description=demande.description_bureau,
+                                utilisateur__isnull=True,
+                                statut='Opérationnel'
+                            )
+                            
+                            # Vérifier qu'aucune autre demande n'utilise déjà ce matériel
+                            demandes_conflit = DemandeEquipement.objects.filter(
+                                materiel_selectionne_id=materiel.id,
+                                statut__in=['approuvee', 'en_cours']
+                            ).exclude(id=demande.id)
+                            
+                            if demandes_conflit.exists():
+                                from django.contrib import messages
+                                messages.error(request, f"Le matériel {materiel.code_inventaire} est déjà affecté à une autre demande en cours.")
+                                return redirect('demande_equipement:approuver_demande', pk=pk)
+                            # AFFECTER AUTOMATIQUEMENT le matériel
+                            materiel.statut = 'Affecté'
+                            materiel.utilisateur = demande.demandeur
+                            materiel.save()
+                            demande.materiel_selectionne_id = materiel.id
+                            demande.date_affectation = timezone.now()
+                            from django.contrib import messages
+                            messages.success(request, f'Matériel {materiel.code_inventaire} automatiquement affecté à {demande.demandeur.get_full_name()}')
+                        except MaterielBureau.DoesNotExist:
+                            from django.contrib import messages
+                            messages.error(request, "Le matériel sélectionné n'est plus disponible.")
+                            return redirect('demande_equipement:approuver_demande', pk=pk)
+                    else:
+                        # Fallback : sélectionner automatiquement le premier disponible
+                        # Utiliser la fonction utilitaire pour récupérer tous les matériels disponibles
+                        materiels_disponibles = get_materiels_disponibles_pour_demande(demande)
+                        
+                        if materiels_disponibles.exists():
+                            # Sélectionner et affecter automatiquement le premier matériel disponible
+                            materiel = materiels_disponibles.first()
+                            materiel.statut = 'Affecté'
+                            materiel.utilisateur = demande.demandeur
+                            materiel.save()
+                            demande.materiel_selectionne_id = materiel.id
+                            demande.date_affectation = timezone.now()
+                            from django.contrib import messages
+                            messages.success(request, f'Matériel {materiel.code_inventaire} automatiquement affecté à {demande.demandeur.get_full_name()}')
+                        else:
+                            from django.contrib import messages
+                            messages.error(request, "Aucun matériel disponible en stock pour cette demande.")
+                            return redirect('demande_equipement:approuver_demande', pk=pk)
             
             # Sauvegarder la demande avant de générer le PDF
             demande.save()
@@ -487,13 +643,91 @@ def approuver_demande(request, pk):
             demande.statut = 'en_cours'
         elif action == 'terminer':
             demande.statut = 'terminee'
+        elif action == 'affecter_materiel':
+            # Affecter réellement le matériel sélectionné
+            if demande.materiel_selectionne_id and demande.type_article == 'materiel':
+                if demande.categorie == 'informatique':
+                    try:
+                        materiel = MaterielInformatique.objects.get(id=demande.materiel_selectionne_id)
+                        if materiel.utilisateur is None and materiel.statut == 'nouveau':
+                            materiel.statut = 'affecte'
+                            materiel.utilisateur = demande.demandeur
+                            materiel.save()
+                            demande.date_affectation = timezone.now()
+                            from django.contrib import messages
+                            messages.success(request, f'Matériel {materiel.code_inventaire} affecté à {demande.demandeur.get_full_name()}')
+                        else:
+                            from django.contrib import messages
+                            messages.error(request, "Ce matériel n'est plus disponible pour affectation")
+                    except MaterielInformatique.DoesNotExist:
+                        from django.contrib import messages
+                        messages.error(request, "Matériel introuvable")
+                elif demande.categorie == 'bureau':
+                    try:
+                        materiel = MaterielBureau.objects.get(id=demande.materiel_selectionne_id)
+                        if materiel.utilisateur is None and materiel.statut == 'operationnel':
+                            materiel.statut = 'affecte'
+                            materiel.utilisateur = demande.demandeur
+                            materiel.save()
+                            demande.date_affectation = timezone.now()
+                            from django.contrib import messages
+                            messages.success(request, f'Matériel {materiel.code_inventaire} affecté à {demande.demandeur.get_full_name()}')
+                        else:
+                            from django.contrib import messages
+                            messages.error(request, "Ce matériel n'est plus disponible pour affectation")
+                    except MaterielBureau.DoesNotExist:
+                        from django.contrib import messages
+                        messages.error(request, "Matériel introuvable")
+            else:
+                from django.contrib import messages
+                messages.error(request, "Aucun matériel sélectionné pour cette demande")
         
         demande.save()
         return redirect('demande_equipement:liste_toutes_demandes')
     
+    # Récupérer TOUS les matériels disponibles pour cette demande
+    # (même désignation ET description, non affectés, en stock)
+    materiels_disponibles = []
+    if demande.type_article == 'materiel' and demande.statut == 'en_attente':
+        # Utiliser la fonction utilitaire pour récupérer tous les matériels disponibles
+        materiels_disponibles = get_materiels_disponibles_pour_demande(demande)
+    
+    # Ajouter des informations supplémentaires sur les matériels disponibles
+    nombre_materiels_disponibles = len(materiels_disponibles)
+    
+    # Calculer le total des matériels de cette catégorie et le nombre d'affectés
+    total_materiels_categorie = 0
+    total_materiels_affectes = 0
+    
+    if demande.type_article == 'materiel' and demande.designation:
+        if demande.categorie == 'informatique':
+            total_materiels_categorie = MaterielInformatique.objects.filter(
+                ligne_commande__designation=demande.designation_info,
+                ligne_commande__description=demande.description_info
+            ).count()
+            total_materiels_affectes = MaterielInformatique.objects.filter(
+                ligne_commande__designation=demande.designation_info,
+                ligne_commande__description=demande.description_info,
+                utilisateur__isnull=False
+            ).count()
+        elif demande.categorie == 'bureau':
+            total_materiels_categorie = MaterielBureau.objects.filter(
+                ligne_commande__designation=demande.designation_bureau,
+                ligne_commande__description=demande.description_bureau
+            ).count()
+            total_materiels_affectes = MaterielBureau.objects.filter(
+                ligne_commande__designation=demande.designation_bureau,
+                ligne_commande__description=demande.description_bureau,
+                utilisateur__isnull=False
+            ).count()
+    
     dashboard_url = get_user_dashboard_url(request.user)
     return render(request, 'demande_equipement/approuver_demande.html', {
         'demande': demande,
+        'materiels_disponibles': materiels_disponibles,
+        'nombre_materiels_disponibles': nombre_materiels_disponibles,
+        'total_materiels_categorie': total_materiels_categorie,
+        'total_materiels_affectes': total_materiels_affectes,
         'dashboard_url': dashboard_url
     })
 

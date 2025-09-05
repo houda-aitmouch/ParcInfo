@@ -14,13 +14,13 @@
 </head>
 <body class="bg-gray-100">
     <div class="bg-white shadow-sm border-b">
-        <div class="max-w-7xl mx-auto px-4 py-3">
+        <div class="max-w-9xl mx-auto px-4 py-3">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-lg font-semibold text-gray-900">Décharge - Demande #{{ demande.id }}</h1>
                     <p class="text-sm text-gray-600">{{ demande.demandeur.get_full_name }} - {{ demande.get_categorie_display }}</p>
                 </div>
-                <div class="flex space-x-2">
+                <div class="flex flex-col space-y-1">
                     <button id="prevPage" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Précédent</button>
                     <span id="pageInfo" class="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm">Page 1 sur 1</span>
                     <button id="nextPage" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Suivant</button>

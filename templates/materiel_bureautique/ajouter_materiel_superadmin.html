@@ -403,7 +403,8 @@ function materielForm() {
                 this.descriptionsPourDesignation = [];
                 return;
             }
-            fetch(`/materiel-bureautique/api/lignes-commande/${this.commandeId}/`)
+            const apiBase = "{% url 'materiel_bureautique:lignes_commande_par_commande' 0 %}".replace(/0\/$/, '');
+            fetch(`${apiBase}${this.commandeId}/`)
                 .then(r => r.json())
                 .then(data => {
                     this.lignesCommande = data;

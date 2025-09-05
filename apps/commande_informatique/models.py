@@ -10,6 +10,7 @@ class Designation(models.Model):
 class Description(models.Model):
     designation = models.ForeignKey(Designation, on_delete=models.CASCADE, related_name='descriptions')
     nom = models.CharField(max_length=200)
+    public = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nom

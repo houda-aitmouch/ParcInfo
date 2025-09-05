@@ -7,7 +7,8 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "gantt:export": "mmdc -i gantt_parcinfo_detailed.mmd -o gantt_parcinfo_detailed.png -t default"
   },
   "repository": {
     "type": "git",

@@ -15,14 +15,14 @@ class OllamaClient:
     def __init__(self):
         self.base_url = getattr(settings, 'OLLAMA_URL', 'http://localhost:11434')
         self.model = getattr(settings, 'OLLAMA_MODEL', 'llama3')
-        self.timeout = getattr(settings, 'OLLAMA_TIMEOUT', 30)
+        self.timeout = getattr(settings, 'OLLAMA_TIMEOUT', 120)  # Increased timeout
         self.max_tokens = getattr(settings, 'OLLAMA_MAX_TOKENS', 1000)
         self.temperature = getattr(settings, 'OLLAMA_TEMPERATURE', 0.7)
         
     def is_available(self) -> bool:
         """Check if Ollama service is available"""
         try:
-            response = requests.get(f"{self.base_url}/api/tags", timeout=5)
+            response = requests.get(f"{self.base_url}/api/tags", timeout=10)
             return response.status_code == 200
         except Exception as e:
             logger.warning(f"Ollama not available: {e}")
@@ -31,7 +31,7 @@ class OllamaClient:
     def list_models(self) -> List[str]:
         """List available models in Ollama"""
         try:
-            response = requests.get(f"{self.base_url}/api/tags", timeout=10)
+            response = requests.get(f"{self.base_url}/api/tags", timeout=15)
             if response.status_code == 200:
                 data = response.json()
                 return [model['name'] for model in data.get('models', [])]
@@ -54,7 +54,8 @@ class OllamaClient:
                     "temperature": self.temperature,
                     "num_predict": self.max_tokens,
                     "top_p": 0.9,
-                    "top_k": 40
+                    "top_k": 40,
+                    "stop": ["Human:", "Assistant:", "User:", "Bot:"]
                 }
             }
             
@@ -73,39 +74,37 @@ class OllamaClient:
                 
         except requests.exceptions.Timeout:
             logger.error("Ollama request timeout")
-            return "La génération de réponse a pris trop de temps. Veuillez réessayer."
+            return "La génération de réponse a pris trop de temps. Veuillez réessayer avec une question plus simple."
         except Exception as e:
             logger.error(f"Error generating response: {e}")
             return "Une erreur est survenue lors de la génération de la réponse."
     
     def _build_rag_prompt(self, query: str, context: List[Dict]) -> str:
         """Build enhanced prompt with RAG context and strong anti-hallucination rules"""
-        system_prompt = """Tu es un assistant IA spécialisé dans la gestion du parc informatique et bureautique.
+        system_prompt = """Tu es ParcInfo, un assistant IA amical et professionnel pour la gestion du parc informatique et bureautique.
 
-RÈGLES STRICTES ANTI-HALLUCINATIONS :
-1. UTILISE UNIQUEMENT LES DONNÉES DU CONTEXTE FOURNI. NE PAS INVENTER OU AJOUTER D'INFORMATIONS EXTÉRIEURES.
-2. SI LE CONTEXTE NE CONTIENT PAS LA RÉPONSE EXACTE, RÉPONDS : "Information non disponible dans les données actuelles."
-3. NE PAS GÉNÉRALISER OU INFÉRER AU-DELÀ DU CONTEXTE. PAS D'OPINIONS PERSONNELLES.
-4. RÉPONDS DE MANIÈRE DÉTAILLÉE ET STRUCTURÉE : Maximum 400 mots pour les questions complexes.
-5. STRUCTURE : Utilise des puces (•) pour les listes, tableaux Markdown pour les données structurées, sections avec ##.
-6. SI DONNÉES NUMÉRIQUES : Fournis des chiffres précis sans arrondis approximatifs.
-7. MONNAIE : Utilise TOUJOURS "DH HT" (Dirhams Hors Taxes) pour tous les montants, jamais d'euros (€).
-8. FIN DE RÉPONSE : Ne pas ajouter de mention de source.
-8. CONTEXTE RICHE : Utilise TOUS les détails disponibles dans le contexte pour une réponse complète.
-9. RELATIONS : Explique les liens entre les entités (fournisseurs, commandes, matériels, etc.).
-10. DATES : Inclus toujours les dates pertinentes pour donner du contexte temporel.
-11. ANALYSES COMPLEXES : Pour les questions multi-tables, organise la réponse par entité ou critère.
-12. RECOMMANDATIONS : Si demandé, propose des actions basées sur les données disponibles.
+TON ET PERSONNALITÉ :
+- Réponds comme un humain sympathique et compétent
+- Sois naturel, chaleureux et engageant
+- Utilise un langage conversationnel mais professionnel
+- Commence par des salutations amicales quand c'est approprié
+- Termine par des invitations à poser d'autres questions
 
-FORMAT DE RÉPONSE EXEMPLES :
-- Comptage : "Total : X éléments. Détails : • Item1 • Item2"
-- Recherche : "Matériel trouvé : Code XXX, Statut YYY, Localisation ZZZ"
-- Statistique : "| Catégorie | Valeur |\n|----------|--------|\n| Total PC | 42 |"
-- Relation : "Fournisseur X a livré Y commandes, dont Z en retard"
-- Analyse complexe : "## Analyse par fournisseur\n### Fournisseur A\n• Commandes : X\n• Livraisons : Y\n### Fournisseur B\n..."
-- Inconnu : "Information non disponible dans les données actuelles."
+RÈGLES DE RÉPONSE :
+1. Pour les questions de conversation simple (salut, ça va, bonjour) : Réponds de manière amicale et naturelle
+2. Pour les questions techniques : Utilise le contexte fourni, mais explique de manière claire et accessible
+3. Si pas de contexte pertinent : Sois honnête mais reste utile et encourageant
+4. Maximum 300 mots pour garder les réponses digestes
+5. Utilise des puces (•) pour les listes, des sections claires
+6. Pour les montants : utilise "DH HT" (Dirhams Hors Taxes)
+7. Inclus les dates importantes pour le contexte
 
-CONTEXTE DISPONIBLE : Utilise TOUS les champs et relations disponibles pour une réponse exhaustive et structurée."""
+EXEMPLES DE TON :
+- Conversation : "Salut ! Ça va bien, merci ! Je suis là pour t'aider avec ton parc informatique. Qu'est-ce que tu aimerais savoir ?"
+- Technique : "Parfait ! Voici les fournisseurs disponibles dans ton système : [liste claire]"
+- Pas d'info : "Désolé, je n'ai pas cette info dans mes données actuelles. Peux-tu reformuler ta question ?"
+
+CONTEXTE DISPONIBLE : Utilise les informations fournies pour donner des réponses précises et utiles."""
 
         if context:
             # Filter and prioritize context (amélioré pour une meilleure pertinence)
@@ -336,10 +335,25 @@ class RAGChatbot:
                     'context_used': chat_result.get('context_used', 0)
                 }
         
-        # Fallback to structured response
+        # Fallback to structured response - use RAG search even without LLM
+        if use_rag:
+            rag_results = self.rag.semantic_search(query, top_k=3)
+            if rag_results:
+                # Format RAG results as a structured response
+                response_parts = []
+                for i, result in enumerate(rag_results[:3], 1):
+                    response_parts.append(f"{i}. {result.get('content', '')[:200]}...")
+                
+                return {
+                    'response': f"Voici les informations trouvées :\n\n" + "\n\n".join(response_parts),
+                    'method': 'rag_fallback',
+                    'sources': [r.get('source', '') for r in rag_results],
+                    'context_used': len(rag_results)
+                }
+        
         return {
-            'response': "Mode de réponse structurée non disponible pour cette requête.",
-            'method': 'structured',
+            'response': "Je n'ai pas trouvé d'informations pertinentes pour votre question. Pouvez-vous reformuler ou être plus spécifique ?",
+            'method': 'no_results',
             'sources': [],
             'context_used': 0
         }

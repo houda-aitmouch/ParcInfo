@@ -246,6 +246,14 @@ def get_user_dashboard_url(user):
     else:
         return 'users:employe_dashboard'
 
+def home_view(request):
+    """Vue d'accueil qui redirige selon l'état d'authentification"""
+    if request.user.is_authenticated:
+        return redirect_user(request)
+    else:
+        # Rediriger vers la page de login HTTP (pas admin)
+        return redirect('login')
+
 @login_required
 def redirect_user(request):
     user = request.user
@@ -1313,6 +1321,10 @@ def notifications_demandes_employe(request):
         if " - " in notif.titre:
             titre_clean = notif.titre.split(" - ")[0]  # Garder seulement "Demande D041"
         
+        # Construire un mapping sûr pour le display label
+        statut_display_map = dict(NotificationDemande.STATUT_CHOICES)
+        statut_display = statut_display_map.get(notif.statut_demande, notif.statut_demande.capitalize())
+
         notifications_formatees.append({
             'id': notif.id,
             'titre': titre_clean,  # Titre sans le statut
@@ -1323,7 +1335,7 @@ def notifications_demandes_employe(request):
             'date_creation': notif.date_creation.strftime('%d/%m/%Y %H:%M'),
             'est_recente': notif.est_recente,
             'badge_couleur': notif.badge_couleur,
-            'statut_display': dict(NotificationDemande.STATUT_CHOICES)[notif.statut_demande]
+            'statut_display': statut_display
         })
     
     return JsonResponse({

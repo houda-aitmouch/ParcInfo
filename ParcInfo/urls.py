@@ -1,15 +1,27 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import redirect
 
 # Ajoutez cette route si vous avez besoin d'un service worker
 from django.views.generic import TemplateView
+from django.http import JsonResponse
+
+def health(request):
+    return JsonResponse({"status": "ok"})
+
+def redirect_admin_login(request):
+    """Redirige /admin/login/ vers /login/login/"""
+    return redirect('login')
 
 urlpatterns = [
+    path('admin/login/', redirect_admin_login, name='admin_login_redirect'),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('login/', include('django.contrib.auth.urls')),
     path('', include('apps.users.urls')),
+    path('health', health),
 
     path('fournisseurs/', include('apps.fournisseurs.urls', namespace='fournisseurs')),
     path('commande-informatique/', include('apps.commande_informatique.urls', namespace='commandes_informatique')),
@@ -19,12 +31,25 @@ urlpatterns = [
     path('demandes/', include('apps.demande_equipement.urls', namespace='demande_equipement')),
     path('livraisons/', include('apps.livraison.urls', namespace='livraison')),
     path('chatbot/', include('apps.chatbot.urls', namespace='chatbot')),
-    path('sw.js', TemplateView.as_view(
-        template_name='sw.js',
-        content_type='application/javascript'
-    )),
 ]
 
+# Configuration des fichiers statiques - Version simplifiée
 if settings.DEBUG:
+    # En mode développement, servir depuis le dossier static
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.BASE_DIR / 'static')
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # En production, servir depuis STATIC_ROOT
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Only expose service worker in non-debug environments
+    urlpatterns += [
+        re_path(r'^sw\.js$', TemplateView.as_view(
+            template_name='sw.js',
+            content_type='application/javascript'
+        )),
+        re_path(r'^sw\.js/$', TemplateView.as_view(
+            template_name='sw.js',
+            content_type='application/javascript'
+        )),
+    ]

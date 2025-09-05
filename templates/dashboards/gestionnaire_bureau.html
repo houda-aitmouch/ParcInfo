@@ -284,9 +284,9 @@
                                 </div>
                             </div>
                             <span class="text-xs px-2 py-1 rounded-full 
-                                {% if materiel.statut == 'Opérationnel' %}bg-green-100 text-green-800
+                                {% if materiel.statut == 'operationnel' %}bg-green-100 text-green-800
                                 {% elif materiel.statut == 'affecte' %}bg-blue-100 text-blue-800
-                                {% elif materiel.statut == 'Réparation' %}bg-orange-100 text-orange-800
+                                {% elif materiel.statut == 'reparation' %}bg-orange-100 text-orange-800
                                 {% else %}bg-red-100 text-red-800{% endif %}">
                                 {{ materiel.statut }}
                             </span>

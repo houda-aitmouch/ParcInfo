@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AS-IS ParcInfo - Workflow Manuel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .diagram-container {
+            position: relative;
+            width: 100%;
+            height: 800px;
+            border: 2px solid #34495e;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .swimlane {
+            position: relative;
+            height: 200px;
+            border-bottom: 2px solid #34495e;
+            display: flex;
+            align-items: center;
+        }
+        
+        .swimlane:last-child {
+            border-bottom: none;
+        }
+        
+        .swimlane-header {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 200px;
+            height: 100%;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            z-index: 10;
+        }
+        
+        .swimlane-content {
+            margin-left: 200px;
+            width: calc(100% - 200px);
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+        
+        .swimlane.employe {
+            background-color: #e8f4fd;
+        }
+        
+        .swimlane.gestionnaire-info {
+            background-color: #f3e5f5;
+        }
+        
+        .swimlane.gestionnaire-bureau {
+            background-color: #fff3e0;
+        }
+        
+        .swimlane.super-admin {
+            background-color: #e8f5e8;
+        }
+        
+        .swimlane.secretaire {
+            background-color: #f5f5f5;
+        }
+        
+        .activity {
+            position: absolute;
+            min-width: 120px;
+            max-width: 150px;
+            height: 60px;
+            background: white;
+            border: 2px solid #34495e;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #2c3e50;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 5;
+        }
+        
+        .decision {
+            position: absolute;
+            width: 100px;
+            height: 60px;
+            background: white;
+            border: 2px solid #e74c3c;
+            transform: rotate(45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: #e74c3c;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 5;
+        }
+        
+        .decision span {
+            transform: rotate(-45deg);
+            max-width: 80px;
+        }
+        
+        .start {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #2c3e50;
+            border-radius: 50%;
+            border: 3px solid #34495e;
+            z-index: 5;
+        }
+        
+        .end {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #2c3e50;
+            border-radius: 50%;
+            border: 3px solid #34495e;
+            z-index: 5;
+        }
+        
+        .end::after {
+            content: "X";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .end-final {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #2c3e50;
+            border-radius: 50%;
+            border: 3px solid white;
+            z-index: 5;
+        }
+        
+        .arrow {
+            position: absolute;
+            height: 2px;
+            background: #34495e;
+            z-index: 3;
+        }
+        
+        .arrow::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: -3px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid #34495e;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+        
+        .arrow-dashed {
+            position: absolute;
+            height: 2px;
+            background: repeating-linear-gradient(to right, #34495e 0, #34495e 5px, transparent 5px, transparent 10px);
+            z-index: 3;
+        }
+        
+        .arrow-dashed::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: -3px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid #34495e;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+        
+        .arrow-vertical {
+            position: absolute;
+            width: 2px;
+            background: #34495e;
+            z-index: 3;
+        }
+        
+        .arrow-vertical::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: -3px;
+            width: 0;
+            height: 0;
+            border-top: 8px solid #34495e;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+        }
+        
+        .label {
+            position: absolute;
+            font-size: 10px;
+            color: #7f8c8d;
+            font-weight: bold;
+            z-index: 4;
+        }
+        
+        .legend {
+            margin-top: 30px;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 8px;
+        }
+        
+        .legend h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .legend-symbol {
+            width: 30px;
+            height: 20px;
+            margin-right: 15px;
+            border: 1px solid #bdc3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        
+        .legend-decision {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 2px solid #e74c3c;
+            transform: rotate(45deg);
+            margin-right: 15px;
+        }
+        
+        .legend-decision::after {
+            content: "D";
+            position: absolute;
+            transform: rotate(-45deg);
+            font-size: 10px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Workflow ParcInfo - AS-IS Manuel</h1>
+        
+        <div class="diagram-container">
+            <!-- Swimlane Employé -->
+            <div class="swimlane employe">
+                <div class="swimlane-header">Employé</div>
+                <div class="swimlane-content">
+                    <!-- Start -->
+                    <div class="start" style="left: 50px; top: 85px;"></div>
+                    
+                    <!-- Activities -->
+                    <div class="activity" style="left: 100px; top: 70px;">
+                        Créer demande<br>équipement
+                    </div>
+                    
+                    <div class="activity" style="left: 300px; top: 70px;">
+                        Remplir<br>formulaire
+                    </div>
+                    
+                    <div class="decision" style="left: 500px; top: 70px;">
+                        <span>Stock<br>disponible?</span>
+                    </div>
+                    
+                    <div class="activity" style="left: 700px; top: 70px;">
+                        Signer<br>décharge
+                    </div>
+                    
+                    <div class="activity" style="left: 900px; top: 70px;">
+                        Réceptionner<br>matériel
+                    </div>
+                    
+                    <div class="end" style="left: 1100px; top: 85px;"></div>
+                    
+                    <!-- Arrows -->
+                    <div class="arrow" style="left: 80px; top: 100px; width: 20px;"></div>
+                    <div class="arrow" style="left: 250px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 450px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 650px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 850px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 1050px; top: 100px; width: 50px;"></div>
+                    
+                    <!-- Labels -->
+                    <div class="label" style="left: 520px; top: 50px;">Non</div>
+                    <div class="label" style="left: 520px; top: 130px;">Oui</div>
+                </div>
+            </div>
+            
+            <!-- Swimlane Secrétaire -->
+            <div class="swimlane secretaire">
+                <div class="swimlane-header">Secrétaire</div>
+                <div class="swimlane-content">
+                    <!-- Activities -->
+                    <div class="activity" style="left: 100px; top: 70px;">
+                        Enregistrer<br>demande
+                    </div>
+                    
+                    <div class="activity" style="left: 300px; top: 70px;">
+                        Attribuer<br>numéro
+                    </div>
+                    
+                    <div class="activity" style="left: 500px; top: 70px;">
+                        Classer par<br>catégorie
+                    </div>
+                    
+                    <div class="activity" style="left: 700px; top: 70px;">
+                        Transmettre à<br>gestionnaire
+                    </div>
+                    
+                    <div class="activity" style="left: 900px; top: 70px;">
+                        Notifier<br>décision
+                    </div>
+                    
+                    <div class="activity" style="left: 1100px; top: 70px;">
+                        Archiver<br>demande
+                    </div>
+                    
+                    <!-- Arrows -->
+                    <div class="arrow" style="left: 250px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 450px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 650px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 850px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 1050px; top: 100px; width: 50px;"></div>
+                    
+                    <!-- Vertical arrows to/from other lanes -->
+                    <div class="arrow-vertical" style="left: 120px; top: -20px; height: 20px;"></div>
+                    <div class="arrow-vertical" style="left: 720px; top: -20px; height: 20px;"></div>
+                </div>
+            </div>
+            
+            <!-- Swimlane Gestionnaire Informatique -->
+            <div class="swimlane gestionnaire-info">
+                <div class="swimlane-header">Gestionnaire<br>Informatique</div>
+                <div class="swimlane-content">
+                    <!-- Activities -->
+                    <div class="activity" style="left: 100px; top: 70px;">
+                        Recevoir<br>demande info
+                    </div>
+                    
+                    <div class="activity" style="left: 300px; top: 70px;">
+                        Vérifier<br>stock info
+                    </div>
+                    
+                    <div class="decision" style="left: 500px; top: 70px;">
+                        <span>Approuver<br>demande?</span>
+                    </div>
+                    
+                    <div class="activity" style="left: 700px; top: 70px;">
+                        Préparer<br>matériel info
+                    </div>
+                    
+                    <div class="activity" style="left: 900px; top: 70px;">
+                        Mettre à jour<br>inventaire
+                    </div>
+                    
+                    <div class="activity" style="left: 1100px; top: 70px;">
+                        Créer<br>commande info
+                    </div>
+                    
+                    <!-- Arrows -->
+                    <div class="arrow" style="left: 250px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 450px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 650px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 850px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 1050px; top: 100px; width: 50px;"></div>
+                    
+                    <!-- Labels -->
+                    <div class="label" style="left: 520px; top: 50px;">Non</div>
+                    <div class="label" style="left: 520px; top: 130px;">Oui</div>
+                    
+                    <!-- Vertical arrows -->
+                    <div class="arrow-vertical" style="left: 120px; top: -20px; height: 20px;"></div>
+                    <div class="arrow-vertical" style="left: 720px; top: -20px; height: 20px;"></div>
+                </div>
+            </div>
+            
+            <!-- Swimlane Gestionnaire Bureau -->
+            <div class="swimlane gestionnaire-bureau">
+                <div class="swimlane-header">Gestionnaire<br>Bureau</div>
+                <div class="swimlane-content">
+                    <!-- Activities -->
+                    <div class="activity" style="left: 100px; top: 70px;">
+                        Recevoir<br>demande bureau
+                    </div>
+                    
+                    <div class="activity" style="left: 300px; top: 70px;">
+                        Vérifier<br>stock bureau
+                    </div>
+                    
+                    <div class="decision" style="left: 500px; top: 70px;">
+                        <span>Approuver<br>demande?</span>
+                    </div>
+                    
+                    <div class="activity" style="left: 700px; top: 70px;">
+                        Préparer<br>matériel bureau
+                    </div>
+                    
+                    <div class="activity" style="left: 900px; top: 70px;">
+                        Mettre à jour<br>inventaire
+                    </div>
+                    
+                    <div class="activity" style="left: 1100px; top: 70px;">
+                        Créer<br>commande bureau
+                    </div>
+                    
+                    <!-- Arrows -->
+                    <div class="arrow" style="left: 250px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 450px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 650px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 850px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 1050px; top: 100px; width: 50px;"></div>
+                    
+                    <!-- Labels -->
+                    <div class="label" style="left: 520px; top: 50px;">Non</div>
+                    <div class="label" style="left: 520px; top: 130px;">Oui</div>
+                    
+                    <!-- Vertical arrows -->
+                    <div class="arrow-vertical" style="left: 120px; top: -20px; height: 20px;"></div>
+                    <div class="arrow-vertical" style="left: 720px; top: -20px; height: 20px;"></div>
+                </div>
+            </div>
+            
+            <!-- Swimlane Super Admin -->
+            <div class="swimlane super-admin">
+                <div class="swimlane-header">Super Admin</div>
+                <div class="swimlane-content">
+                    <!-- Activities -->
+                    <div class="activity" style="left: 100px; top: 70px;">
+                        Valider<br>commande
+                    </div>
+                    
+                    <div class="activity" style="left: 300px; top: 70px;">
+                        Contacter<br>fournisseur
+                    </div>
+                    
+                    <div class="activity" style="left: 500px; top: 70px;">
+                        Suivre<br>livraison
+                    </div>
+                    
+                    <div class="activity" style="left: 700px; top: 70px;">
+                        Valider<br>réception
+                    </div>
+                    
+                    <div class="activity" style="left: 900px; top: 70px;">
+                        Signer<br>PV réception
+                    </div>
+                    
+                    <div class="end-final" style="left: 1100px; top: 85px;"></div>
+                    
+                    <!-- Arrows -->
+                    <div class="arrow" style="left: 250px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 450px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 650px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 850px; top: 100px; width: 50px;"></div>
+                    <div class="arrow" style="left: 1050px; top: 100px; width: 50px;"></div>
+                    
+                    <!-- Vertical arrows from other lanes -->
+                    <div class="arrow-vertical" style="left: 1120px; top: -20px; height: 20px;"></div>
+                    <div class="arrow-vertical" style="left: 1120px; top: -20px; height: 20px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <h3>📋 Légende du Diagramme AS-IS ParcInfo</h3>
+            
+            <div class="legend-item">
+                <div class="legend-symbol">●</div>
+                <span>Début du processus</span>
+            </div>
+            
+            <div class="legend-item">
+                <div class="legend-symbol">●X</div>
+                <span>Fin du processus</span>
+            </div>
+            
+            <div class="legend-item">
+                <div class="legend-symbol">●</div>
+                <span>Fin finale du processus</span>
+            </div>
+            
+            <div class="legend-item">
+                <div class="legend-symbol">Activité</div>
+                <span>Activité/Processus manuel</span>
+            </div>
+            
+            <div class="legend-item">
+                <div class="legend-decision"></div>
+                <span>Point de décision</span>
+            </div>
+            
+            <div class="legend-item">
+                <div class="legend-symbol">→</div>
+                <span>Flux principal</span>
+            </div>
+            
+            <div class="legend-item">
+                <div class="legend-symbol">⇢</div>
+                <span>Flux de retour/erreur</span>
+            </div>
+            
+            <div class="legend-item">
+                <div class="legend-symbol">↓</div>
+                <span>Passage entre swimlanes</span>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 20px; background: #e8f4fd; border-radius: 8px;">
+            <h3>🎯 Description du Workflow AS-IS ParcInfo</h3>
+            <p><strong>Ce diagramme représente l'état actuel (AS-IS) du workflow de gestion de parc informatique et bureautique, entièrement manuel :</strong></p>
+            
+            <h4>📋 Processus Principal :</h4>
+            <ol>
+                <li><strong>Employé</strong> : Crée une demande d'équipement et remplit un formulaire papier</li>
+                <li><strong>Secrétaire</strong> : Enregistre la demande, attribue un numéro et la classe par catégorie</li>
+                <li><strong>Gestionnaire (Info/Bureau)</strong> : Vérifie le stock disponible et prend une décision d'approbation</li>
+                <li><strong>Employé</strong> : Si approuvé, signe une décharge et réceptionne le matériel</li>
+                <li><strong>Super Admin</strong> : Valide les commandes, suit les livraisons et signe les procès-verbaux de réception</li>
+            </ol>
+            
+            <h4>🔄 Points de Décision :</h4>
+            <ul>
+                <li><strong>Stock disponible ?</strong> : Détermine si la demande peut être satisfaite immédiatement</li>
+                <li><strong>Approuver demande ?</strong> : Validation par le gestionnaire concerné</li>
+            </ul>
+            
+            <h4>📄 Documents Manuels :</h4>
+            <ul>
+                <li>Formulaires de demande d'équipement</li>
+                <li>Registres d'inventaire</li>
+                <li>Décharges de responsabilité</li>
+                <li>Bons de commande</li>
+                <li>Procès-verbaux de réception</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

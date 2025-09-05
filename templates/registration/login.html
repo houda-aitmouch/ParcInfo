@@ -9,7 +9,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -42,26 +42,43 @@
                             800: '#6b21a8',
                             900: '#581c87',
                         },
-                        add: {
-                            blue: '#3399FF',
-                            purple: '#8B5CF6',
+                        accent: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
                         }
                     },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Poppins', 'system-ui', 'sans-serif'],
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.8s ease-in-out',
-                        'slide-up': 'slideUp 0.5s ease-out',
-                        'bounce-in': 'bounceIn 0.6s ease-out',
+                        'fade-in-up': 'fadeInUp 0.8s ease-out',
+                        'fade-in-down': 'fadeInDown 0.8s ease-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'bounce-in': 'bounceIn 0.8s ease-out',
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'shimmer': 'shimmer 2s linear infinite',
                     },
                     keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeInDown: {
+                            '0%': { opacity: '0', transform: 'translateY(-30px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
                         slideUp: {
-                            '0%': { transform: 'translateY(30px)', opacity: '0' },
+                            '0%': { transform: 'translateY(40px)', opacity: '0' },
                             '100%': { transform: 'translateY(0)', opacity: '1' },
                         },
                         bounceIn: {
@@ -70,7 +87,22 @@
                             '70%': { transform: 'scale(0.9)' },
                             '100%': { transform: 'scale(1)', opacity: '1' },
                         },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)' },
+                            '100%': { boxShadow: '0 0 30px rgba(59, 130, 246, 0.6)' },
+                        },
+                        shimmer: {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(100%)' },
+                        },
                     },
+                    backdropBlur: {
+                        xs: '2px',
+                    }
                 },
             },
         }
@@ -80,122 +112,164 @@
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
-    <link rel="stylesheet" href="{% static 'css/parcinfo-ui.css' %}">
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-    <div class="w-full max-w-md mx-auto">
-        <!-- Logo avec animation et effet -->
-        <div class="flex justify-center mb-8 animate-bounce-in">
-            <div class="relative group">
-                <img src="{% static 'images/ADD.png' %}" alt="ADD - Agence de Développement du Digital" class="h-16 w-auto drop-shadow-lg transition-transform duration-300 group-hover:scale-105">
-                <div class="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </div>
-        </div>
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
+    <!-- Background Elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <!-- Floating geometric shapes -->
+        <div class="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-xl animate-float"></div>
+        <div class="absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-indigo-200/40 to-blue-200/40 rounded-full blur-xl animate-float" style="animation-delay: -2s;"></div>
+        <div class="absolute bottom-32 left-1/4 w-20 h-20 bg-gradient-to-br from-purple-200/30 to-pink-200/30 rounded-full blur-xl animate-float" style="animation-delay: -4s;"></div>
         
-        <!-- Titre principal -->
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">ParcInfo</h1>
-            <p class="text-gray-600">Système de Gestion de Parc Informatique</p>
-            <div class="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-500 mx-auto rounded-full mt-3"></div>
-        </div>
+        <!-- Grid pattern overlay -->
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23e2e8f0" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="1"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+    </div>
 
-        <div class="w-full">
-            <div class="bg-white/95 backdrop-blur-sm shadow-2xl border-0 rounded-3xl p-8 animate-fade-in">
-                <!-- Card Header -->
-                <div class="space-y-1 text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">Connexion</h2>
-                    <p class="text-gray-600">Accédez à votre espace de travail</p>
+    <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md mx-auto">
+            <!-- Logo avec animation et effet -->
+            <div class="flex justify-center mb-12 animate-bounce-in">
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-indigo-400/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <img src="{% static 'images/ADD.png' %}" alt="ADD - Agence de Développement du Digital" 
+                         class="relative h-24 w-auto drop-shadow-2xl transition-all duration-500 group-hover:scale-110 group-hover:drop-shadow-3xl">
                 </div>
-                
-                <!-- Messages d'erreur -->
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="mb-4 p-4 rounded-lg border border-red-200 bg-red-50 text-red-800">
-                            <div class="flex items-center space-x-3">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <span>{{ message }}</span>
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% endif %}
+            </div>
 
-                {% if form.errors %}
-                    <div class="mb-4 p-4 rounded-lg border border-red-200 bg-red-50 text-red-800">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>Identifiants incorrects. Veuillez réessayer.</span>
+            <!-- Card principale avec glassmorphism -->
+            <div class="w-full">
+                <div class="bg-white/80 backdrop-blur-xl shadow-2xl border border-white/20 rounded-3xl p-8 animate-fade-in-up relative overflow-hidden">
+                    <!-- Shimmer effect overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer"></div>
+                    
+                    <!-- Card Header -->
+                    <div class="space-y-3 text-center mb-8 relative z-10">
+                        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-lg">
+                            <i class="fas fa-user-lock text-3xl text-white"></i>
                         </div>
+                        <h2 class="text-3xl font-bold text-slate-800 font-display">Connexion</h2>
+                        <p class="text-slate-600 text-lg">Accédez à votre espace de travail sécurisé</p>
                     </div>
-                {% endif %}
-
-                <!-- Formulaire -->
-                <form method="post" action="{% url 'login' %}" class="space-y-4">
-                    {% csrf_token %}
-                    {% if next %}
-                    <input type="hidden" name="next" value="{{ next }}">
+                    
+                    <!-- Messages d'erreur avec animation -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="mb-6 p-4 rounded-xl border border-red-200/50 bg-gradient-to-r from-red-50 to-red-100/50 backdrop-blur-sm text-red-800 animate-fade-in-up">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex-shrink-0 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-exclamation-triangle text-xs text-white"></i>
+                                    </div>
+                                    <span class="font-medium">{{ message }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
                     {% endif %}
 
-                    <!-- Champ nom d'utilisateur -->
-                    <div class="space-y-2">
-                        <label for="username" class="block text-sm font-medium text-gray-700">
-                            Nom d'utilisateur
-                        </label>
-                        <input
-                            type="text"
-                            id="username"
-                            name="username"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                            placeholder="votre.nom@add.gov.ma"
-                            required
-                        />
-                    </div>
-
-                    <!-- Champ mot de passe -->
-                    <div class="space-y-2">
-                        <label for="password" class="block text-sm font-medium text-gray-700">
-                            Mot de passe
-                        </label>
-                        <div class="relative">
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                                placeholder="••••••••"
-                                required
-                            />
+                    {% if form.errors %}
+                        <div class="mb-6 p-4 rounded-xl border border-red-200/50 bg-gradient-to-r from-red-50 to-red-100/50 backdrop-blur-sm text-red-800 animate-fade-in-up">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-exclamation-triangle text-xs text-white"></i>
+                                </div>
+                                <span class="font-medium">Identifiants incorrects. Veuillez réessayer.</span>
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
 
-                    <!-- Bouton de soumission -->
-                    <button 
-                        type="submit" 
-                        class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-4 px-6 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg hover:shadow-xl transform hover:scale-105"
-                    >
-                        <span class="flex items-center justify-center space-x-3">
-                            <i class="fas fa-sign-in-alt"></i>
-                            <span>Se connecter</span>
-                        </span>
-                    </button>
-                </form>
+                    <!-- Formulaire avec design moderne -->
+                    <form method="post" action="{% url 'login' %}" class="space-y-6 relative z-10">
+                        {% csrf_token %}
+                        {% if next %}
+                        <input type="hidden" name="next" value="{{ next }}">
+                        {% endif %}
+
+                        <!-- Champ nom d'utilisateur -->
+                        <div class="space-y-2">
+                            <label for="username" class="block text-sm font-semibold text-slate-700 flex items-center space-x-2">
+                                <i class="fas fa-user text-blue-500"></i>
+                                <span>Nom d'utilisateur</span>
+                            </label>
+                            <div class="relative group">
+                                <input
+                                    type="text"
+                                    id="username"
+                                    name="username"
+                                    class="w-full px-5 py-4 bg-white/70 backdrop-blur-sm border border-slate-200/50 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 placeholder-slate-400 group-hover:border-slate-300/70 group-hover:bg-white/90 text-slate-800"
+                                    placeholder="votre.nom@add.gov.ma"
+                                    required
+                                />
+                                <div class="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                            </div>
+                        </div>
+
+                        <!-- Champ mot de passe -->
+                        <div class="space-y-2">
+                            <label for="password" class="block text-sm font-semibold text-slate-700 flex items-center space-x-2">
+                                <i class="fas fa-lock text-blue-500"></i>
+                                <span>Mot de passe</span>
+                            </label>
+                            <div class="relative group">
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    class="w-full px-5 py-4 bg-white/70 backdrop-blur-sm border border-slate-200/50 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 placeholder-slate-400 group-hover:border-slate-300/70 group-hover:bg-white/90 pr-12 text-slate-800"
+                                    placeholder="••••••••"
+                                    required
+                                />
+                                <div class="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                                <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors duration-200" onclick="togglePassword()">
+                                    <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Bouton de soumission avec effet avancé -->
+                        <button 
+                            type="submit" 
+                            class="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 shadow-xl hover:shadow-2xl transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group"
+                        >
+                            <!-- Shimmer effect -->
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                            
+                            <span class="relative flex items-center justify-center space-x-3">
+                                <i class="fas fa-sign-in-alt text-lg"></i>
+                                <span class="text-lg">Se connecter</span>
+                            </span>
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="text-center mt-8 animate-fade-in" style="animation-delay: 0.5s;">
-            <p class="text-gray-500 text-sm">
-                © 2024 ADD - Agence de Développement du Digital
-            </p>
-            <p class="text-gray-400 text-xs mt-2">
-                Système de Gestion de Parc Informatique
-            </p>
         </div>
     </div>
 
-    <script src="{% static 'js/login.js' %}"></script>
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('passwordToggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Animation d'entrée progressive
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.animate-fade-in-up, .animate-fade-in-down');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
 </body>
 </html>

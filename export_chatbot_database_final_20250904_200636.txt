@@ -1,0 +1,1718 @@
+================================================================================
+EXPORT FINAL DE LA BASE DE DONNÉES - MODÈLES CHATBOT
+================================================================================
+Date d'export : 2025-09-04 20:06:36
+Généré par : Script d'export final (tous champs corrects)
+================================================================================
+
+
+============================================================
+MODÈLE : UTILISATEURS
+============================================================
+Nombre d'enregistrements : 4
+Champs exportés : id, username, email, first_name, last_name, is_active, is_staff, is_superuser, date_joined
+============================================================
+
+id | username | email | first_name | last_name | is_active | is_staff | is_superuser | date_joined
+------------------------------------------------------------------------------------------------------------
+1 | superadmin | superadmin@parcinfo.com | super | admin | True | True | True | 2025-07-27 22:37:08
+4 | gestionnaire bureau | gestion_bureau1@add.com | gestionnaire bureau | gestionnaire | True | False | False | 2025-07-29 14:34:21
+5 | gestionnaire info | gestion_info1@add.com | Gestionnaire | Informatique | True | False | False | 2025-07-29 16:25:29
+3 | employe | employe_1@add.com | employe | employe1 | True | False | False | 2025-07-29 11:54:36
+
+Total exporté : 4 enregistrements
+
+
+============================================================
+MODÈLE : GROUPES
+============================================================
+Nombre d'enregistrements : 4
+Champs exportés : id, name
+============================================================
+
+id | name
+-------------------
+13 | Employé
+9 | Super Admin
+10 | Gestionnaire Informatique
+11 | Gestionnaire Bureau
+
+Total exporté : 4 enregistrements
+
+
+============================================================
+MODÈLE : FOURNISSEURS
+============================================================
+Nombre d'enregistrements : 42
+Champs exportés : id, nom, adresse, telephone, email, contact_principal
+============================================================
+
+id | nom | adresse | telephone | email | contact_principal
+--------------------------------------------------------------------
+67 | RKFE | 28 RUE AL AGHALEINE, SECTEUR 21, BLOC B, HAY RYAD - RABAT | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+68 | ONBOARDTECH | 26 AV MERS SULTAN ETG 1 APT 3 CASABLANCA | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+69 | BROME CONSULTING & TECHNOLOGY | IMM PROMOFFICE ETG 4 N 3 SIDI MAAROUF, 20190, CASABLANCA, MAROC | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+70 | ASSURANCES LYAZIDI | 22, AVENUE MOULAY YOUSSEF - RABAT | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+71 | LE GRAND PRESTIGE | MAGASIN 1364-2, AL WIFAQ, TEMARA | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+72 | LIMIT PROB | RESIDENCE MAAMOURA MAGASIN N°100 SALA AL JADIDA, SALE | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+73 | TECHNICOVIGILE | 298, AVENUES OMAR IBN ABDELAZIZ, HAY CHEMAOU - SALE | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+74 | TWO WAYS | 39 RUE ABDELKRIM DYOURI - APPT. 5 - RABAT | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+75 | MAROC SOIR | 17, RUE OTHMANE BEN AFFANE, CASABLANCA | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+76 | CASANET | AVENUE ANNAKHIL HAY RIAD IMMEUBLE RIAD 1 RDC RABAT | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+77 | BRAIN MANAGEMENT | 63 BD ANFA, ANGLE RUE WASHINGTON, RESIDENCE AL-SAID 7EME ETG - 20250 CASABLAN... | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+78 | CLASSE BUREAU | 8, OP SIDI ABDERRAHMANE, APPT N°11 - GHB, 190 20200 CASABLANCA | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+79 | 3STD | BUR 5 PARTIE A ETAGE 1 LOT 39 CHAMPS DE COURS, FES | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+80 | Barid Al-Maghrib | AVENUE MOULAY ISMAIL, HASSAN A0020 - RABAT - MAROC | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+81 | 218 LABS SARL | 218 RDC GROUPE AL MAJD, HAY NAHDA 2 RABAT MAROC | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+82 | INTELCOM | 219, BD ZERKTOUNI ANGLE BD ROUDANI, N°51 - 7éme ETAGE, 20100 CASABLANCA | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+83 | AGIRH | 55, BD ZERKTOUNI ETAGE 2 - N° 5 - CASABLANCA 20360 - MAROC | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+84 | ILEF BUREAUTIQUE | 11, AVENUE ABDELMOUMEN, RABAT | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+85 | MTDS | 14, RUE 16 NOVEMBRE, AGDAL, RABAT, 10080, MAROC | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+86 | TERRATOUR | 121 AV. ALLAL BEN ABDELLAH - RABAT - MAROC | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+87 | MUNISYS | LOT. BOUSKOURA PARK N°11 VILLE VERTE DE BOUSKOURA 27182 BOUSKOURA PROVINCE DE... | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+88 | IT6 | 37 ANGLE AVENUE FAL OULD OUMEIR ET RUE OUKEIMEDEN APPT 4, AGDAL - RABAT | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+89 | AEBDM | 20, RUE THEOPHILE GAUTHIER BP 14744 - 20060 CASABLANCA - MAROC | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+90 | MOBIBLANC | 4, LOT LA COLLINE 1 ENTREE A RDC CASABLANCA 20100 | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+91 | WAFA LLD | ANGLE BD BRAHIM ROUDANI ET RUE JEAN JAURES 5EME ETAGE CASABLANCA | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+92 | JANKARI CONSULTING | 2 BIS RUE SAVOIE, RESIDENCE SABBAH, APPART 23 - QARTIER DES HOPITAUX CASABLANCA | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+93 | COHESIUM | 40, BD DE LA RESISTANCE - 20000 - CASABLANCA - MAROC | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+94 | ARTEMIS | BELGI CENTRE, 17 RUE IBN KHALIKANE, QUARTIER PALMIER, CASABLANCA | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+95 | GETLINKED | ANGLE AVENUE ABDELMOUMEN RUE SOUMIA, APP 28, 6EME ETAGE | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+96 | SCHOBEDRA | ANGLE RUE MEZIATA, MAGAZIN 12A, AV. ELIMELIA CENTRE COMMERCIAL ACIMA CITY CENTRE | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+97 | ITS | 10 RUE LIBERTE 3EME ETAGE, SIDI BELYOUT, CASABLANCA, MAROC | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+98 | MAITRE PRESTIGE NET | MASSIRA 1 N°771-TEMARA | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+99 | MOUVEMENT CONSEIL | 12 AVENUE MICHLIFEN 4EME ETAGE APT N°9 AGDAL RABAT | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+100 | GLOBAL SPOT | N°67 3EME ETAGE HAY AL MANZAH CYM RABAT | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+101 | UNIMARKET | 35 AVENUE OKBA APPT N° 2 AGDAL-RABAT | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+102 | SMART | RESIDENCE NKHILA IMM25 APPT A14, TEMARA | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+103 | ATLAS CLOUD SERVICES | LOT 660 HAY MOULAY RACHID, BENGUERIR, MAROC | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+104 | DEVMOZ | 15 AVENUE AL ABTAL APPT 4 AGDAL, RABAT | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+105 | ARCADES IT | 15 AV AL ABTAL APPT 4 AGDAL, RABAT- 10090 MAROC | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+106 | MRCDEV | 15, AVENUE AL ABTAL, AGDAL - RABAT | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+107 | STE LAYAZAD | IMM 402MC ALLIANCE DARNA TR2/B APPT 4 - KENITRA | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+66 | WANA CORPORATE SA | 20270 CASABLANCA, SIDI MAAROUF LOTISSELENT LA COLLINE | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object | ERROR: 'Fournisseur' object
+
+Total exporté : 42 enregistrements
+
+
+============================================================
+MODÈLE : DESIGNATIONS INFORMATIQUE
+============================================================
+Nombre d'enregistrements : 29
+Champs exportés : id, nom
+============================================================
+
+id | nom
+------------------
+1 | teste
+2 | Baie
+3 | Call Server
+4 | Caméra
+5 | Casque sans fil
+6 | Ecran
+7 | Ecran de réservation sans-fil
+8 | Encodeur de badge
+9 | Enrôleur d'empreintes digitales
+10 | Imprimante
+11 | Imprimante à badges en couleur
+12 | Kit de projection audiovisuel sans fil
+13 | Kit de visioconférence
+14 | Ordinateur bureau
+15 | Pare feu
+16 | PC portable
+17 | Point d'accès
+18 | Poste téléphonique
+19 | Scanner
+20 | Serveur
+21 | Station d'accueil
+22 | Switch
+23 | Tablette
+24 | Téléviseur
+25 | Terminaux biométriques multi technologies de type réseaux
+26 | WAF
+27 | WORKSTATION
+28 | aaaad
+29 | Ordinateur portable
+
+Total exporté : 29 enregistrements
+
+
+============================================================
+MODÈLE : DESCRIPTIONS INFORMATIQUE
+============================================================
+Nombre d'enregistrements : 67
+Champs exportés : id, nom
+============================================================
+
+id | nom
+------------------
+68 | Casque Bluetooth marque JABRA Evolve2 85
+69 | Casque Bluetooth marque JABRA Evolve2 65
+70 | Lenovo ThinkVision T24-10
+71 | Lenovo ThinkVision X24-20
+72 | HP EliteDisplay E243
+73 | Dell 24 Monitor - P2419H - 60.5cm (23.8") Black
+74 | Dell 19 Monitor E1916H
+78 | Imprimante HP M570dn
+79 | HP Color LaserJet Pro MFP M281fdn
+80 | HP Color LaserJet Pro MFP M477fdw
+81 | Imprimante HP M681Z
+82 | Imprimante HP M377dw
+83 | HP Color LaserJet M283fdn
+87 | POLY - STUDIO X50
+88 | Dell Optiplex 7070 MT
+90 | Forcepoint NGFW 2201 Appliance
+91 | Lenovo ThinkPad L480
+92 | Lenovo ThinkPad L380 Yoga
+93 | Lenovo ThinkPad E590
+94 | Lenovo ThinkPad E490
+95 | HP EliteBook X360
+96 | Dell Latitude 5411 MLK XCTO
+97 | ThinkPad X1 Carbon Gen 12
+98 | ThinkPad T14 G5 1 To
+99 | ThinkPad T14 G5 512 Go
+100 | HP Dragonfly 13,5 pouces G4
+101 | MacBook Pro
+103 | 8028s Premium Deskphone
+104 | 8058s Premium Deskphone
+105 | 8068s Premium Deskphone
+106 | 8088s Premium Deskphone
+107 | ScanJet Pro 2600 f1
+109 | Nutanix NX-8035-G7
+110 | Lenovo ThinkSystem SR530
+111 | Station d'accueil Lenovo ThinkPad 40A9
+112 | HP Thunderbolt Dock
+113 | Belkin Thunderbolt 3 Express Dock HD F4U095
+114 | Dell Station d'accueil WD19
+115 | L2+ managed POE FortiSwitch with 24 GE
+116 | Alcatel-Lucent Enterprise OS6860-P48
+117 | Alcatel-Lucent Enterprise OS6900-X20
+118 | Cisco Nexus 3524X 24 10G Ports
+119 | Cisco C8S350 Managed 24-port GE
+121 | Apple iPad Pro
+122 | Samsung 55 Série R
+123 | Téléviseur PHILIPS 55"
+126 | Workstation Lenovo P520
+127 | Dell Precision 5820 Tower XCTO Base
+129 | Dell Latitude 5520
+65 | Lenovo ThinkSystem DE2000H
+66 | OmniPCX Entreprise Large
+67 | Caméra dôme intérieure
+75 | ROOMZ Display
+76 | RIFL réf LK2-ENC/USB
+77 | HIKVISION réf DSK1F820-F
+84 | EVOLIS réf PRIMACY 2
+85 | Barco ClickShare C-10
+86 | POLYCOM - G7500 STUDIO E70
+89 | FortiGate-100E
+102 | Indoor Wireless AP FortiAP-221E
+108 | NVR 32 Channels
+120 | Samsung TAB A SM-595
+124 | HIKVISION réf DS-K1T804AMF
+125 | Web Application Firewall FWB-100D
+130 | Ecran Lenovo ThinkVision T24-10
+131 | L2+managed POE FortiSwitch with 24 GE
+132 | Samsung55 Série R
+
+Total exporté : 67 enregistrements
+
+
+============================================================
+MODÈLE : COMMANDES INFORMATIQUE
+============================================================
+Nombre d'enregistrements : 2
+Champs exportés : id, numero_commande, date_commande, montant_total, statut
+============================================================
+
+id | numero_commande | date_commande | montant_total | statut
+-----------------------------------------------------------------------
+2 | BC24 | 2025-07-01 | 5000.00 | ERROR: 'Commande' object ha
+1 | BC23 | 2025-07-04 | 6666.00 | ERROR: 'Commande' object ha
+
+Total exporté : 2 enregistrements
+
+
+============================================================
+MODÈLE : LIGNES COMMANDE INFORMATIQUE
+============================================================
+Nombre d'enregistrements : 3
+Champs exportés : id, quantite, prix_unitaire, montant_total
+============================================================
+
+id | quantite | prix_unitaire | montant_total
+-------------------------------------------------------
+3 | 2 | 1500.00 | ERROR: 'LigneCommande' obje
+2 | 2 | 1000.00 | ERROR: 'LigneCommande' obje
+1 | 6 | 1111.00 | ERROR: 'LigneCommande' obje
+
+Total exporté : 3 enregistrements
+
+
+============================================================
+MODÈLE : MATÉRIELS INFORMATIQUE
+============================================================
+Nombre d'enregistrements : 8
+Champs exportés : id, code_inventaire, numero_serie, statut, date_affectation
+============================================================
+
+id | code_inventaire | numero_serie | statut | date_affectation
+-------------------------------------------------------------------------
+5 | cd14 | sn14 | affecte | ERROR: 'MaterielInformatiqu
+3 | ADD/INFO/01000 | sn01000 | nouveau | ERROR: 'MaterielInformatiqu
+1 | cd12 | sn12 | affecte | ERROR: 'MaterielInformatiqu
+7 | ADD/CD/23 | ADD/NS/23 | affecte | ERROR: 'MaterielInformatiqu
+10 | CD2023 | NS2023 | nouveau | ERROR: 'MaterielInformatiqu
+9 | CD2024 | NS2024 | affecte | ERROR: 'MaterielInformatiqu
+8 | CD2025 | NS2025 | affecte | ERROR: 'MaterielInformatiqu
+4 | cd13 | sn13 | affecte | ERROR: 'MaterielInformatiqu
+
+Total exporté : 8 enregistrements
+
+
+============================================================
+MODÈLE : DESIGNATIONS BUREAUTIQUE
+============================================================
+Nombre d'enregistrements : 27
+Champs exportés : id, nom
+============================================================
+
+id | nom
+------------------
+1 | Armoire
+2 | Banquette
+3 | Bouilloire
+4 | Box
+5 | Bureau
+6 | Canapé
+7 | Casier
+8 | Chaise
+9 | Chariot
+10 | Climatiseur
+11 | Coffre-fort
+12 | Comptoir
+13 | Destructeur
+14 | Ecran
+15 | Fauteuil
+16 | Meuble
+17 | Panneau
+18 | Pouf
+19 | Store
+20 | Table
+21 | Tableau
+22 | Tabouret
+23 | Vidéo projecteur
+24 | test
+25 | test1
+26 | test2
+27 | Bureau de travail
+
+Total exporté : 27 enregistrements
+
+
+============================================================
+MODÈLE : DESCRIPTIONS BUREAUTIQUE
+============================================================
+Nombre d'enregistrements : 97
+Champs exportés : id, nom
+============================================================
+
+id | nom
+------------------
+1 | Armoire archive de 228 cm de hauteur (228 * 80 * 44cm)
+2 | Armoire archive de 70 cm de hauteur (70 * 90 * 44cm)
+3 | Armoire archives haute 158 cm RN
+4 | Armoire Basse
+5 | Armoire basse de 82 cm AB
+6 | Armoire Basse L 1730 x P 538 x H 530mm
+7 | Armoire Centrale avec porte latérales (Squad) 410*220cm P2
+8 | Armoire haute de 158 cm AH
+9 | Armoire haute L 1835 x P 480 x H 1000mm
+10 | Armoire Suspendu (Squad) 140*180cm P4
+11 | Banquette dossier haut 3,9 ml B2
+12 | Banquette ronde tapissé et tissu anti tache avec socle en bois y compris jard...
+13 | Bouilloire 1.7L, ROUGE, BOSH
+14 | Box de réunion acoustique 250*1800*180 (Banquette et table centrale) MB
+15 | BUREAU 160*80
+16 | Bureau 180*80cm et retour intégré
+17 | Bureau 200*90cm
+18 | Canapé 1 place
+19 | Canapé 1 place F1 en cuir
+20 | Canapé 1 place F1 en tissu
+21 | Canapé 2 place
+22 | Canapé 2 places F2
+23 | Canapé 3 places 2mx0,8m
+24 | Casier 45*45*45 à portes
+25 | Chaise pour T4
+26 | Chaise visiteur et réunion
+27 | Chaise visiteur sur luge
+28 | Chariot de bureau pliable
+29 | Chariot plateforme (74 x 48 x 16.5 cm)
+30 | Climatiseurs mobiles
+31 | Coffre-fort de bureau a combinaison Electronique + clé Grand Modèle
+32 | Coffre-fort de bureau a combinaison Electronique + clé Petit Modèle
+33 | Coffres fort de bureau à combinaison électronique +clé marque SAFEGUARD
+34 | Coffres fort de bureau à combinaison électronique +clé marque SAFEGUARD modèl...
+35 | Comptoir avec retour
+36 | Comptoir en U
+37 | Destructeur de papier Marque Deli
+38 | Destructeur de papier Marque Deli modèle 9905, 40MIN PAPER SHREDDER 10-SHEET ...
+39 | Ecran acoustique
+40 | Ecran de projection : Oray
+41 | Ecran télévision interactive 55" VGA, HDMI2.0, USB (2.0) x3, USB (3.0) x 1, U...
+42 | Ecran télévision LG séries UM 7380, LED 70’
+43 | Fauteuil
+44 | Fauteuil 2 places dossier haut F3
+45 | Fauteuil avec têtière
+46 | Fauteuil de travail et de réunion
+47 | Fauteuil Directeur 
+48 | Fauteuil pivot dossier haut FP
+49 | Fauteuil salle de réunion : ALTEA
+50 | Fauteuil sur pivot
+51 | Fauteuil sur roulette réunion RD
+52 | Fauteuil suspendu FS
+53 | Fauteuil table hexagone
+54 | Fauteuil visiteur
+55 | Fauteuil visiteur sur pivot
+56 | Fauteuils sur roulette réunion RD Altea INCLASS
+57 | Meuble arrière canapé 160*45*60cm AR
+58 | Meuble Bas à 4 portes battantes avec une étagère
+59 | Meuble Photocopie M1
+60 | Meuble Photocopie M2
+61 | Mini-Bar, 46L, REGAL GRIS A+
+62 | Panneau Accordéon 1 (Salle de réunion) 743*260cm P1
+63 | Panneau Accordéon 2 (Squad)500*260cm P3
+64 | Pouf diamètre 40 x 45 cm
+65 | Pouf diamètre 60 x 35 cm
+66 | Store à enroulement 112m²
+67 | Store à enroulement 224M²
+68 | Store à enroulement 46m²
+69 | Table à manger 80*60 T4
+70 | Table avec jardinière et prises intégrés avec piètement métallique noir :3,20...
+71 | Table basse
+72 | Table basse diamètre 80cm T5
+73 | Table basse EOS centrale avec dessus vitré L 1200 x P 800 x H 400 mm
+74 | Table basse iulio carrée largeur 80 cm L800 x P800 x H 400 m
+75 | Table de 160*80 cm pliable avec pied sur roulette R1
+76 | Table de 240*120cm R2
+77 | Table de 480*160cm R3
+78 | Table de 6400*1600cm RD
+79 | Table de coin
+80 | Table de réunion 4 places
+81 | Table de réunion 4 places ronde diamètre 120cm
+82 | Table de réunion ronde
+83 | Table de réunion :  NTT+
+84 | Table haute : Plan de travail en bois stratifié finition chêne, Piètement mét...
+85 | Table haute avec jardinière y compris les plantes
+86 | Table haute T1
+87 | Table haute T2
+88 | Table hexagonale S1
+89 | Table hexagonale S2
+90 | Tableau de conférence 67*100 sur roulettes 616
+91 | Tableau écritoire
+92 | Tabouret haut
+93 | Tabouret pour T1/T2/T3
+94 | Vidéo projecteur (Datashow) : Epson
+95 | testt
+96 | test2
+97 | Bureau en bois massif
+
+Total exporté : 97 enregistrements
+
+
+============================================================
+MODÈLE : COMMANDES BUREAUTIQUE
+============================================================
+Nombre d'enregistrements : 3
+Champs exportés : id, numero_commande, date_commande, montant_total, statut
+============================================================
+
+id | numero_commande | date_commande | montant_total | statut
+-----------------------------------------------------------------------
+1 | AOO2025 | 2025-07-01 | 1500.00 | ERROR: 'CommandeBureau' obj
+3 | C2025 | 2025-08-23 | 1111.00 | ERROR: 'CommandeBureau' obj
+4 | AOO2024 | 2025-08-03 | 11111.00 | ERROR: 'CommandeBureau' obj
+
+Total exporté : 3 enregistrements
+
+
+============================================================
+MODÈLE : LIGNES COMMANDE BUREAUTIQUE
+============================================================
+Nombre d'enregistrements : 3
+Champs exportés : id, quantite, prix_unitaire, montant_total
+============================================================
+
+id | quantite | prix_unitaire | montant_total
+-------------------------------------------------------
+1 | 3 | 500.00 | ERROR: 'LigneCommandeBureau
+4 | 1 | 11111.00 | ERROR: 'LigneCommandeBureau
+3 | 1 | 1111.00 | ERROR: 'LigneCommandeBureau
+
+Total exporté : 3 enregistrements
+
+
+============================================================
+MODÈLE : MATÉRIELS BUREAUTIQUE
+============================================================
+Nombre d'enregistrements : 3
+Champs exportés : id, code_inventaire, statut, date_affectation
+============================================================
+
+id | code_inventaire | statut | date_affectation
+----------------------------------------------------------
+4 | ADD/BR/01 | operationnel | ERROR: 'MaterielBureau' obj
+3 | add/bureau1 | affecte | ERROR: 'MaterielBureau' obj
+1 | ADD/INFO/01094 | affecte | ERROR: 'MaterielBureau' obj
+
+Total exporté : 3 enregistrements
+
+
+============================================================
+MODÈLE : LIVRAISONS
+============================================================
+Nombre d'enregistrements : 4
+Champs exportés : id, numero_livraison, date_livraison, statut, commentaires
+============================================================
+
+id | numero_livraison | date_livraison | statut | commentaires
+------------------------------------------------------------------------
+9 | ERROR: 'Livraison' object h | ERROR: 'Livraison' object h | ERROR: 'Livraison' object h | ERROR: 'Livraison' object h
+5 | ERROR: 'Livraison' object h | ERROR: 'Livraison' object h | ERROR: 'Livraison' object h | ERROR: 'Livraison' object h
+2 | ERROR: 'Livraison' object h | ERROR: 'Livraison' object h | ERROR: 'Livraison' object h | ERROR: 'Livraison' object h
+1 | ERROR: 'Livraison' object h | ERROR: 'Livraison' object h | ERROR: 'Livraison' object h | ERROR: 'Livraison' object h
+
+Total exporté : 4 enregistrements
+
+
+============================================================
+MODÈLE : DEMANDES D'ÉQUIPEMENT
+============================================================
+Nombre d'enregistrements : 3
+Champs exportés : id, categorie, type_article, type_demande, statut, date_demande
+============================================================
+
+id | categorie | type_article | type_demande | statut | date_demande
+------------------------------------------------------------------------------
+54 | informatique | materiel | nouveau | approuvee | 2025-09-04 18:48:39
+52 | informatique | materiel | nouveau | approuvee | 2025-09-04 18:06:21
+50 | informatique | materiel | nouveau | approuvee | 2025-09-04 18:03:27
+
+Total exporté : 3 enregistrements
+
+
+============================================================
+MODÈLE : FOURNITURES
+============================================================
+Nombre d'enregistrements : 2
+Champs exportés : id, quantite, prix_unitaire
+============================================================
+
+id | quantite | prix_unitaire
+---------------------------------------
+1 | ERROR: 'Fourniture' object  | ERROR: 'Fourniture' object 
+2 | ERROR: 'Fourniture' object  | ERROR: 'Fourniture' object 
+
+Total exporté : 2 enregistrements
+
+
+============================================================
+MODÈLE : ARCHIVES DÉCHARGE
+============================================================
+Nombre d'enregistrements : 1
+Champs exportés : id, date_signature, statut
+============================================================
+
+id | date_signature | statut
+--------------------------------------
+12 | ERROR: 'ArchiveDecharge' ob | ERROR: 'ArchiveDecharge' ob
+
+Total exporté : 1 enregistrements
+
+
+============================================================
+MODÈLE : EXEMPLES D'INTENTIONS CHATBOT
+============================================================
+Nombre d'enregistrements : 3
+Champs exportés : id, intent, phrase, weight, source, created_at
+============================================================
+
+id | intent | phrase | weight | source | created_at
+-------------------------------------------------------------
+1 | recherche_materiel | code inventaire | 1.0 | system | 2025-08-09 13:34:53
+2 | recherche_materiel | numéro de série | 1.0 | system | 2025-08-09 13:34:53
+3 | liste_fournisseurs | fournisseurs pour call server | 1.0 | system | 2025-08-09 13:34:53
+
+Total exporté : 3 enregistrements
+
+
+============================================================
+MODÈLE : FEEDBACK CHATBOT
+============================================================
+Nombre d'enregistrements : 7
+Champs exportés : id, rating, comment, created_at
+============================================================
+
+id | rating | comment | created_at
+--------------------------------------------
+8 | 1 | ERROR: 'ChatbotFeedback' ob | 2025-08-24 16:57:07
+7 | -1 | ERROR: 'ChatbotFeedback' ob | 2025-08-24 16:56:31
+6 | 1 | ERROR: 'ChatbotFeedback' ob | 2025-08-24 16:42:12
+5 | 1 | ERROR: 'ChatbotFeedback' ob | 2025-08-24 16:42:11
+4 | -1 | ERROR: 'ChatbotFeedback' ob | 2025-08-24 16:42:11
+3 | -1 | ERROR: 'ChatbotFeedback' ob | 2025-08-24 16:42:10
+1 | 1 | ERROR: 'ChatbotFeedback' ob | 2025-08-24 16:41:56
+
+Total exporté : 7 enregistrements
+
+
+============================================================
+MODÈLE : INTERACTIONS CHATBOT
+============================================================
+Nombre d'enregistrements : 2904
+Champs exportés : id, session_id, user_query, detected_intent, sql_attempted, sql_results, rag_results, final_response, timestamp
+============================================================
+
+id | session_id | user_query | detected_intent | sql_attempted | sql_results | rag_results | final_response | timestamp
+---------------------------------------------------------------------------------------------------------------------------------
+2908 | web_session | Quelles livraisons sont en retard ? | delivery_delay | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Bonjour ! Voici les matériels livrés... | 2025-08-31 23:40:42
+2907 | web_session | Liste des fournisseurs | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-31 23:40:25
+2906 | web_session | granite BC23 | fallback | False | 0 | 1 | Malheureusement, je n'ai pas pu localiser les informations demandées. **🤖 Ass... | 2025-08-31 23:40:06
+2905 | web_session | Liste des fournisseurs | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-31 23:39:24
+2904 | web_session | Listez tous les fournisseurs | completeness_question | False | 0 | 1 | **🏢 ANALYSE COMPLÈTE - FOURNISSEURS**
+
+##  **Vue d'Ensemble**
+
+### 🏢 **Portfo... | 2025-08-31 23:39:07
+2903 | web_session | Listez tous les utilisateurs | list_users | False | 0 | 1 | **Liste des utilisateurs :**
+
+• **employe** — ✅ Actif
+  📧 Email: employe_1@ad... | 2025-08-31 23:38:53
+2902 | web_session | Quels sont les matériels informatiques à l'étage 2 ? | materials_assigned_to_user | False | 0 | 1 | Veuillez préciser l'utilisateur entre guillemets. | 2025-08-31 23:38:42
+2901 | web_session | Quelles sont les commandes bureautiques enregistrées ? | fallback | False | 0 | 1 | ## Réponse
+
+Total : 2 commandes bureautiques enregistrées.
+
+Détails :
+• Comma... | 2025-08-25 10:22:52
+2900 | web_session | donnes moi la liste des fournisseurs | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-25 10:22:08
+2899 | web_session | quelle est la date de livraison pour le BC23M | analysis_complexe | False | 0 | 1 | **📦 Statut des livraisons :**
+**Liste des livraisons :**
+- Commande C2025: en... | 2025-08-25 10:21:15
+2898 | web_session | Existe-t-il une livraison pour la commande "AOO2024" ? | delivery_delay | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Bonjour ! Voici les matériels livrés en r... | 2025-08-25 10:14:39
+2897 | web_session | Quelles livraisons sont associées à des commandes bureautiques ? | delivery_delay | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Bonjour ! Voici les matériels livré... | 2025-08-25 10:14:35
+2896 | web_session | Combien de livraisons sont enregistrées au total ? | completeness_question | False | 0 | 1 | ** ANALYSE EXHAUSTIVE - COMMANDES ET LIVRAISONS**
+
+##  **Vue d'Ensemble**
+
+##... | 2025-08-25 10:14:29
+2895 | web_session | Quelles livraisons ont une date prévue avant le 1er août 2025 ? | delivery_delay | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Bonjour ! Voici les matériels livrés... | 2025-08-25 10:14:24
+2894 | web_session | Combien de livraisons ont une date effective en août 2025 ? | delivery_delay | False | 0 | 1 | Super ! J'ai les informations pour vous. Bonjour ! Voici les matériels livrés... | 2025-08-25 10:14:20
+2893 | web_session | Quelle est la répartition des livraisons par statut ? | analysis_complexe | False | 0 | 1 | ** Analyse complète du parc :**
+• **Parc total :** 8 matériels
+  - Informatiq... | 2025-08-25 10:14:16
+2892 | web_session | Combien de livraisons ont un statut "retardee" ? | delivery_delay | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Bonjour ! Voici les matériels livré... | 2025-08-25 10:14:11
+2891 | web_session | Combien de livraisons ont un statut "livree" ? | delivery_delay | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Bonjour ! Voici les matériels livré... | 2025-08-25 10:14:06
+2890 | web_session | Combien de livraisons ont un statut "en_attente" ? | delivery_delay | False | 0 | 1 | Super ! J'ai les informations pour vous. Bonjour ! Voici les matériels livrés... | 2025-08-25 10:14:02
+2889 | web_session | Quelles sont les notes de la livraison numéro 9 ? | delivery_delay | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Bonjour ! Voici les matériels livrés... | 2025-08-25 10:13:56
+2888 | web_session | Quelles livraisons ont été créées par "superadmin" ? | delivery_creator | False | 0 | 1 | Veuillez préciser le numéro de commande. | 2025-08-25 10:13:52
+2887 | web_session | Quel est le statut de la livraison numéro 5 ? | analysis_complexe | False | 0 | 1 | ** Analyse complète du parc :**
+• **Parc total :** 8 matériels
+  - Informatiq... | 2025-08-25 10:13:47
+2886 | web_session | Quelles livraisons sont associées à la commande "BC24" ? | delivery_delay | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Bonjour ! Voici les matériels livré... | 2025-08-25 10:13:43
+2885 | web_session | Quelle est la date effective de la livraison pour la commande "BC23" ? | analysis_complexe | False | 0 | 1 | **📅 Analyse des commandes par date :**
+• Commandes du mois 8/2025 : 0
+• Total... | 2025-08-25 10:13:38
+2884 | web_session | Quelles sont les livraisons enregistrées ? | delivery_delay | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Bonjour ! Voici les matériels livrés... | 2025-08-25 10:13:31
+2883 | web_session | Existe-t-il une demande faite par "test_employe" ? | fallback | False | 0 | 1 | Réponse structurée et détaillée :
+• *Recherche**
+
+Aucune demande n'a été fait... | 2025-08-25 10:12:19
+2882 | web_session | Combien de demandes incluent une description contenant "Lenovo" ? | count_equipment_requests | False | 0 | 1 | Excellent ! J'ai trouvé les informations.  **Demandes d'équipement toutes (8)... | 2025-08-25 10:11:22
+2881 | web_session | Quelle est la répartition des demandes d'équipement par demandeur ? | materials_assigned_to_user | False | 0 | 1 | Veuillez préciser l'utilisateur entre guillemets. | 2025-08-25 10:11:17
+2880 | web_session | Combien de demandes d'équipement sont en attente ? | materials_assigned_to_user | False | 0 | 1 | Veuillez préciser l'utilisateur entre guillemets. | 2025-08-25 10:10:55
+2879 | web_session | Quand la demande numéro 32 a-t-elle été approuvée ? | specific_equipment_request | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Salut ! Voici les détails de la dema... | 2025-08-25 10:10:49
+2878 | web_session | Quelles demandes ont été approuvées ? | demandes_equipement | False | 0 | 1 | **Demandes d'équipement approuvées (4):**
+
+• Demande n°32 (Baie) du 23/08/202... | 2025-08-25 10:10:45
+2877 | web_session | Quelles demandes ont été faites par "gestionnaire bureau" ? | fallback | False | 0 | 1 | En examinant le contexte, je peux vous informer que les demandes suivantes on... | 2025-08-25 10:10:41
+2876 | web_session | Quelles sont les demandes d'équipement enregistrées ? | materials_assigned_to_user | False | 0 | 1 | Veuillez préciser l'utilisateur entre guillemets. | 2025-08-25 10:10:07
+2875 | web_session | Existe-t-il une description contenant "Barco ClickShare" ? | fallback | False | 0 | 1 | Oui, il existe une description contenant "Barco ClickShare". Voici la descrip... | 2025-08-25 10:07:26
+2874 | web_session | Quelles descriptions sont associées à des équipements de type "Serveur" ? | fallback | False | 0 | 1 | • *Réponse**
+
+Total : 1 élément. Détails :
+• Designation: Serveur [FOURNISSEU... | 2025-08-25 10:07:16
+2873 | web_session | Combien de descriptions sont enregistrées au total ? | completeness_question | False | 0 | 1 | ** RAPPORT COMPLET - PERFORMANCES DU SYSTÈME**
+
+##  **Indicateurs de Performa... | 2025-08-25 10:07:03
+2872 | web_session | Quelles descriptions sont liées à des équipements de visioconférence ? | fallback | False | 0 | 1 | En examinant le contexte, nous pouvons voir que deux descriptions sont liées ... | 2025-08-25 10:06:59
+2871 | web_session | Combien de descriptions contiennent le mot "ThinkPad" ? | count_generic | False | 0 | 1 |  **Question de comptage détectée**
+
+Pour une réponse précise, veuillez précis... | 2025-08-25 10:06:39
+2870 | web_session | Quelle est la répartition des descriptions par désignation ? | analysis_complexe | False | 0 | 1 | ** Analyse complète du parc :**
+• **Parc total :** 8 matériels
+  - Informatiq... | 2025-08-25 10:06:33
+2869 | web_session | Combien de descriptions incluent la marque "Dell" ? | count_generic | False | 0 | 1 |  **Question de comptage détectée**
+
+Pour une réponse précise, veuillez précis... | 2025-08-25 10:06:28
+2868 | web_session | Combien de descriptions sont associées à la désignation "Switch" ? | count_generic | False | 0 | 1 |  **Question de comptage détectée**
+
+Pour une réponse précise, veuillez précis... | 2025-08-25 10:06:26
+2867 | web_session | Quelles descriptions incluent la marque "HP" ? | fallback | False | 0 | 1 | ## Réponse
+
+Les descriptions qui incluent la marque "HP" sont les suivantes :... | 2025-08-25 10:05:51
+2866 | web_session | Quelle est la description complète de l'article "Lenovo ThinkSystem DE2000H" ? | materials_assigned_to_user | False | 0 | 1 | Je suis désolé, mais je n'ai pas trouvé de données pour cette requête. Aucun ... | 2025-08-25 10:05:33
+2865 | web_session | Quelles descriptions sont associées à la désignation "PC portable" ? | fallback | False | 0 | 1 | • *Réponse**
+
+Total : 1 élément.
+
+Détails :
+• Designation: PC portable [FOURN... | 2025-08-25 10:05:30
+2864 | web_session | Quelles désignations sont associées à des équipements sans fil ? | fallback | False | 0 | 1 | ## Équipements sans fil
+
+Les désignations associées à des équipements sans fi... | 2025-08-25 10:05:17
+2863 | web_session | Existe-t-il une désignation nommée "teste" ? | fallback | False | 0 | 1 | • Désignations trouvées : • test [FOURNISSEUR_NON_VÉRIFIÉ]: 1 App: commande_i... | 2025-08-25 10:05:09
+2862 | web_session | Quelles désignations sont disponibles pour les équipements informatiques ? | fallback | False | 0 | 1 | • *Réponse**
+
+Total : 5 désignations. Détails :
+• PC portable
+• Workstation L... | 2025-08-25 10:04:52
+2861 | web_session | Combien de désignations contiennent le mot "Imprimante" ? | count_generic | False | 0 | 1 |  **Question de comptage détectée**
+
+Pour une réponse précise, veuillez précis... | 2025-08-25 10:04:37
+2860 | web_session | Quelle est la répartition des désignations par type (informatique, bureautiqu... | analysis_complexe | False | 0 | 1 | ** Analyse complète du parc :**
+• **Parc total :** 8 matériels
+  - Informatiq... | 2025-08-25 10:04:33
+2859 | web_session | Combien de désignations sont liées à des équipements informatiques (ex. : "PC... | count_generic | False | 0 | 1 |  **Question de comptage détectée**
+
+Pour une réponse précise, veuillez précis... | 2025-08-25 10:04:28
+2858 | web_session | Combien de désignations sont enregistrées au total ? | completeness_question | False | 0 | 1 | ** RAPPORT COMPLET - PERFORMANCES DU SYSTÈME**
+
+##  **Indicateurs de Performa... | 2025-08-25 10:04:23
+2857 | web_session | Quelles désignations commencent par la lettre "C" ? | fallback | False | 0 | 1 | ## Réponse
+
+Désignations commenant par la lettre "C" :
+• Coffre-fort de burea... | 2025-08-25 10:04:19
+2856 | web_session | Quelle est la désignation avec le nom "Call Server" ? | analysis_complexe | False | 0 | 1 | ** Analyse complète du parc :**
+• **Parc total :** 8 matériels
+  - Informatiq... | 2025-08-25 10:04:06
+2855 | web_session | Y a-t-il une désignation appelée "PC portable" ? | fallback | False | 0 | 1 | Oui, il y a une désignation appelée "PC portable". Voici les détails :
+• Desi... | 2025-08-25 10:04:04
+2854 | web_session | Quelles sont toutes les désignations enregistrées ? | fallback | False | 0 | 1 | ## Liste des désignations enregistrées
+• Tableau de conférence
+• Armoire arch... | 2025-08-25 10:03:52
+2853 | web_session | Quelles sont toutes les désignations enregistrées ? | fallback | False | 0 | 1 | ## Réponse exhaustive et structurée
+
+Total des désignations enregistrées : 6
+... | 2025-08-25 10:03:40
+2852 | web_session | Existe-t-il une ligne de commande avec une quantité supérieure à 2 ? | order_lines | False | 0 | 1 | Veuillez préciser le numéro de commande. | 2025-08-25 09:58:34
+2851 | web_session | Quelles lignes de commande sont associées à la commande "BC23" ? | order_lines | False | 0 | 1 | Lignes de commande BC23:
+• Baie — Lenovo ThinkSystem DE2000H — Qté 3 — PU 111... | 2025-08-25 09:58:29
+2850 | web_session | Combien de lignes de commande sont enregistrées au total ? | order_lines | False | 0 | 1 | Veuillez préciser le numéro de commande. | 2025-08-25 09:58:25
+2849 | web_session | Quelles lignes de commande ont une description contenant "Lenovo" ? | order_lines_desc_contains | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Lignes de commande avec description... | 2025-08-25 09:58:21
+2848 | web_session | Quelle est la répartition des lignes de commande par désignation ? | order_lines | False | 0 | 1 | Veuillez préciser le numéro de commande. | 2025-08-25 09:58:16
+2847 | web_session | Combien d'unités ont été commandées au total dans toutes les lignes de comman... | materials_assigned_to_user | False | 0 | 1 | Veuillez préciser l'utilisateur entre guillemets. | 2025-08-25 09:58:11
+2846 | web_session | Quel est le coût total des articles dans la commande "BC24" ? | completeness_question | False | 0 | 1 |  Erreur lors de l'analyse exhaustive des commandes : property 'montant_total'... | 2025-08-25 09:58:07
+2845 | web_session | Combien de lignes de commande incluent une désignation "Baie" ? | order_lines | False | 0 | 1 | Veuillez préciser le numéro de commande. | 2025-08-25 09:58:03
+2844 | web_session | Quelle est la description de la ligne de commande numéro 2 ? | order_lines | False | 0 | 1 | Veuillez préciser le numéro de commande. | 2025-08-25 09:57:57
+2843 | web_session | Quel est le prix unitaire de l'article "Call Server" dans la commande "BC24" ? | unit_price_by_article_in_order | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Prix unitaire de 'Call Server' dans... | 2025-08-25 09:57:53
+2842 | web_session | Quelle est la description de la ligne de commande numéro 2 ? | order_lines | False | 0 | 1 | Veuillez préciser le numéro de commande. | 2025-08-25 09:57:49
+2841 | web_session | Combien d'unités ont été commandées pour l'article "Baie" dans la commande "B... | materials_assigned_to_user | False | 0 | 1 | Malheureusement, je n'ai pas pu localiser les informations demandées. Aucun m... | 2025-08-25 09:57:44
+2840 | web_session | Quelle est la désignation de la ligne de commande numéro 1 ? | order_lines | False | 0 | 1 | Veuillez préciser le numéro de commande. | 2025-08-25 09:57:40
+2839 | web_session | Quelles sont les lignes de commande associées à la commande "BC24" ? | order_lines | False | 0 | 1 | Lignes de commande BC24:
+• Call Server — OmniPCX Entreprise Large — Qté 1 — P... | 2025-08-25 09:57:35
+2838 | web_session | Existe-t-il une commande informatique avec le numéro de facture "123" ? | fallback | False | 0 | 1 | Réponse structurée et détaillée :
+• *Résultat de la recherche**
+
+Aucune comma... | 2025-08-25 09:57:32
+2837 | web_session | Quelles commandes informatiques ont été reçues en juillet 2025 ? | list_it_orders | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Commandes informatiques enregistrées :
+• ... | 2025-08-25 09:57:03
+2836 | web_session | Combien de commandes informatiques sont enregistrées au total ? | list_it_orders | False | 0 | 1 | Super ! J'ai les informations pour vous. Commandes informatiques enregistrées... | 2025-08-25 09:56:57
+2835 | web_session | Quelles commandes informatiques ont un montant supérieur à 3000 ? | order_total_amount | False | 0 | 1 | Veuillez préciser le numéro de la commande (ex: BC23). | 2025-08-25 09:56:51
+2834 | web_session | Quelle est la répartition des commandes informatiques par fournisseur ? | order_supplier | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. Veuillez préciser le n... | 2025-08-25 09:56:46
+2833 | web_session | Combien de commandes informatiques ont une durée de garantie de 1 mois ? | order_warranty_duration | False | 0 | 1 | Veuillez préciser le numéro de la commande (ex: BC23). | 2025-08-25 09:56:42
+2832 | web_session | Quel est le coût total des commandes informatiques ? | total_cost_all_orders | False | 0 | 1 | Super ! J'ai les informations pour vous. Coût total des commandes — Informati... | 2025-08-25 09:56:37
+2831 | web_session | Combien de commandes informatiques ont été passées en juillet 2025 ? | it_orders_by_month | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Commandes informatiques en juillet 2... | 2025-08-25 09:56:31
+2830 | web_session | Quel est le numéro de facture de la commande "BC23" ? | analysis_complexe | False | 0 | 1 | ** Analyse complète du parc :**
+• **Parc total :** 8 matériels
+  - Informatiq... | 2025-08-25 09:56:26
+2829 | web_session | Quelle est la durée de garantie de la commande "BC24" ? | order_warranty_duration | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Commande BC24 — Durée de garantie :... | 2025-08-25 09:56:20
+2828 | web_session | Quelle est la date de réception de la commande "BC23" ? | order_reception_date | False | 0 | 1 | Commande BC23 — Date de réception: 23/07/2025 | 2025-08-25 09:56:15
+2827 | web_session | Quel fournisseur est associé à la commande "BC24" ? | supplier_by_address | False | 0 | 1 | Aucun fournisseur trouvé à l'adresse 'BC24'. | 2025-08-25 09:56:10
+2826 | web_session | Quel est le montant total de la commande "BC23" ? | order_total_amount | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Montant total de BC23 : 3333.00 DH HT Pui... | 2025-08-25 09:56:05
+2825 | web_session | Quelles sont les commandes informatiques enregistrées ? | list_it_orders | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Commandes informatiques enregistrée... | 2025-08-25 09:56:02
+2824 | web_session | Existe-t-il un matériel informatique avec le code inventaire "cd13" ? | codes_by_designation | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. Aucun matériel trouvé ... | 2025-08-25 09:53:01
+2823 | web_session | Quels matériels informatiques n'ont pas été affectés à un utilisateur ? | it_assigned_materials | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Matériels informatiques affectés à ... | 2025-08-25 09:52:56
+2822 | web_session | Combien de matériels informatiques sont enregistrés au total ? | completeness_question | False | 0 | 1 | ** RAPPORT COMPLET - ÉTAT DU PARC INFORMATIQUE**
+
+##  **Vue d'Ensemble Généra... | 2025-08-25 09:52:52
+2821 | web_session | Combien de matériels informatiques n'ont pas de nom spécifié ? | it_without_name | False | 0 | 1 | Super ! J'ai les informations pour vous. Tous les matériels informatiques ont... | 2025-08-25 09:52:46
+2820 | web_session | Quelle est la répartition des matériels informatiques par statut ? | analysis_complexe | False | 0 | 1 | ** Analyse complète du parc :**
+• **Parc total :** 8 matériels
+  - Informatiq... | 2025-08-25 09:52:38
+2819 | web_session | Combien de matériels informatiques ont un statut "affecte" ? | computer_materials_assignment | False | 0 | 1 | Salut ! Voici les matériels informatiques actuellement affectés :
+
+👤 **employ... | 2025-08-25 09:52:33
+2818 | web_session | Combien de matériels informatiques sont affectés à un utilisateur ? | it_assigned_materials | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Matériels informatiques affectés à un uti... | 2025-08-25 09:52:28
+2817 | web_session | Combien de matériels informatiques ont un statut "nouveau" ? | it_new_materials | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Matériels informatiques en statut '... | 2025-08-25 09:52:22
+2816 | web_session | Quel matériel informatique a le numéro de série "sn14" ? | material_warranty_status | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Matériel sn14 (Baie) :
+- Code d'inventair... | 2025-08-25 09:52:17
+2815 | web_session | Quel est le statut du matériel avec le code inventaire "ADD/INFO/01000" ? | codes_by_designation | False | 0 | 1 | Malheureusement, je n'ai pas de résultats. Aucun matériel trouvé pour la dési... | 2025-08-25 09:52:13
+2814 | web_session | Quel matériel informatique est affecté à "employe" ? | computer_materials_assignment | False | 0 | 1 | Salut ! Voici les matériels informatiques actuellement affectés :
+
+👤 **employ... | 2025-08-25 09:52:08
+2813 | web_session | Quel est le numéro de série du matériel avec le code inventaire "cd12" ? | material_warranty_status | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. Aucun matériel trouvé ... | 2025-08-25 09:52:04
+2812 | web_session | Quels matériels informatiques sont enregistrés ? | fallback | False | 0 | 1 | • *Matériel Informatique Enregistré**
+• Caméra dôme intérieure ([FOURNISSEUR_... | 2025-08-25 09:51:59
+2811 | web_session | Quels matériels bureautiques sont stockés à "etage2" ? | materials_by_location | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Matériels bureautiques à etage2 — T... | 2025-08-25 09:50:30
+2810 | web_session | Combien de matériels bureautiques sont enregistrés au total ? | completeness_question | False | 0 | 1 | ** RAPPORT COMPLET - PERFORMANCES DU SYSTÈME**
+
+##  **Indicateurs de Performa... | 2025-08-25 09:50:25
+2809 | web_session | Combien de matériels bureautiques sont fournis par "AEBDM" ? | count_office_material | False | 0 | 1 |  **Matériel bureautique :**
+• Total : 3
+• Affecté : 3
+• Disponible : 0
+
+ | 2025-08-25 09:50:18
+2808 | web_session | Quelle est la moyenne des prix unitaires des matériels bureautiques ? | analysis_complexe | False | 0 | 1 | ** Analyse complète du parc :**
+• **Parc total :** 8 matériels
+  - Informatiq... | 2025-08-25 09:50:12
+2807 | web_session | Quel est le coût total des matériels bureautiques ? | completeness_question | False | 0 | 1 | ** RAPPORT COMPLET - PERFORMANCES DU SYSTÈME**
+
+##  **Indicateurs de Performa... | 2025-08-25 09:50:08
+2806 | web_session | Quelle est la répartition des matériels bureautiques par lieu de stockage (et... | materials_by_location | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Matériels bureautiques à etage1 — T... | 2025-08-25 09:50:03
+2805 | web_session | Combien de matériels bureautiques ont un statut "affecte" ? | office_assigned_to_user | False | 0 | 1 | Malheureusement, je n'ai pas de résultats. Aucun matériel bureautique affecté... | 2025-08-25 09:49:58
+2804 | web_session | Combien de matériels bureautiques ont un statut "Opérationnel" ? | office_operational_materials | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Matériels bureautiques en statut 'Opérati... | 2025-08-25 09:49:52
+2803 | web_session | Combien de matériels bureautiques sont affectés à un utilisateur ? | count_users | False | 0 | 1 |  **Total des utilisateurs :**
+• **Total : 4**
+• **Actifs : 4**
+
+**Répartition... | 2025-08-25 09:49:46
+2802 | web_session | Quel fournisseur a fourni le matériel "Armoire" ? | supplier_by_address | False | 0 | 1 | Aucun fournisseur trouvé à l'adresse 'Armoire'. | 2025-08-25 09:49:41
+2801 | web_session | Quelle est la description du matériel avec le code inventaire "ADD/INFO/01094" ? | codes_by_designation | False | 0 | 1 | Malheureusement, je n'ai pas de résultats. Aucun matériel trouvé pour la dési... | 2025-08-25 09:49:32
+2800 | web_session | Quel est le statut du matériel "Bureau" ? | analysis_complexe | False | 0 | 1 | ** Analyse complète du parc :**
+• **Parc total :** 8 matériels
+  - Informatiq... | 2025-08-25 09:49:27
+2799 | web_session | Quelle est la description du matériel avec le code inventaire "ADD/INFO/01094" ? | codes_by_designation | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. Aucun matériel trouvé ... | 2025-08-25 09:49:22
+2798 | web_session | Où est stocké le matériel avec le code inventaire "add/bureau1" ? | storage_by_designation | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. Aucun lieu de stockage... | 2025-08-25 09:49:17
+2797 | web_session | Quel matériel bureautique est affecté à "gestionnaire bureau" ? | office_assigned_to_user | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Matériels bureautiques affectés à '... | 2025-08-25 09:49:13
+2796 | web_session | Quel est le prix unitaire du matériel avec le code inventaire "ADD/BR/01" ? | unit_price_by_code | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Prix unitaire de ADD/BR/01 : 1111.0... | 2025-08-25 09:49:05
+2795 | web_session | Quels matériels bureautiques sont enregistrés ? | fallback | False | 0 | 1 | .
+
+ | 2025-08-25 09:48:57
+2794 | web_session | Existe-t-il un fournisseur nommé "3STD" ? | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-25 09:47:34
+2793 | web_session | Quels sont tous les fournisseurs enregistrés ? | completeness_question | False | 0 | 1 | **🏢 ANALYSE COMPLÈTE - FOURNISSEURS**
+
+##  **Vue d'Ensemble**
+
+### 🏢 **Portfo... | 2025-08-25 09:47:30
+2792 | web_session | Quels sont tous les fournisseurs enregistrés ? | completeness_question | False | 0 | 1 | **🏢 ANALYSE COMPLÈTE - FOURNISSEURS**
+
+##  **Vue d'Ensemble**
+
+### 🏢 **Portfo... | 2025-08-25 09:47:21
+2791 | web_session | Combien de fournisseurs ont une adresse contenant "AVENUE" ? | supplier_details | False | 0 | 1 |  Aucun fournisseur trouvé avec le nom 'AVENUE' | 2025-08-25 09:47:13
+2790 | web_session | Quels fournisseurs ont un ICE commençant par "001" ? | supplier_ice | False | 0 | 1 | Aucun fournisseur trouvé avec le nom '001'. | 2025-08-25 09:47:08
+2789 | web_session | Quelle est la répartition des fournisseurs par ville (Casablanca, Rabat, etc.) ? | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-25 09:47:01
+2788 | web_session | Combien de fournisseurs ont une adresse à Temara ? | supplier_details | False | 0 | 1 | ❓ Veuillez préciser le nom du fournisseur pour obtenir les détails. | 2025-08-25 09:46:56
+2787 | web_session | Combien de fournisseurs sont basés à Rabat ? | supplier_location | False | 0 | 1 | Fournisseurs situés à Rabat:
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-25 09:46:52
+2786 | web_session | Combien de fournisseurs sont basés à Casablanca ? | supplier_location | False | 0 | 1 | Fournisseurs situés à Casablanca:
+• ONBOARDTECH - ICE: 003323735000063 - 26 A... | 2025-08-25 09:46:48
+2785 | web_session | Quel fournisseur est situé à "15 AVENUE AL ABTAL, AGDAL - RABAT" ? | supplier_by_address | False | 0 | 1 | Aucun fournisseur trouvé à l'adresse '15 AVENUE AL ABTAL, AGDAL - RABAT'. | 2025-08-25 09:46:41
+2784 | web_session | Quels sont les détails du fournisseur "ATLAS CLOUD SERVICES" ? | supplier_ice | False | 0 | 1 | 🏢 ICE du fournisseur ATLAS CLOUD SERVICES : 002555403000025
+Adresse : LOT 660... | 2025-08-25 09:46:36
+2783 | web_session | Quel fournisseur a l'ICE "001524911000023" ? | supplier_by_ice | False | 0 | 1 | 🏢 MTDS — ICE: 001524911000023
+Adresse : 14, RUE 16 NOVEMBRE, AGDAL, RABAT, 10... | 2025-08-25 09:46:31
+2782 | web_session | Quelle est l'adresse du fournisseur "COHESIUM" ? | supplier_details | False | 0 | 1 | 🏢 **Détails du fournisseur COHESIUM :**
+
+• **ICE :** 001546203000058
+• **Adre... | 2025-08-25 09:46:26
+2781 | web_session | Quel est l'ICE du fournisseur "TECHNICOVIGILE" ? | supplier_ice | False | 0 | 1 | 🏢 ICE du fournisseur TECHNICOVIGILE : 000078278000027
+Adresse : 298, AVENUES ... | 2025-08-25 09:46:21
+2780 | web_session | Quelle est l'adresse du fournisseur "ARTEMIS" ? | supplier_details | False | 0 | 1 | 🏢 **Détails du fournisseur ARTEMIS :**
+
+• **ICE :** 001560563000047
+• **Adres... | 2025-08-25 09:46:16
+2779 | web_session | Combien de fournisseurs sont enregistrés dans la base de données ? | count_suppliers | False | 0 | 1 | 🏢 **Total des fournisseurs :**
+• **Total : 42**
+
+ | 2025-08-25 09:46:14
+2778 | web_session | Quels utilisateurs sont dans le groupe "Gestionnaire Bureau" ? | user_groups_by_name | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Groupes de 'Gestionnaire bureautiqu... | 2025-08-25 09:45:30
+2777 | web_session | Quel est l'email de l'utilisateur "superadmin" ? | user_email_by_name | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Email de 'superadmin' : superadmin@p... | 2025-08-25 09:44:54
+2776 | web_session | Qui sont les utilisateurs enregistrés dans la base de données ? | count_users | False | 0 | 1 |  **Total des utilisateurs :**
+• **Total : 4**
+• **Actifs : 4**
+
+**Répartition... | 2025-08-25 09:44:42
+2775 | web_session | Combien de fournisseurs sont basés à Rabat ? | supplier_location | False | 0 | 1 | Fournisseurs situés à Rabat:
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-25 09:42:33
+2774 | web_session | Combien de fournisseurs sont basés à Casablanca ? | supplier_location | False | 0 | 1 | Fournisseurs situés à Casablanca:
+• ONBOARDTECH - ICE: 003323735000063 - 26 A... | 2025-08-25 09:42:13
+2773 | web_session | Quel fournisseur est situé à "15 AVENUE AL ABTAL, AGDAL - RABAT" ? | supplier_location | False | 0 | 1 | Fournisseurs situés à Rabat, Agdal:
+• RKFE - ICE: 0016692294000015 - 28 RUE A... | 2025-08-25 09:41:31
+2772 | web_session | Quels sont les détails du fournisseur "ATLAS CLOUD SERVICES" ? | supplier_ice | False | 0 | 1 | 🏢 ICE du fournisseur ATLAS CLOUD SERVICES : 002555403000025
+Adresse : LOT 660... | 2025-08-25 09:41:25
+2771 | web_session | Quel fournisseur a l'ICE "001524911000023" ? | supplier_ice | False | 0 | 1 | Aucun fournisseur trouvé avec le nom 'a l'. | 2025-08-25 09:41:19
+2770 | web_session | Quelle est l'adresse du fournisseur "COHESIUM" ? | supplier_details | False | 0 | 1 | ❓ Veuillez préciser le nom du fournisseur pour obtenir les détails. | 2025-08-25 09:41:15
+2769 | web_session | Quel est l'ICE du fournisseur "TECHNICOVIGILE" ? | supplier_ice | False | 0 | 1 | 🏢 ICE du fournisseur TECHNICOVIGILE : 000078278000027
+Adresse : 298, AVENUES ... | 2025-08-25 09:41:09
+2768 | web_session | Quelle est l'adresse du fournisseur "ARTEMIS" ? | supplier_details | False | 0 | 1 | ❓ Veuillez préciser le nom du fournisseur pour obtenir les détails. | 2025-08-25 09:41:04
+2767 | web_session | Combien de fournisseurs sont enregistrés dans la base de données ? | count_suppliers | False | 0 | 1 | 🏢 **Total des fournisseurs :**
+• **Total : 42**
+
+ | 2025-08-25 09:40:59
+2766 | web_session | Quels sont les détails complets de l'utilisateur "superadmin" ? | materials_assigned_to_user | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Matériels affectés à 'superadmin' :
+burea... | 2025-08-25 09:40:24
+2765 | web_session | Combien d'utilisateurs sont enregistrés au total ? | materials_assigned_to_user | False | 0 | 1 | Veuillez préciser l'utilisateur entre guillemets. | 2025-08-25 09:40:18
+2764 | web_session | Combien d'utilisateurs ont été créés en juillet 2025 ? | user_created_date | False | 0 | 1 | Veuillez préciser l'utilisateur entre guillemets. | 2025-08-25 09:40:09
+2763 | web_session | Combien d'utilisateurs sont actifs ? | materials_assigned_to_user | False | 0 | 1 | Veuillez préciser l'utilisateur entre guillemets. | 2025-08-25 09:40:05
+2762 | web_session | Quel est l'email de l'utilisateur "employe" ? | user_email_by_name | False | 0 | 1 | Je suis désolé, mais je n'ai pas trouvé de données pour cette requête. Aucun ... | 2025-08-25 09:39:57
+2761 | web_session | Quand l'utilisateur "gestionnaire bureau" a-t-il été créé ? | user_created_date | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Date de création de 'gestionnaire b... | 2025-08-25 09:39:49
+2760 | web_session | Quels utilisateurs n'appartiennent à aucun groupe ? | users_without_group | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Tous les utilisateurs appartiennent à au ... | 2025-08-25 09:39:41
+2759 | web_session | Quel est le groupe de l'utilisateur "employe" ? | user_groups_by_name | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Groupes de 'employe' : Employé Voulez-vou... | 2025-08-25 09:39:34
+2758 | web_session | Quels utilisateurs sont dans le groupe "Gestionnaire Bureau" ? | user_groups_by_name | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Groupes de 'Gestionnaire bureautique' : G... | 2025-08-25 09:39:26
+2757 | web_session | Quel est le statut (actif/inactif) de l'utilisateur "gestionnaire info" ? | materials_assigned_to_user | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Matériels affectés à 'gestionnaire ... | 2025-08-25 09:39:22
+2756 | web_session | Quand l'utilisateur "employe_test" a-t-il été créé ? | user_created_date | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. Aucun utilisateur trou... | 2025-08-25 09:39:17
+2755 | web_session | Quel est l'email de l'utilisateur "superadmin" ? | user_email_by_name | False | 0 | 1 | Je suis désolé, mais je n'ai pas trouvé de données pour cette requête. Aucun ... | 2025-08-25 09:39:11
+2754 | web_session | Qui sont les utilisateurs enregistrés dans la base de données ? | fallback | False | 0 | 1 | ## Liste des utilisateurs enregistrés
+
+Total : 3 utilisateurs.
+
+Détails :
+• e... | 2025-08-25 09:39:02
+2753 | web_session | Quels utilisateurs sont dans le groupe "Gestionnaire Bureau" ? | list_groups | False | 0 | 1 | Groupes d'utilisateurs :
+• Employé
+• Super Admin
+• Gestionnaire Informatique
+... | 2025-08-25 09:31:45
+2752 | web_session | Quel est le statut (actif/inactif) de l'utilisateur "gestionnaire info" ? | materials_assigned_to_user | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Matériels affectés à 'gestionnaire ... | 2025-08-25 09:31:36
+2751 | web_session | Quand l'utilisateur "employe_test" a-t-il été créé ? | materials_assigned_to_user | False | 0 | 1 | Je suis désolé, mais je n'ai pas trouvé de données pour cette requête. Aucun ... | 2025-08-25 09:31:31
+2750 | web_session | Quel est l'email de l'utilisateur "superadmin" ? | materials_assigned_to_user | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. Aucun matériel affecté... | 2025-08-25 09:31:26
+2749 | web_session | Quel est l'email de l'utilisateur "superadmin" ? | materials_assigned_to_user | False | 0 | 1 | Malheureusement, je n'ai pas pu localiser les informations demandées. Aucun m... | 2025-08-25 09:31:06
+2748 | web_session | Quel est l'email de l'utilisateur "superadmin" ? | materials_assigned_to_user | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. Aucun matériel affecté... | 2025-08-25 09:31:00
+2747 | web_session | Quel est l'email de l'utilisateur "superadmin" ? | error | False | 0 | 1 | Une erreur est survenue lors du traitement de votre demande. Veuillez réessayer. | 2025-08-25 09:30:06
+2746 | web_session | Quel est l'email de l'utilisateur "superadmin" ? | error | False | 0 | 1 | Une erreur est survenue lors du traitement de votre demande. Veuillez réessayer. | 2025-08-25 09:29:27
+2745 | web_session | Quel est l'email de l'utilisateur "superadmin" ? | error | False | 0 | 1 | Une erreur est survenue lors du traitement de votre demande. Veuillez réessayer. | 2025-08-25 09:27:43
+2744 | web_session | Qui sont les utilisateurs enregistrés dans la base de données ? | error | False | 0 | 1 | Une erreur est survenue lors du traitement de votre demande. Veuillez réessayer. | 2025-08-25 09:27:41
+2743 | web_session | Quels matériels informatiques n'ont pas encore été affectés à un utilisateur ? | it_assigned_materials | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Matériels informatiques affectés à un uti... | 2025-08-25 09:24:28
+2742 | web_session | Combien de demandes d'équipement ont été faites en août 2025 ? | error | False | 0 | 1 | Une erreur est survenue lors du traitement de votre demande. Veuillez réessayer. | 2025-08-25 09:24:24
+2741 | web_session | Quelles commandes (bureautiques ou informatiques) ont un montant supérieur à ... | error | False | 0 | 1 | Une erreur est survenue lors du traitement de votre demande. Veuillez réessayer. | 2025-08-25 09:24:01
+2740 | web_session | Quels fournisseurs ont fourni à la fois des matériels bureautiques et informa... | supplier_location | False | 0 | 1 | Aucun fournisseur trouvé pour la localisation: la fois des matériels bureauti... | 2025-08-25 09:23:56
+2739 | web_session | Quel est le coût total des commandes bureautiques et informatiques ? | error | False | 0 | 1 | Une erreur est survenue lors du traitement de votre demande. Veuillez réessayer. | 2025-08-25 09:23:50
+2738 | web_session | Quel est le nombre total d'équipements (bureautiques et informatiques) dans l... | error | False | 0 | 1 | Une erreur est survenue lors du traitement de votre demande. Veuillez réessayer. | 2025-08-25 09:23:45
+2737 | web_session | Quels matériels sont affectés à l'utilisateur "gestionnaire info" ? | error | False | 0 | 1 | Une erreur est survenue lors du traitement de votre demande. Veuillez réessayer. | 2025-08-25 09:23:43
+2736 | web_session | Quel est le prix unitaire de l'article "Call Server" dans la commande "BC24" ? | analysis_complexe | False | 0 | 1 | ** Analyse complète du parc :**
+• **Parc total :** 8 matériels
+  - Informatiq... | 2025-08-25 09:23:12
+2735 | web_session | Combien d'unités de "Baie" ont été commandées dans la commande "BC23" ? | fallback | False | 0 | 1 | ## Réponse
+
+Total : 3 unités.
+
+Détails :
+• Baie (Ligne commande: BC23) : Quan... | 2025-08-25 09:23:09
+2734 | web_session | Quelle est la désignation des articles dans la commande "BC23" ? | analysis_complexe | False | 0 | 1 | ** Analyse complète du parc :**
+• **Parc total :** 8 matériels
+  - Informatiq... | 2025-08-25 09:22:54
+2733 | web_session | Quelles sont les lignes de commande associées à la commande "BC24" ? | order_lines | False | 0 | 1 | Lignes de commande BC24:
+• Call Server — OmniPCX Entreprise Large — Qté 1 — P... | 2025-08-25 09:22:50
+2732 | web_session | Quelles commandes informatiques ont été passées en juillet 2025 ? | liste_commandes | False | 0 | 1 | **Commandes informatiques:**
+**Commandes informatiques:**
+- BC23: TECHNICOVIG... | 2025-08-25 09:22:18
+2731 | web_session | Quel est le montant total de la commande "BC23" ? | completeness_question | False | 0 | 1 |  Erreur lors de l'analyse exhaustive des commandes : property 'montant_total'... | 2025-08-25 09:21:56
+2730 | web_session | garantie de bc 24 | warranty_details | False | 0 | 1 | Commande BC24
+• Durée: 2 Mois
+• Réception: 15/07/2025
+• Fin de garantie: 15/0... | 2025-08-25 09:21:38
+2729 | web_session | Quel est le numéro de série du matériel avec le code inventaire "cd12" ? | material_warranty_status | False | 0 | 1 | Je suis désolé, mais je n'ai pas trouvé de données pour cette requête. Aucun ... | 2025-08-25 09:19:58
+2728 | web_session | Quels matériels informatiques ont un statut "nouveau" ? | liste_materiel | False | 0 | 1 | Excellent ! J'ai trouvé les informations. **Matériel informatique :**
+• cd14 ... | 2025-08-25 09:19:56
+2727 | web_session | Quels matériels bureautiques ont un statut "Opérationnel" ? | fallback | False | 0 | 1 | En utilisant le contexte disponible, je n'ai trouvé aucune information relati... | 2025-08-25 09:19:31
+2726 | web_session | Quels matériels bureautiques sont affectés à "gestionnaire bureau" ? | fallback | False | 0 | 1 | ## Matériel bureautique affecté à "Gestionnaire Bureau"
+
+Selon le contexte, l... | 2025-08-25 09:18:34
+2725 | web_session | Quel est le prix unitaire du matériel avec le code inventaire "ADD/BR/01" ? | codes_by_designation | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. Aucun matériel trouvé ... | 2025-08-25 09:18:12
+2724 | web_session | Quels matériels bureautiques sont disponibles ? | fallback | False | 0 | 1 | ## Matériel Bureautique Disponible
+
+En consultant les demandes d'équipements ... | 2025-08-25 09:18:07
+2723 | web_session | Quels fournisseurs sont basés à Casablanca ? | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-25 09:17:11
+2722 | web_session | Quelle est l'adresse du fournisseur "ARTEMIS" ? | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-25 09:17:01
+2721 | web_session | Liste des designations bureau | fallback | False | 0 | 1 | • *Réponse**
+
+Total : 5 éléments. Détails :
+• Bureau [FOURNISSEUR_NON_VÉRIFIÉ... | 2025-08-25 09:16:03
+2720 | web_session | la liste des designation. informatique | fallback | False | 0 | 1 | • *Liste des designations**
+• Imprimante [FOURNISSEUR_NON_VÉRIFIÉ]: 10
+• Ordi... | 2025-08-25 09:15:47
+2719 | web_session | la liste des utilisateurs | list_users | False | 0 | 1 | **Liste des utilisateurs :**
+
+• **employe** — ✅ Actif
+  📧 Email: employe_1@ad... | 2025-08-25 09:15:25
+2718 | web_session | la liste des fournisseurs | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-25 09:15:12
+2717 | web_session | liste des matereils | fallback | False | 0 | 1 | En vous basant exclusivement sur le contexte, voici la réponse :
+• *Matériel ... | 2025-08-25 08:32:32
+2716 | web_session | liste des utilisateurs | list_users | False | 0 | 1 | **Liste des utilisateurs :**
+
+• **employe** — ✅ Actif
+  📧 Email: employe_1@ad... | 2025-08-25 08:32:06
+2715 | web_session | liste des matreils informatique a etage1 | fallback | False | 0 | 1 | ## Liste des matériaux informatiques à étage 1
+• ADD/INFO/010, Statut: nouvea... | 2025-08-25 08:31:36
+2714 | web_session | liste des matreils bureatiques a etage1 | fallback | False | 0 | 1 | • *Matériel bureau à étage 1**
+• Total : 1 élément.
+• Détails : • Armoire ([C... | 2025-08-25 08:31:21
+2713 | web_session | liste des matreils bureau a etage1 | fallback | False | 0 | 1 | • *Réponse**
+
+Total : 3 éléments. Détails :
+• Armoire (Affectation : étage1)
+... | 2025-08-25 08:30:57
+2712 | web_session | liste des matreils informatique a etage1 | fallback | False | 0 | 1 | ## Liste des matériaux informatiques à étage 1
+
+Total : 3 éléments.
+
+Détails ... | 2025-08-25 08:25:47
+2711 | web_session | liste des matreils informatique a etage2 | fallback | False | 0 | 1 | • *Réponse**
+
+Liste des matériaux informatiques à étage 2 :
+• Aucun matériel ... | 2025-08-25 08:25:30
+2710 | web_session | liste des matreils bureau a etage1 | fallback | False | 0 | 1 | • *Réponse**
+
+Liste des matériaux bureautiques stockés à l'étage 1 :
+• Armoir... | 2025-08-25 08:25:17
+2709 | web_session | liste des matreils bureatiques a etage1 | fallback | False | 0 | 1 | • *Matériel bureau à étage 1**
+
+Total : 2 éléments. Détails :
+• Matériel : Ar... | 2025-08-25 08:24:48
+2708 | web_session | liste des matreils bureau a etage1 | fallback | False | 0 | 1 | • *Matériel bureau à étage 1**
+• Armoire (Archive de 228 cm de hauteur) - Lig... | 2025-08-25 08:23:15
+2707 | web_session | liste des matreils informatique a etage2 | fallback | False | 0 | 1 | ## Liste des matériels informatiques à étage 2
+
+Total : 0 éléments. Détails :... | 2025-08-25 08:22:33
+2706 | web_session | liste des matreils informatique a etage1 | fallback | False | 0 | 1 | ## Réponse
+
+Total : 2 éléments. Détails :
+• ADD/INFO/010 (sn010) - Statut : n... | 2025-08-25 08:21:51
+2705 | web_session | liste des utilisateurs | list_users | False | 0 | 1 | **Liste des utilisateurs :**
+
+• **employe** — ✅ Actif
+  📧 Email: employe_1@ad... | 2025-08-25 08:17:46
+2704 | web_session | code inventaire de armoire | codes_by_designation | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Voici les codes d'inventaire pour A... | 2025-08-25 08:17:36
+2703 | web_session | code inventaire be baie | codes_by_designation | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Voici les codes d'inventaire pour Ba... | 2025-08-25 08:17:28
+2702 | web_session | matériels informatiques | fallback | False | 0 | 1 | ## Réponse sur les matériels informatiques
+
+Total : 2 matériels. Détails :
+• ... | 2025-08-25 08:17:12
+2701 | web_session | Matériel Informatique* | fallback | False | 0 | 1 | ## Réponse au matériels informatiques
+
+### Matériel nouveaux
+• ADD/INFO/010 (... | 2025-08-25 08:16:45
+2700 | web_session | • Liste des matériaux informatiques | fallback | False | 0 | 1 | • *Matériel Informatique**
+
+En examinant le contexte, nous trouvons les éléme... | 2025-08-25 08:15:53
+2699 | web_session | liste Matériel Bureau | fallback | False | 0 | 1 | • *Liste des matériaux bureau**
+• ADD/BR/01: Bureau Affecté, étage3, Prix uni... | 2025-08-25 08:15:06
+2698 | web_session | liset matereils bureatiques | fallback | False | 0 | 1 | ## Matériel Bureautique
+
+En consultant le contexte, nous avons identifié les ... | 2025-08-25 08:13:32
+2697 | web_session | liset meereils informatiques | fallback | False | 0 | 1 | • *Réponse**
+
+Total : 2 éléments. Détails :
+• DescriptionBureau: Coffre-fort ... | 2025-08-25 08:08:38
+2696 | web_session | liset matereils bureatiques | fallback | False | 0 | 1 | • *Matériel Bureautique**
+
+Total : 2 éléments. Détails :
+• Banquette ronde ta... | 2025-08-25 08:06:24
+2695 | web_session | Liste toutes les demandes d'équipement | final_validation_guardrail | False | 0 | 1 | **Demandes d'équipement**
+• Demande en cours — gestionnaire | 2025-08-25 08:05:56
+2694 | web_session | Quelles demandes d'équipement ont été rejetées ? | count_equipment_requests | False | 0 | 1 | Bonjour ! Voici les détails : Voici ce que j'ai trouvé.  **Demandes d'équipem... | 2025-08-25 08:05:37
+2693 | web_session | Quels utilisateurs ayant des demandes d'équipement approuvées ont des matérie... | computer_materials_assignment | False | 0 | 1 | Salut ! Voici les matériels informatiques actuellement affectés :
+
+👤 **employ... | 2025-08-25 08:05:23
+2692 | web_session | Quels matériels informatiques et bureautiques sont affectés à 'gestionnaire i... | final_validation_guardrail | False | 0 | 1 | **Affectations (2)**
+• cd12
+• cd13 | 2025-08-25 08:05:14
+2691 | web_session | Quels fournisseurs ont fourni à la fois des commandes informatiques et bureau... | final_validation_guardrail | False | 0 | 1 | **Fournisseurs 2025 (2)**
+• ARTEMIS
+• COHESIUM | 2025-08-25 08:05:04
+2690 | web_session | Quels utilisateurs n'ont aucun matériel informatique affecté ? | computer_materials_assignment | False | 0 | 1 | Salut ! Voici les matériels informatiques actuellement affectés :
+
+👤 **employ... | 2025-08-25 08:04:50
+2689 | web_session | Quels fournisseurs n’ont fourni ni commandes informatiques ni commandes burea... | final_validation_guardrail | False | 0 | 1 | **Fournisseurs 2025 (2)**
+• ARTEMIS
+• COHESIUM | 2025-08-25 08:04:32
+2688 | web_session | Liste toutes les commandes informatiques | final_validation_guardrail | False | 0 | 1 | **Commandes informatiques (2)**
+• BC23
+• BC24 | 2025-08-25 08:04:11
+2687 | web_session | Quelles commandes bureautiques de COHESIUM ont un montant entre 1000 et 5000 ... | final_validation_guardrail | False | 0 | 1 | **Commandes bureautiques — COHESIUM (1)**
+• C2025 (COHESIUM, 1111.00 DH) | 2025-08-25 08:02:15
+2686 | web_session | Quelles livraisons associées à des commandes bureautiques ont un retard de pl... | delivery_delays | False | 0 | 1 | Livraisons en retard (4 trouvées) :
+
+📦 Commande C2025 :
+   📅 Prévu : 2025-07-... | 2025-08-25 08:02:07
+2685 | web_session | Quelles livraisons sont associées à des commandes informatiques de 3STD ? | final_validation_guardrail | False | 0 | 1 | **Livraisons — 3STD (1)**
+• Livraison 10 (BC24, 3STD, Date prévue: 2025-07-15) | 2025-08-25 08:01:52
+2684 | web_session | Quelles livraisons sont associées à des commandes informatiques de 3STD ? | delivery_delay | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Bonjour ! Voici les matériels livrés... | 2025-08-25 07:51:33
+2683 | web_session | Quelles livraisons associées à des commandes bureautiques ont un retard de pl... | delivery_delays | False | 0 | 1 | Livraisons en retard (4 trouvées) :
+
+📦 Commande C2025 :
+   📅 Prévu : 2025-07-... | 2025-08-25 07:51:26
+2682 | web_session | Quelles commandes bureautiques de COHESIUM ont un montant entre 1000 et 5000 ... | liste_commandes | False | 0 | 1 | **Commandes bureau:**
+- C2025: COHESIUM (Date: 23/08/2025, Mode: Contrat, Mon... | 2025-08-25 07:51:16
+2681 | web_session | Liste toutes les commandes informatiques | final_validation_guardrail | False | 0 | 1 | **Commandes informatiques (2)**
+• BC23
+• BC24 | 2025-08-25 07:51:05
+2680 | web_session | Quels fournisseurs n’ont fourni ni commandes informatiques ni commandes burea... | order_supplier | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. Aucune commande trouvé... | 2025-08-25 07:50:56
+2679 | web_session | Liste tous les fournisseurs disponibles | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-25 07:50:48
+2678 | web_session | Quels utilisateurs n'ont aucun matériel informatique affecté ? | computer_materials_assignment | False | 0 | 1 | Salut ! Voici les matériels informatiques actuellement affectés :
+
+👤 **employ... | 2025-08-25 07:50:33
+2677 | web_session | Quels fournisseurs ont fourni à la fois des commandes informatiques et bureau... | order_supplier | False | 0 | 1 | Malheureusement, je n'ai pas pu localiser les informations demandées. Aucune ... | 2025-08-25 07:50:25
+2676 | web_session | Quels matériels informatiques et bureautiques sont affectés à 'gestionnaire i... | final_validation_guardrail | False | 0 | 1 | **Affectations (2)**
+• cd12
+• cd13 | 2025-08-25 07:50:13
+2675 | web_session | Quels utilisateurs ayant des demandes d'équipement approuvées ont des matérie... | computer_materials_assignment | False | 0 | 1 | Salut ! Voici les matériels informatiques actuellement affectés :
+
+👤 **employ... | 2025-08-25 07:50:04
+2674 | web_session | Quelles demandes d'équipement ont été rejetées ? | count_equipment_requests | False | 0 | 1 | Bonjour ! Voici les informations : Voici les détails.  **Demandes d'équipemen... | 2025-08-25 07:49:54
+2673 | web_session | Quelles demandes d'équipement en statut 'approuvee' concernent des matériels ... | liste_materiel | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. **Matériel informatique :**
+• cd14 - Stat... | 2025-08-25 07:49:45
+2672 | web_session | Liste toutes les demandes d'équipement | final_validation_guardrail | False | 0 | 1 | **Demandes d'équipement**
+• Demande en cours — gestionnaire | 2025-08-25 07:49:31
+2671 | web_session | Quels matériels bureautiques sont stockés à 'etage2' et affectés à 'superadmi... | list_material | False | 0 | 1 | 1 matériel bureautique à etage2 pour superadmin
+**Matériels bureautiques (tot... | 2025-08-25 07:49:22
+2670 | web_session | Quels matériels bureautiques sont stockés à 'etage1' ? | materials_by_location | False | 0 | 1 | Voici les détails que vous cherchiez :
+
+Matériels à etage1 :
+Informatique :
+•... | 2025-08-25 07:49:14
+2669 | web_session | Liste tous les matériels bureautiques | list_bureau_materials | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer Matériels bureautiques (total: 3) :
+... | 2025-08-25 07:49:04
+2668 | web_session | Quels matériels informatiques sont stockés à 'etage1' et non affectés ? | materials_by_location | False | 0 | 1 | Voici ce que j'ai pu récupérer :
+
+Matériels à etage1 :
+Informatique :
+• cd14 ... | 2025-08-25 07:48:44
+2667 | web_session | Quels matériels informatiques sont affectés à des utilisateurs ? | computer_materials_assignment | False | 0 | 1 | Salut ! Voici les matériels informatiques actuellement affectés :
+
+👤 **employ... | 2025-08-25 07:48:26
+2666 | web_session | Liste tous les matériels informatiques | list_info_materials | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé Matériels informatiques (total: 5) :
+• sn1... | 2025-08-25 07:48:08
+2665 | web_session | Garanties expirant dans les 30 jours | warranty_details | False | 0 | 1 | Aucune commande trouvée pour LES30. | 2025-08-24 17:23:18
+2664 | web_session | Garanties expirant dans les 30 jours | warranty_details | False | 0 | 1 | Aucune commande trouvée pour LES30. | 2025-08-24 17:04:37
+2663 | web_session | Garanties expirant dans les 30 jours | warranty_details | False | 0 | 1 | Aucune commande trouvée pour LES30. | 2025-08-24 16:59:29
+2662 | web_session | Garanties expirant dans les 30 jours | warranty_details | False | 0 | 1 | Aucune commande trouvée pour LES30. | 2025-08-24 16:57:03
+2661 | web_session | Garanties expirant dans les 30 jours | warranty_details | False | 0 | 1 | Aucune commande trouvée pour LES30. | 2025-08-24 16:56:29
+2660 | web_session | Utilisateur avec le plus de matériels affectés | fallback | False | 0 | 1 | • *Utilisateur avec le plus de matériels affectés**
+
+Total : 4 éléments sont ... | 2025-08-24 16:55:31
+2659 | web_session | Utilisateur avec le plus de matériels affectés | fallback | False | 0 | 1 | ## Résultats
+
+En analysant les données du contexte, nous avons trouvé que l'u... | 2025-08-24 16:51:20
+2658 | web_session | Historique des logs admin pour l'utilisateur superadmin | fallback | False | 0 | 1 | ## Historique des logs admin pour l'utilisateur superadmin
+
+Total : 0 élément... | 2025-08-24 16:51:09
+2657 | web_session | Quels sont les prix des matériels ? | fallback | False | 0 | 1 | ## Prix des matériaux
+
+Les informations relatives aux prix des matériels ne s... | 2025-08-24 16:50:59
+2656 | web_session | Garanties expirant dans les 30 jours | warranty_details | False | 0 | 1 | Aucune commande trouvée pour LES30. | 2025-08-24 16:50:48
+2655 | web_session | Garanties expirant dans les 30 jours | warranty_details | False | 0 | 1 | Aucune commande trouvée pour LES30. | 2025-08-24 16:48:52
+2654 | web_session | Garanties expirant dans les 30 jours | warranty_details | False | 0 | 1 | Aucune commande trouvée pour LES30. | 2025-08-24 16:43:20
+2653 | web_session | Historique des logs admin pour l'utilisateur superadmin | fallback | False | 0 | 1 | Historique des logs admin pour l'utilisateur superadmin :
+
+## Analyse des log... | 2025-08-24 16:39:25
+2652 | web_session | Quels sont les prix des matériels ? | fallback | False | 0 | 1 | ## Réponse aux questions sur les prix des matériels
+
+Aucune information n'est... | 2025-08-24 16:38:48
+2651 | web_session | Utilisateur avec le plus de matériels affectés | fallback | False | 0 | 1 | En analysant le contexte, nous pouvons identifier les différents matériels af... | 2025-08-24 16:38:37
+2650 | web_session | Garanties expirant dans les 30 jours | warranty_details | False | 0 | 1 | Aucune commande trouvée pour LES30. | 2025-08-24 16:38:19
+2649 | web_session | Demandes d'équipement approuvées en août 2025 | count_equipment_requests | False | 0 | 1 | Excellente nouvelle ! Voici les détails.  **Demandes d'équipement approuvées ... | 2025-08-24 16:38:13
+2648 | web_session | Matériels bureautiques affectés à gestionnaire bureau | fallback | False | 0 | 1 | Matériel bureautique affecté à Gestionnaire Bureau :
+
+Total : 2 matériels. Dé... | 2025-08-24 16:38:09
+2647 | web_session | Fournisseur de la commande BC23 | order_supplier | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Salut ! La commande BC23 (matériels ... | 2025-08-24 16:37:52
+2646 | web_session | Quels utilisateurs ont des matériels informatiques affectés ? | computer_materials_assignment | False | 0 | 1 | Salut ! Voici les matériels informatiques actuellement affectés :
+
+👤 **employ... | 2025-08-24 16:37:46
+2645 | web_session | Utilisateurs dans le groupe Employe | list_groups | False | 0 | 1 | Groupes d'utilisateurs :
+• Employé
+• Super Admin
+• Gestionnaire Informatique
+... | 2025-08-24 16:37:37
+2644 | web_session | Livraisons en retard | delivery_delay | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Bonjour ! Voici les matériels livré... | 2025-08-24 16:37:30
+2643 | web_session | Fournisseurs avec ICE commençant par 001 | supplier_ice | False | 0 | 1 | Veuillez préciser le nom du fournisseur. | 2025-08-24 16:37:24
+2642 | web_session | Nombre de matériels affectés | count_total_material | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Actuellement, 4 matériels sont affectés à... | 2025-08-24 16:37:14
+2641 | web_session | Nombre total d'utilisateurs actifs | count_users | False | 0 | 1 |  **Total des utilisateurs :**
+• **Total : 6**
+• **Actifs : 6**
+
+**Répartition... | 2025-08-24 16:37:07
+2640 | web_session | Lieu de stockage du matériel ADD/INFO/01094 | structured_search | False | 0 | 1 | **Matériel trouvé :**
+• **Code :** ADD/INFO/01094
+• **Série :** None
+• **Obse... | 2025-08-24 16:37:01
+2639 | web_session | Durée de garantie de la commande BC24 | warranty_details | False | 0 | 1 | Commande BC24
+• Durée: 2 Mois
+• Réception: 15/07/2025
+• Fin de garantie: 15/0... | 2025-08-24 16:36:55
+2638 | web_session | Code inventaire de Baie | codes_by_designation | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Voici les codes d'inventaire pour B... | 2025-08-24 16:36:48
+2637 | web_session | Statut de la livraison BC23 | delivery_delay | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Bonjour ! Voici les matériels livré... | 2025-08-24 16:36:40
+2636 | web_session | Code inventaire de la Baie | codes_by_designation | False | 0 | 1 | Désolé, je n'ai rien trouvé pour cette demande. Aucun matériel trouvé pour la... | 2025-08-24 16:36:32
+2635 | web_session | Numéro de série du Call Server | serial_by_designation | False | 0 | 1 | Numéros de série pour call server:
+• ADD/INFO/01000 — sn01000 | 2025-08-24 16:36:27
+2634 | web_session | Email de l'utilisateur superadmin | fallback | False | 0 | 1 | Email de l'utilisateur superadmin : superadmin@parcinfo.com
+
+ | 2025-08-24 16:36:24
+2633 | web_session | Détails du fournisseur WANA CORPORATE SA | structured_search | False | 0 | 1 | **Fournisseur trouvé :**
+• **Nom :** WANA CORPORATE SA
+• **ICE :** 0015276820... | 2025-08-24 16:36:07
+2632 | web_session | code inventaire de armoire | codes_by_designation | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Voici les codes d'inventaire pour A... | 2025-08-24 16:36:00
+2631 | web_session | garanty bc24 | warranty_details | False | 0 | 1 | Commande BC24
+• Durée: 2 Mois
+• Réception: 15/07/2025
+• Fin de garantie: 15/0... | 2025-08-24 16:35:54
+2630 | web_session | materiels informatique | fallback | False | 0 | 1 | ## Matériel Informatique
+
+Total : 3 matériaux. Détails :
+• cd13 (Numéro série... | 2025-08-24 16:35:47
+2629 | web_session | materiels bureau | fallback | False | 0 | 1 | .
+
+ | 2025-08-24 16:35:28
+2628 | web_session | liste des utilistaeurs | fallback | False | 0 | 1 | • *Réponse**
+
+Liste des utilisateurs :
+
+Total : 5 utilisateurs. Détails :
+• C... | 2025-08-24 16:35:07
+2627 | web_session | liste des fournisuers | fallback | False | 0 | 1 | • *Liste des fournisseurs**
+
+En examinant le contexte, nous avons trouvé les ... | 2025-08-24 16:34:56
+2626 | web_session | Liste des livraisons existantes | delivery_delay | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Bonjour ! Voici les matériels livrés... | 2025-08-24 16:34:38
+2625 | web_session | Liste des commandes bureautiques existantes | fallback | False | 0 | 1 | • *Liste des commandes bureautiques existantes**
+
+En examinant le contexte, n... | 2025-08-24 16:34:23
+2624 | web_session | Liste des commandes informatiques existantes | fallback | False | 0 | 1 | ## Réponse à la question utilisateur
+• *Liste des commandes informatiques exi... | 2025-08-24 16:34:09
+2623 | web_session | Liste des matériels informatiques | fallback | False | 0 | 1 | • *Matériel Informatique**
+
+Total : 4 éléments.
+
+Détails :
+• Dell 19 Monitor ... | 2025-08-24 16:33:50
+2622 | web_session | Liste des matériels bureautiques | fallback | False | 0 | 1 | ## Matériel Bureautique
+
+Total : 5 éléments. Détails :
+• Fauteuil de travail ... | 2025-08-24 16:33:38
+2621 | web_session | Liste des groupes d'utilisateurs | list_users | False | 0 | 1 | Voici les détails que vous cherchiez :
+
+**Liste des utilisateurs :**
+
+• **emp... | 2025-08-24 16:33:23
+2620 | web_session | Liste des utilisateurs | list_users | False | 0 | 1 | J'ai trouvé ces informations pour vous :
+
+**Liste des utilisateurs :**
+
+• **e... | 2025-08-24 16:33:15
+2619 | web_session | Liste des livraisons existantes | delivery_delay | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Bonjour ! Voici les matériels livré... | 2025-08-24 16:33:00
+2618 | web_session | matereils bureau | fallback | False | 0 | 1 | • *Réponse**
+
+## Matériel Bureau
+
+### Total
+• Nombre de matériaux bureaux : 3... | 2025-08-24 16:32:37
+2617 | web_session | Liste des matériels bureautiques | fallback | False | 0 | 1 | • *Matériel Bureautique**
+
+Total : 5 éléments.
+
+Détails :
+• Fauteuil de trava... | 2025-08-24 16:32:09
+2616 | web_session | Liste des commandes bureautiques existantes | fallback | False | 0 | 1 | • *Liste des commandes bureautiques existantes**
+
+Total : 1 commande. Détails... | 2025-08-24 16:31:41
+2615 | web_session | Liste des commandes bureautiques existantes | fallback | False | 0 | 1 | • *Liste des commandes bureautiques existantes**
+
+Total : 1 commande. Détails... | 2025-08-24 16:30:41
+2614 | web_session | matereils bureau | fallback | False | 0 | 1 | ## Matériel Bureau
+
+Total : 3 éléments. Détails :
+• ADD/Bureau1 : Armoire arc... | 2025-08-24 15:01:02
+2613 | web_session | garantie bc24 | warranty_details | False | 0 | 1 | Commande BC24
+• Durée: 2 Mois
+• Réception: 15/07/2025
+• Fin de garantie: 15/0... | 2025-08-24 15:00:32
+2612 | web_session | liste des utilisateurs | list_users | False | 0 | 1 | **Liste des utilisateurs :**
+
+• **employe** — ✅ Actif
+  📧 Email: employe_1@ad... | 2025-08-24 15:00:21
+2611 | web_session | liste des fournisseurs | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-24 15:00:11
+2610 | web_session | garantie bc23 | warranty_details | False | 0 | 1 | Commande BC23
+• Durée: 1 Mois
+• Réception: 23/07/2025
+• Fin de garantie: 23/0... | 2025-08-22 22:36:16
+2609 | web_session | superadmin | fallback | False | 0 | 1 | • *Réponse structurée**
+
+## Informations sur les utilisateurs
+
+Les informatio... | 2025-08-22 22:35:53
+2608 | web_session | liste des fournisseurs | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-22 22:35:31
+2607 | web_session | liste des utilisateurs | list_users | False | 0 | 1 | **Liste des utilisateurs :**
+
+• **employe anonyme** — ✅ Actif
+  📧 Email: empl... | 2025-08-22 22:35:19
+2606 | web_session | liste des utilisatuers | fallback | False | 0 | 1 | • *Liste des utilisateurs**
+
+Comptage : Total : 5 éléments. Détails : 
+• [FOU... | 2025-08-22 01:38:41
+2605 | web_session | superadmin | fallback | False | 0 | 1 | Bonjour superadmin, je suis ravi de vous aider.
+
+Les actions administratives ... | 2025-08-22 01:36:40
+2604 | web_session | liste des utilisatuers | fallback | False | 0 | 1 | • *Réponse structurée**
+
+## Utilisateurs du parc informatique et bureautique
+... | 2025-08-22 01:36:24
+2603 | web_session | Y a-t-il des garanties qui expirent bientôt ? | warranty_expiring_soon | False | 0 | 1 | Garanties expirant dans 30 jours:
+- BC23 (Informatique) — fin 23/08/2025
+- BC... | 2025-08-22 01:36:09
+2602 | web_session | Montre-moi les commandes récentes | fallback | False | 0 | 1 | • *Commandes récentes**
+
+## Commandes du parc informatique et bureautique
+
+##... | 2025-08-22 01:36:09
+2601 | web_session | Quels sont les fournisseurs disponibles ? | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-22 01:35:52
+2600 | web_session | Liste les matériels informatiques | fallback | False | 0 | 1 | • *Matériel Informatique**
+
+Total : 5 éléments. Détails :
+• Dell 19 Monitor [... | 2025-08-22 01:35:52
+2599 | web_session | Combien d'utilisateurs y a-t-il dans le système ? | fallback | False | 0 | 1 | Total : 3 utilisateurs.
+
+Détails :
+• Gestionnaire info
+• Gestionnaire bureau
+... | 2025-08-22 01:35:44
+2598 | web_session | liste des utilisatuers | fallback | False | 0 | 1 | Malheureusement, je n'ai pas pu localiser les informations demandées. **🤖 Ass... | 2025-08-22 01:33:50
+2597 | web_session | superadmin | fallback | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. **🤖 Assistant ParcInfo... | 2025-08-22 01:27:43
+2596 | web_session | liste des utilisatuers | fallback | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. **🤖 Assistant ParcInfo... | 2025-08-22 01:23:17
+2595 | web_session | superadmin | fallback | False | 0 | 1 | Je suis désolé, mais je n'ai pas trouvé de données pour cette requête. **🤖 As... | 2025-08-22 01:01:01
+2594 | web_session | liste des fournisseurs | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• RKFE - ICE: 0016692294000015 - 28 RUE AL AGHAL... | 2025-08-22 01:00:57
+2593 | web_session | liste des utilisatuers | fallback | False | 0 | 1 | Je suis désolé, mais je n'ai pas trouvé de données pour cette requête. **🤖 As... | 2025-08-22 01:00:34
+2592 | web_session | liste des utilisatuers | fallback | False | 0 | 1 | Désolé, je n'ai rien trouvé pour cette demande. **🤖 Assistant ParcInfo - Répo... | 2025-08-22 00:56:39
+2591 | web_session | liste des utilisatuers | fallback | False | 0 | 1 | Malheureusement, je n'ai pas de résultats. **🤖 Assistant ParcInfo - Réponse I... | 2025-08-22 00:52:53
+2590 | web_session | garantie bc23 | warranty_details | False | 0 | 1 | Commande BC23
+• Durée: 1 Mois
+• Réception: 23/07/2025
+• Fin de garantie: 23/0... | 2025-08-22 00:52:41
+2589 | web_session | liste des utilisateurs | fallback | False | 0 | 1 | Malheureusement, je n'ai pas pu localiser les informations demandées. **🤖 Ass... | 2025-08-22 00:52:40
+2588 | web_session | liste des utilisateurs | fallback | False | 0 | 1 | Je suis désolé, mais je n'ai pas trouvé de données pour cette requête. **🤖 As... | 2025-08-22 00:52:34
+2587 | web_session | liste des utilisateurs | fallback | False | 0 | 1 | Je suis désolé, mais je n'ai pas trouvé de données pour cette requête. **🤖 As... | 2025-08-22 00:43:05
+2586 | web_session | garantie bc23 | warranty_details | False | 0 | 1 | Commande BC23
+• Durée: 1 Mois
+• Réception: 23/07/2025
+• Fin de garantie: 23/0... | 2025-08-22 00:36:49
+2585 | web_session | liste des utilisateurs | fallback | False | 0 | 1 | Malheureusement, je n'ai pas pu localiser les informations demandées. **🤖 Ass... | 2025-08-22 00:33:21
+2584 | web_session | liste des fournisseurs | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs (nom + ICE) :**
+• RKFE — ICE: 0016692294000015
+• ONB... | 2025-08-22 00:33:20
+2583 | web_session | liste des utilisateurs | fallback | False | 0 | 1 | Malheureusement, je n'ai pas pu localiser les informations demandées. **🤖 Ass... | 2025-08-22 00:31:47
+2582 | web_session | liste des fournisseurs | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs (nom + ICE) :**
+• RKFE — ICE: 0016692294000015
+• ONB... | 2025-08-22 00:31:43
+2581 | web_session | superadmin | fallback | False | 0 | 1 | Désolé, je n'ai rien trouvé pour cette demande. **🤖 Assistant ParcInfo - Répo... | 2025-08-22 00:28:35
+2580 | web_session | liste des fournisseurs | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs (nom + ICE) :**
+• RKFE — ICE: 0016692294000015
+• ONB... | 2025-08-22 00:28:28
+2579 | web_session | liste des utilisateurs | fallback | False | 0 | 1 | Désolé, je n'ai rien trouvé pour cette demande. **🤖 Assistant ParcInfo - Répo... | 2025-08-22 00:28:11
+2578 | web_session | garantie bc23 | warranty_details | False | 0 | 1 | Commande BC23
+• Durée: 1 Mois
+• Réception: 23/07/2025
+• Fin de garantie: 23/0... | 2025-08-22 00:27:59
+2577 | web_session | liste des demandes | fallback | False | 0 | 1 | Malheureusement, je n'ai pas pu localiser les informations demandées. **🤖 Ass... | 2025-08-21 17:45:31
+2576 | web_session | garantie bc23 | warranty_details | False | 0 | 1 | Commande BC23
+• Durée: 1 Mois
+• Réception: 23/07/2025
+• Fin de garantie: 23/0... | 2025-08-21 17:40:45
+2575 | web_session | grantie bc24 | fallback | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. **🤖 Assistant ParcInfo... | 2025-08-21 17:40:37
+2574 | web_session | grantie bc24 | fallback | False | 0 | 1 | Malheureusement, je n'ai pas de résultats. **🤖 Assistant ParcInfo - Réponse I... | 2025-08-21 17:40:30
+2573 | web_session | garantie bc24 | warranty_details | False | 0 | 1 | Commande BC24
+• Durée: 2 Mois
+• Réception: 15/07/2025
+• Fin de garantie: 15/0... | 2025-08-21 17:37:48
+2572 | web_session | liste des demandes | fallback | False | 0 | 1 | Désolé, je n'ai rien trouvé pour cette demande. **🤖 Assistant ParcInfo - Répo... | 2025-08-21 17:37:43
+2571 | web_session | À quel utilisateur est affecté le matériel cd13 ? | structured_search | False | 0 | 1 | **Matériel trouvé :**
+• **Code :** cd13
+• **Série :** sn13
+• **Observation :*... | 2025-08-20 13:14:33
+2570 | web_session | Quels utilisateurs sont enregistrés comme gestionnaires informatiques | users_in_group | False | 0 | 1 | Utilisateurs dans le groupe Gestionnaire Informatique:
+• gestionnaire info ge... | 2025-08-20 12:37:59
+2569 | web_session | Quels utilisateurs sont enregistrés comme gestionnaires informatiques | users_in_group | False | 0 | 1 | Veuillez préciser le nom du groupe. | 2025-08-20 12:33:37
+2568 | web_session | Quels utilisateurs sont enregistrés comme gestionnaires informatiques | users_in_group | False | 0 | 1 | Veuillez préciser le nom du groupe. | 2025-08-20 12:27:19
+2567 | web_session | Quels utilisateurs sont enregistrés comme gestionnaires informatiques | fallback | False | 0 | 1 | Détails :
+• Gestionnaire info (nom: gestionnaire_info, email: gestion_info1@a... | 2025-08-20 12:11:55
+2566 | web_session | Quels utilisateurs sont enregistrés comme gestionnaires informatiques ? | fallback | False | 0 | 1 | ## Réponse
+
+Les utilisateurs enregistrés comme gestionnaires informatiques so... | 2025-08-20 12:11:34
+2565 | web_session | Quels fournisseurs proposent du matériel informatique | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs (nom + ICE) :**
+• WANA CORPORATE SA — ICE: 001527682... | 2025-08-20 12:11:28
+2564 | web_session | À quel utilisateur est affecté le matériel cd13 ? | structured_search | False | 0 | 1 | **Matériel trouvé :**
+• **Code :** cd13
+• **Série :** sn13
+• **Observation :*... | 2025-08-20 12:11:21
+2563 | web_session | Liste des employés ayant reçu du matériel en 2025. | employees_with_material_by_year | False | 0 | 1 | Employés ayant reçu du matériel en 2025:
+• employe anonyme
+• gestionnaire bur... | 2025-08-20 12:11:09
+2562 | web_session | À quel utilisateur est affecté le matériel cd13 ? | structured_search | False | 0 | 1 | **Matériel trouvé :**
+• **Code :** cd13
+• **Série :** sn13
+• **Observation :*... | 2025-08-20 12:11:06
+2561 | web_session | Quels utilisateurs sont enregistrés comme gestionnaires informatiques ? | fallback | False | 0 | 1 | ## Liste des utilisateurs gestionnaires informatiques
+• Nom: gestionnaire_inf... | 2025-08-20 12:10:35
+2560 | web_session | Quels utilisateurs sont enregistrés comme gestionnaires informatiques ? | error | False | 0 | 1 | Une erreur est survenue lors du traitement de votre demande. Veuillez réessayer. | 2025-08-20 11:53:23
+2559 | web_session | Quels utilisateurs sont enregistrés comme gestionnaires informatiques ? | error | False | 0 | 1 | Une erreur est survenue lors du traitement de votre demande. Veuillez réessayer. | 2025-08-20 11:45:21
+2558 | web_session | Liste des employés ayant reçu du matériel en 2025. | fallback | False | 0 | 1 | ## Résultats de la recherche
+
+En examinant les demandes d'équipement fournies... | 2025-08-20 11:30:01
+2557 | web_session | À quel utilisateur est affecté le matériel cd13 ? | structured_search | False | 0 | 1 | **Matériel trouvé :**
+• **Code :** cd13
+• **Série :** sn13
+• **Observation :*... | 2025-08-20 11:29:23
+2556 | web_session | Quels utilisateurs sont enregistrés comme gestionnaires informatiques ? | fallback | False | 0 | 1 | ## Résultats de la recherche
+
+Selon les informations fournies, deux utilisate... | 2025-08-20 11:29:00
+2555 | web_session | Quels fournisseurs proposent du matériel informatique | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• WANA CORPORATE SA - ICE: 001527682000090 - 202... | 2025-08-20 11:28:38
+2554 | web_session | Quels sont les fournisseurs enregistrés avec leur ICE ? | supplier_ice | False | 0 | 1 | Veuillez préciser le nom du fournisseur. | 2025-08-20 11:28:31
+2553 | web_session | Quels sont les fournisseurs enregistrés avec leur ICE ? | supplier_ice | False | 0 | 1 | Veuillez préciser le nom du fournisseur. | 2025-08-20 11:28:27
+2552 | web_session | Quel fournisseur a livré la commande BC23 ? | order_supplier | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Salut ! La commande BC23 (matériels ... | 2025-08-20 11:28:19
+2551 | web_session | Donne-moi la date effective de livraison de la commande AOO2025. | delivery_delay | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Bonjour ! Voici les matériels livrés en r... | 2025-08-20 11:28:06
+2550 | web_session | Quel est le statut du matériel avec le numéro de série sn12 ? | material_warranty_status | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Matériel sn12 (Baie) :
+- Code d'inv... | 2025-08-20 11:27:42
+2549 | web_session | Quels matériels de bureau sont stockés à l’étage 2 ? | materials_by_location | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Matériels à etage2 :
+bureautiquetiq... | 2025-08-20 11:27:17
+2548 | web_session | Quels sont les numéros de facture associés aux commandes ? | fallback | False | 0 | 1 | Réponse structurée et détaillée :
+
+## Numéros de facture associés aux command... | 2025-08-20 11:27:14
+2547 | web_session | Combien de commandes ont été passées en mode AO | count_total_commands | False | 0 | 1 |  **Total des commandes :**
+• Informatique : 2
+• Bureautique : 1
+• **Total gén... | 2025-08-20 11:26:49
+2546 | web_session | Quelles sont les commandes bureau avec une garantie exprimée en années | bureau_year_warranties | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Pour les commandes bureautiques avec... | 2025-08-20 11:26:31
+2545 | web_session | Donne-moi la liste des commandes informatiques avec leur date et fournisseur. | order_supplier | False | 0 | 1 | Je n'ai pas pu trouver d'informations correspondantes. Veuillez préciser le n... | 2025-08-20 11:26:23
+2544 | web_session | Quels matériels sont encore sous garantie en août 2025 ? | warranty_details | False | 0 | 1 | Aucune commande trouvée pour 2025. | 2025-08-20 11:25:26
+2543 | web_session | Quels équipements pourraient poser problème dans 6 mois ? | fallback | False | 0 | 1 | ## Équipement potentiellement problématique dans 6 mois
+
+En examinant les dem... | 2025-08-20 11:25:21
+2542 | web_session | Quels matériels devraient être renouvelés bientôt ? | liste_materiel | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. **Aucun matériel trouvé pour les critères... | 2025-08-20 11:25:08
+2541 | web_session | Quels matériels devraient être renouvelés bientôt ? | liste_materiel | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. **Aucun matériel trouvé pour les critères... | 2025-08-20 11:25:05
+2540 | web_session | Quels équipements sont liés à la commande BC23 ? | command_materials | False | 0 | 1 | Super ! J'ai les informations pour vous. Bonjour ! La commande BC23 (matériel... | 2025-08-20 11:24:59
+2539 | web_session | Quels équipements pourraient poser problème dans 6 mois ? | fallback | False | 0 | 1 | En examinant les informations fournies, nous pouvons identifier les équipemen... | 2025-08-20 11:24:22
+2538 | web_session | Quels équipements sont liés à la commande BC23 ? | command_materials | False | 0 | 1 | Super ! J'ai les informations pour vous. Bonjour ! La commande BC23 (matériel... | 2025-08-20 11:23:59
+2537 | web_session | À qui est affecté le matériel avec le code cd12 ? | structured_search | False | 0 | 1 | **Matériel trouvé :**
+• **Code :** cd12
+• **Série :** sn12
+• **Observation :*... | 2025-08-20 11:23:15
+2536 | web_session | Quels équipements pourraient poser problème dans 6 mois ? | fallback | False | 0 | 1 | La génération de réponse a pris trop de temps. Veuillez réessayer.
+
+ | 2025-08-20 11:19:42
+2535 | web_session | Quels équipements sont liés à la commande BC23 ? | command_materials | False | 0 | 1 | Super ! J'ai les informations pour vous. Bonjour ! La commande BC23 (matériel... | 2025-08-20 11:19:06
+2534 | web_session | À qui est affecté le matériel avec le code cd12 ? | structured_search | False | 0 | 1 | **Matériel trouvé :**
+• **Code :** cd12
+• **Série :** sn12
+• **Observation :*... | 2025-08-20 11:17:59
+2533 | web_session | Quels matériels devraient être renouvelés bientôt ? | liste_materiel | False | 0 | 1 | Excellente nouvelle ! Voici les détails. **Aucun matériel trouvé pour les cri... | 2025-08-20 11:14:22
+2532 | web_session | Quels équipements pourraient poser problème dans 6 mois ? | fallback | False | 0 | 1 | La génération de réponse a pris trop de temps. Veuillez réessayer.
+
+ | 2025-08-20 11:14:12
+2531 | web_session | Quels équipements sont liés à la commande BC23 ? | command_materials | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Bonjour ! La commande BC23 (matérie... | 2025-08-20 11:13:26
+2530 | web_session | À qui est affecté le matériel avec le code cd12 ? | structured_search | False | 0 | 1 | **Matériel trouvé :**
+• **Code :** cd12
+• **Série :** sn12
+• **Observation :*... | 2025-08-20 11:13:18
+2529 | web_session | Quels matériels sont encore sous garantie en août 2025 ? | warranty_details | False | 0 | 1 | Aucune commande trouvée pour 2025. | 2025-08-20 11:13:06
+2528 | web_session | •	“Commandes bureau en attente” | count_pending_commands | False | 0 | 1 |  **Analyse des commandes récentes et livraisons :**
+
+**📦 Commandes récentes (... | 2025-08-20 11:12:53
+2527 | web_session | •	“Liste des matériels informatiques affectés” | computer_materials_assignment | False | 0 | 1 | Salut ! Voici les matériels informatiques actuellement affectés :
+
+👤 **super ... | 2025-08-20 11:12:37
+2526 | web_session | •	“Quels sont les fournisseurs existants ?” | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• WANA CORPORATE SA - ICE: 001527682000090 - 202... | 2025-08-20 11:12:30
+2525 | web_session | •	“Code inventaire de baie” | codes_by_designation | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Voici les codes d'inventaire pour Ba... | 2025-08-20 11:12:14
+2524 | web_session | Numéro de série du baietest | serial_by_designation | False | 0 | 1 | Aucun matériel trouvé pour la désignation 'baietest'. | 2025-08-20 11:12:07
+2523 | web_session | Numéro de série du call server | serial_by_designation | False | 0 | 1 | Numéros de série pour call server:
+• ADD/INFO/01000 — sn01000 | 2025-08-20 11:11:55
+2522 | web_session | Numéro de série du call server | serial_by_designation | False | 0 | 1 | Numéros de série pour call server:
+• ADD/INFO/01000 — sn_01000 | 2025-08-20 11:10:02
+2521 | web_session | Mode de passation de la commande BC23 ? | order_mode_passation | False | 0 | 1 | 📄 Mode de passation de BC23 : BC
+ | 2025-08-20 11:09:58
+2520 | web_session | liste des demandes | fallback | False | 0 | 1 | La génération de réponse a pris trop de temps. Veuillez réessayer.
+
+ | 2025-08-19 10:00:00
+2519 | web_session | liste des demandes | fallback | False | 0 | 1 | La génération de réponse a pris trop de temps. Veuillez réessayer.
+
+ | 2025-08-19 09:58:26
+2518 | web_session | garantie bc24 | warranty_details | False | 0 | 1 | Commande BC24
+• Durée: 2 Mois
+• Réception: 15/07/2025
+• Fin de garantie: 15/0... | 2025-08-19 09:57:37
+2517 | web_session | grantie bc24 | fallback | False | 0 | 1 | ## Analyse garanties BC23 et BC24
+
+### Garantie BC23
+• Durée garantie: 1 mois... | 2025-08-19 09:57:36
+2516 | web_session | arantie de la commande BC24 | fallback | False | 0 | 1 | ## Analyse de l'arantie de la commande BC23
+
+La commande BC23 a été réception... | 2025-08-19 09:57:19
+2515 | web_session | arantie de la commande BC24 | fallback | False | 0 | 1 | ## Analyse d'anticipation de garantie
+
+En examinant le contexte, nous pouvons... | 2025-08-19 09:57:11
+2514 | web_session | Garantie de la commande BC24 | warranty_details | False | 0 | 1 | Commande BC24
+• Durée: 2 Mois
+• Réception: 15/07/2025
+• Fin de garantie: 15/0... | 2025-08-19 09:56:58
+2513 | web_session | Garantie de la commande BC23 | warranty_details | False | 0 | 1 | Commande BC23
+• Durée: 1 Mois
+• Réception: 23/07/2025
+• Fin de garantie: 23/0... | 2025-08-19 09:56:51
+2512 | web_session | garantie de bc24 | warranty_details | False | 0 | 1 | Commande BC24
+• Durée: 2 Mois
+• Réception: 15/07/2025
+• Fin de garantie: 15/0... | 2025-08-19 09:56:42
+2511 | web_session | arantie de la commande BC24 | fallback | False | 0 | 1 | ## Analyse de la garantie de la commande BC23
+
+La commande BC23 a été récepti... | 2025-08-19 09:56:28
+2510 | web_session | Garantie de la commande BC24 | warranty_details | False | 0 | 1 | Commande BC24
+• Durée: 2 Mois
+• Réception: 15/07/2025
+• Fin de garantie: 15/0... | 2025-08-19 09:56:27
+2509 | web_session | grantie de bc23 | fallback | False | 0 | 1 | ## Garantie de la commande BC23
+
+La garantie de la commande BC23 a une durée ... | 2025-08-19 09:56:04
+2508 | web_session | garantie de 123 | warranty_details | False | 0 | 1 | Aucune commande trouvée pour DE123. | 2025-08-19 09:55:09
+2507 | web_session | grantie de bc23 | fallback | False | 0 | 1 | ## Réponse au sujet de la garantie pour la commande BC23
+
+La durée de garanti... | 2025-08-19 09:54:46
+2506 | web_session | Quel matériel est stocké à l’étage 1 ? | materials_by_location | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Matériels à etage1 :
+Informatique :... | 2025-08-19 09:53:58
+2505 | web_session | Quel matériel est stocké à l’étage 2 ? | materials_by_location | False | 0 | 1 | Super ! J'ai les informations pour vous. Matériels à etage2 :
+bureautiquetiqu... | 2025-08-19 09:53:48
+2504 | web_session | Quelles demandes sont en attente pour gestionnaire informatique ? | demandes_equipement | False | 0 | 1 | **Demandes d'équipement en attente (3):**
+
+• Demande n°24 (N/A) du 16/08/2025... | 2025-08-19 09:53:35
+2503 | web_session | Quelles demandes sont en attente pour gestionnaire bureau ? | demandes_equipement | False | 0 | 1 | **Demandes d'équipement en attente (3):**
+
+• Demande n°24 (N/A) du 16/08/2025... | 2025-08-19 09:53:22
+2502 | web_session | Quels matériels sont affectés à employe anonyme ? | fallback | False | 0 | 1 | • *Matériel affecté**
+
+Total : 1 matériel.
+
+Détails :
+• Matériel informatique... | 2025-08-19 09:43:38
+2501 | web_session | Quelles demandes sont en attente pour gestionnaire bureau ? | demandes_equipement | False | 0 | 1 | **Demandes d'équipement en attente (3):**
+
+• Demande n°24 (N/A) du 16/08/2025... | 2025-08-19 09:43:14
+2500 | web_session | liste des utilisateurs | fallback | False | 0 | 1 | ## Liste des utilisateurs
+
+Total : 3 éléments. Détails :
+• employe1 employe (... | 2025-08-19 09:40:43
+2499 | web_session | Quel matériel est stocké à l’étage 2 ? | materials_by_location | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Matériels à etage2 :
+bureautiquetique :
+•... | 2025-08-19 09:36:12
+2498 | web_session | Quels matériels sont affectés à employe anonyme ? | fallback | False | 0 | 1 | ## Matériel affecté à l'employé anonyme
+
+Total : 1 matériel. Détails :
+• cd12... | 2025-08-18 21:42:53
+2497 | web_session | Quel matériel est stocké à l’étage 2 ? | materials_by_location | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Matériels à etage2 :
+bureautiquetique :
+•... | 2025-08-18 21:40:59
+2496 | web_session | Quel matériel est stocké à l’étage 2 ? | materials_by_location | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Matériels à etage2 :
+bureautiquetiq... | 2025-08-18 21:39:04
+2495 | web_session | Quelles demandes sont en attente pour gestionnaire bureau ? | demandes_equipement | False | 0 | 1 | **Demandes d'équipement en attente (3):**
+
+• Demande n°24 (N/A) du 16/08/2025... | 2025-08-18 21:38:48
+2494 | web_session | Quels matériels ont une description contenant "Lenovo" ? | fallback | False | 0 | 1 | Information non disponible dans les données actuelles.
+
+ | 2025-08-18 21:38:44
+2493 | web_session | Quels matériels sont en stock à l’étage 1 ? | materials_by_location | False | 0 | 1 | Super ! J'ai les informations pour vous. Matériels à etage1 :
+Informatique :
+... | 2025-08-18 21:37:41
+2492 | web_session | Quels matériels ont une description contenant "OmniPCX" ? | fallback | False | 0 | 1 | Matériel trouvé : OmniPCX Entreprise Large [FOURNISSEUR_NON_VÉRIFIÉ]: 66 App:... | 2025-08-18 21:37:13
+2491 | web_session | Quelles demandes sont associées au fourniseur 3STD ? | fallback | False | 0 | 1 | • *Demandes associées au fournisseur 3STD**
+
+Selon le contexte, il existe une... | 2025-08-18 21:36:46
+2490 | web_session | Quel fourniseur a livré la comande BC23 ? | order_supplier | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Salut ! La commande BC23 (matériels ... | 2025-08-18 21:36:10
+2489 | web_session | Quel est le total des matériels par catégorie ? | completeness_question | False | 0 | 1 | ** RAPPORT COMPLET - PERFORMANCES DU SYSTÈME**
+
+##  **Indicateurs de Performa... | 2025-08-18 21:35:21
+2488 | web_session | Quels matériels ont été livrés par le fourniseur AEBDM ? | delivery_delay | False | 0 | 1 | Super ! J'ai les informations pour vous. Bonjour ! Voici les matériels livrés... | 2025-08-18 21:34:32
+2487 | web_session | Quels matériels informatiques sont à l’étage 2 ? | materials_by_location | False | 0 | 1 | Matériels à etage2 :
+Bureautique :
+• ADD/INFO/01094 — Statut: affecte — Utili... | 2025-08-18 21:34:23
+2486 | web_session | Quel est le montant total des comandes informatiques livrées en retard ? | completeness_question | False | 0 | 1 | ** RAPPORT COMPLET - ÉTAT DU PARC INFORMATIQUE**
+
+##  **Vue d'Ensemble Généra... | 2025-08-18 21:34:23
+2485 | web_session | Salut ! Les commandes avec PV de réception non reçu sont : - 123 (informatiqu... | structured_search | False | 0 | 1 | **Matériel trouvé :**
+• **Code :** ADD/INFO/010
+• **Série :** sn_correct
+• **... | 2025-08-18 21:34:20
+2484 | web_session | Salut ! Les commandes avec PV de réception non reçu sont : - 123 (informatiqu... | structured_search | False | 0 | 1 | **Matériel trouvé :**
+• **Code :** ADD/INFO/010
+• **Série :** sn_correct
+• **... | 2025-08-18 21:24:41
+2483 | web_session | Quel est le montant total des comandes informatiques livrées en retard ? | completeness_question | False | 0 | 1 | ** RAPPORT COMPLET - ÉTAT DU PARC INFORMATIQUE**
+
+##  **Vue d'Ensemble Généra... | 2025-08-18 21:24:36
+2482 | web_session | Quelles sont les demandes de gestionnaire bureau ? | fallback | False | 0 | 1 | ## Demandes du gestionnaire Bureau
+
+La demande équipement [FOURNISSEUR_NON_VÉ... | 2025-08-18 21:24:31
+2481 | web_session | Quels matériels informatiques sont à l’étage 2 ? | materials_by_location | False | 0 | 1 | Matériels à etage2 :
+Bureautique :
+• ADD/INFO/01094 — Statut: affecte — Utili... | 2025-08-18 21:24:02
+2480 | web_session | Quels matériels ont été livrés par le fourniseur AEBDM ? | delivery_delay | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Bonjour ! Voici les matériels livrés en r... | 2025-08-18 21:23:49
+2479 | web_session | Quelle est la dernière comande passée par TECHNICOVIGILE ? | analysis_complexe | False | 0 | 1 | ** Analyse complète du parc :**
+• **Parc total :** 6 matériels
+  - Informatiq... | 2025-08-18 21:23:36
+2478 | web_session | Quels matériels bureautiques sont affectés à un utilisateur ? | fallback | False | 0 | 1 | • *Matériel bureautique affecté**
+
+Aucun matériel bureautique n'est affecté à... | 2025-08-18 21:23:28
+2477 | web_session | Quels matériels sont publics à l’étage 1 ? | materials_by_location | False | 0 | 1 | Matériels à etage1 :
+Informatique :
+• cd14 — Statut: affecte — Utilisateur: s... | 2025-08-18 21:23:01
+2476 | web_session | Quel matériel est associé au fourniseur INCONNU ? | liste_materiel | False | 0 | 1 | **Aucun matériel trouvé pour les critères spécifiés.** | 2025-08-18 21:22:58
+2475 | web_session | Quels matériels bureautiques sont affectés à un utilisateur ? | fallback | False | 0 | 1 | • *Matériel bureautique affecté à l'utilisateur**
+
+Aucun matériel bureautique... | 2025-08-18 21:22:15
+2474 | web_session | Quel matériel est associé au fourniseur INCONNU ? | liste_materiel | False | 0 | 1 | **Aucun matériel trouvé pour les critères spécifiés.** | 2025-08-18 21:09:07
+2473 | web_session | Combien de matériels sont en stock actuellement ? | count_total_material | False | 0 | 1 | Super ! J'ai les informations pour vous. Le parc total comprend 6 matériels :... | 2025-08-18 21:08:59
+2472 | web_session | Quels matériels sont publics à l’étage 1 ? | materials_by_location | False | 0 | 1 | Matériels à etage1 :
+Informatique :
+• ADD/INFO/010 — Statut: nouveau — Utilis... | 2025-08-18 21:08:51
+2471 | web_session | Quel fourniseur a livré le matériel ADD/INFO/01094 ? | structured_search | False | 0 | 1 | **Matériel trouvé :**
+• **Code :** ADD/INFO/01094
+• **Série :** None
+• **Obse... | 2025-08-18 21:08:37
+2470 | web_session | Quels matériels sont liés à des demandes non approuvées ? | count_equipment_requests | False | 0 | 1 |  **Demandes d'équipement approuvées (6):**
+
+• **Demande n°23** du 02/08/2025
+... | 2025-08-18 21:08:28
+2469 | web_session | Quel est le total des comandes passées en juillet 2025 ? | completeness_question | False | 0 | 1 | ** RAPPORT COMPLET - PERFORMANCES DU SYSTÈME**
+
+##  **Indicateurs de Performa... | 2025-08-18 21:08:16
+2468 | web_session | Quels matériels informatiques sont marqués comme nouveaux ? | liste_materiel | False | 0 | 1 | **Matériel informatique :**
+• ADD/INFO/010 - Statut: nouveau (Série: 123456, ... | 2025-08-18 21:08:05
+2467 | web_session | Quel est le statut des livraisons pour le fourniseur 3STD ? | delivery_delay | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Bonjour ! Voici les matériels livrés... | 2025-08-18 21:07:53
+2466 | web_session | Quelles demandes sont associées à la comande BC23 ? | fallback | False | 0 | 1 | • *Réponse structurée**
+
+Demandes associées à la commande BC23 :
+• Matériel i... | 2025-08-18 21:07:44
+2465 | web_session | Quels matériels sont stockés à l’étage 1 ? | materials_by_location | False | 0 | 1 | Matériels à etage1 :
+Informatique :
+• ADD/INFO/010 — Statut: nouveau — Utilis... | 2025-08-18 21:06:55
+2464 | web_session | Quel matériel est lié à la demande n°999 ? | specific_equipment_request | False | 0 | 1 | Malheureusement, je n'ai pas pu localiser les informations demandées. La dema... | 2025-08-18 21:05:31
+2463 | web_session | Quels matériels ont une garantie de moins de 10 jours restants ? | warranty_compare_threshold_lt | False | 0 | 1 | Commandes avec garantie < 10 an:
+- BC23 (Informatique) — 1 mois — TECHNICOVIG... | 2025-08-18 21:05:18
+2462 | web_session | Combien de matériels informatiques sont affectés à un utilisateur ? | computer_materials_assignment | False | 0 | 1 | Salut ! Voici les matériels informatiques actuellement affectés :
+
+👤 **super ... | 2025-08-18 21:04:58
+2461 | web_session | Quelles sont les commandes passées par le fourniseur AEBDM ? | liste_commandes | False | 0 | 1 | **Commandes informatiques:**
+- BC23: TECHNICOVIGILE (Date: 04/07/2025, Mode: ... | 2025-08-18 21:04:41
+2460 | web_session | Quel est le matériel avec le numéro de série 123456 ? | material_warranty_status | False | 0 | 1 | Super ! J'ai les informations pour vous. Matériel 123456 (Baie) :
+- Code d'in... | 2025-08-18 21:04:31
+2459 | web_session | Quels matériels sont associés à la comande 123 ? | command_materials | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Bonjour ! La commande 123 (matériel... | 2025-08-18 21:04:23
+2458 | web_session | Combien de matériels sont en maintenance actuellement ? | count_total_material | False | 0 | 1 | Je suis désolé, mais je n'ai pas trouvé de données pour cette requête. Aucun ... | 2025-08-18 21:04:07
+2457 | web_session | Quels matériels ont été livrés après la date prévue ? | delivery_delay | False | 0 | 1 | Super ! J'ai les informations pour vous. Bonjour ! Voici les matériels livrés... | 2025-08-18 21:03:56
+2456 | web_session | Quel est le fourniseur de la comande BC23 ? | order_supplier | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Salut ! La commande BC23 (matériels infor... | 2025-08-18 21:03:45
+2455 | web_session | Quelles sont les demandes en attente pour superadmin ? | demandes_equipement | False | 0 | 1 | Super ! J'ai les informations pour vous. Bonjour ! Aucune demande n'est actue... | 2025-08-18 21:03:34
+2454 | web_session | Quel fourniseur pour la commande 123 ? | liste_commandes | False | 0 | 1 | **Commandes informatiques:**
+- BC23: TECHNICOVIGILE (Date: 04/07/2025, Mode: ... | 2025-08-18 20:29:53
+2453 | web_session | Combien de demandes approuvées pour superadmin ? | count_equipment_requests | False | 0 | 1 |  **Demandes d'équipement approuvées (6):**
+
+• **Demande n°23** du 02/08/2025
+... | 2025-08-18 20:29:46
+2452 | web_session | Quels sont les équipements avec la garanty expirée ? | fallback | False | 0 | 1 | En consultant le contexte disponible, j'ai identifié les équipements suivants... | 2025-08-18 20:29:42
+2451 | web_session | Quels matériels n’ont pas d’utilisateur assigné ? | fallback | False | 0 | 1 | En analysant le contexte, nous pouvons voir que les données disponibles ne mo... | 2025-08-18 20:28:59
+2450 | web_session | Quelle est la date de livraison de la commande BC23 ? | analysis_complexe | False | 0 | 1 | ** Analyse complète du parc :**
+• **Parc total :** 6 matériels
+  - Informatiq... | 2025-08-18 20:28:25
+2449 | web_session | Quels matériels sont en service actuellement ? | fallback | False | 0 | 1 | ## Matériels en service actuellement
+
+Les informations suivantes montrent les... | 2025-08-18 20:28:15
+2448 | web_session | Quel est le montant total des comandes informatiques pour 2025 ? | completeness_question | False | 0 | 1 | ** RAPPORT COMPLET - ÉTAT DU PARC INFORMATIQUE**
+
+##  **Vue d'Ensemble Généra... | 2025-08-18 20:27:49
+2447 | web_session | Quels équipements sont assignés à 'gestionnaire bureau' ? | fallback | False | 0 | 1 | En examinant le contexte, nous pouvons identifier les équipements attribués a... | 2025-08-18 20:27:27
+2446 | web_session | Quel est le statut de la livraison pour la comande AOO2025 ? | analysis_complexe | False | 0 | 1 | **📦 Statut des livraisons :**
+**Liste des livraisons :**
+- Commande AOO2025: ... | 2025-08-18 20:26:51
+2445 | web_session | Quels sont les fournisseurs pour les matériels informatiques ? | liste_fournisseurs | False | 0 | 1 | **Liste des fournisseurs :**
+• WANA CORPORATE SA - ICE: 001527682000090 - 202... | 2025-08-18 20:26:39
+2444 | web_session | Y a-t-il des matériels affectés à 'superadmin' encore sous garantie ? | user_materials_under_warranty | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Matériels sous garantie affectés à supera... | 2025-08-18 20:25:18
+2443 | web_session | Quel matériel informatique avec le numéro de série sn12 a une garantie associ... | material_warranty_status | False | 0 | 1 | Super ! J'ai les informations pour vous. Matériel sn12 (Baie) :
+- Code d'inve... | 2025-08-18 20:25:08
+2442 | web_session | Quels types de matériels sont disponibles ? | material_types | False | 0 | 1 | Super ! J'ai les informations pour vous. Voici les types de matériels que nou... | 2025-08-18 20:24:58
+2441 | web_session | Liste des commandes bureautiques avec garantie en années. | bureau_year_warranties | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Pour les commandes bureautiques avec... | 2025-08-18 20:24:47
+2440 | web_session | Y a-t-il des commandes sans garantie spécifiée ? | orders_without_warranty | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Excellente nouvelle ! Toutes les commande... | 2025-08-18 20:24:38
+2439 | web_session | Quel est le code d’inventaire de la Baie ? | codes_by_designation | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Voici les codes d'inventaire pour B... | 2025-08-18 20:24:30
+2438 | web_session | Liste les matériels bureautiques dont la garantie expire bientôt. | materials_expiring_soon | False | 0 | 1 | Excellent ! J'ai trouvé les informations. Aucun matériel bureautique avec gar... | 2025-08-18 20:24:19
+2437 | web_session | La garantie du matériel avec le code d’inventaire ADD/INFO/01094 est-elle tou... | material_warranty_status | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Matériel ADD/INFO/01094 (Armoire) :
+... | 2025-08-18 20:24:08
+2436 | web_session | Quels matériels informatiques sont encore sous garantie ? | material_warranty_status | False | 0 | 1 | Parfait ! Voici ce que j'ai trouvé. Voici les matériels informatiques encore ... | 2025-08-18 20:23:34
+2435 | web_session | Quel est le numéro de série de la fourniture 'cable' ? | supplies_query | False | 0 | 1 | Numéro de série de la fourniture 'cable' : sn1230 | 2025-08-18 20:23:22
+2434 | web_session | Quel matériel a été affecté à la demande de 'superadmin' ? | materials_for_user_requests | False | 0 | 1 | Excellente nouvelle ! Voici les détails. Demande n°11 (Baie) : Aucun matériel... | 2025-08-18 20:23:12
+2433 | web_session | Y a-t-il des matériels affectés à 'superadmin' encore sous garantie ? | user_materials_under_warranty | False | 0 | 1 | Parfait ! Voici ce que j'ai pu récupérer. Matériels sous garantie affectés à ... | 2025-08-18 20:13:18
+2432 | web_session | Quel matériel informatique avec le numéro de série sn12 a une garantie associ... | material_warranty_status | False | 0 | 1 | Super ! J'ai les informations pour vous. Matériel sn12 (Baie) :
+- Code d'inve... | 2025-08-18 20:13:16
+2431 | web_session | Liste des commandes bureautiques avec garantie en années. | bureau_year_warranties | False | 0 | 1 | Super ! J'ai les informations pour vous. Pour les commandes bureautiques avec... | 2025-08-18 20:13:12
+2430 | web_session | Quels types de matériels sont disponibles ? | material_types | False | 0 | 1 | Super ! J'ai les informations pour vous. Voici les types de matériels que nou... | 2025-08-18 20:12:46
+2429 | web_session | Quel matériel informatique avec le numéro de série sn12 a une garantie associ... | material_warranty_status | False | 0 | 1 | Parfainformatique ! Voici ce que j'ai pu récupérer. Matériel sn12 (Baie) :
+- ... | 2025-08-18 20:10:25
+2428 | web_session | Quels types de matériels sont disponibles ? | material_types | False | 0 | 1 | Super ! J'ai les informations pour vous. Voici les types de matériels disponi... | 2025-08-18 20:10:04
+2427 | web_session | Liste des commandes bureautiques avec garantie en années. | bureau_year_warranties | False | 0 | 1 | Super ! J'ai les informations pour vous. Pour les commandes bureautiques avec... | 2025-08-18 20:09:47
+2426 | web_session | Y a-t-il des matériels affectés à 'superadmin' encore sous garantie ? | user_materials_under_warranty | False | 0 | 1 | Matériels sous garantie affectés à superadmin :
+• cd14 (Informatique) — Cmd B... | 2025-08-18 19:17:51
+2425 | web_session | Quel matériel informatique avec le numéro de série sn12 a une garantie associ... | material_warranty_status | False | 0 | 1 | Matériel sn12 — Commande BC23 — Fin de garantie: 23/08/2025 — Active: Oui | 2025-08-18 19:17:45
+2424 | web_session | Quels types de matériels sont disponibles ? | material_types | False | 0 | 1 | 🏷️ **Types de matériels disponibles :**
+
+Types de matériels: Informatique, Bu... | 2025-08-18 19:17:37
+2423 | web_session | Liste des commandes bureautiques avec garantie en années. | bureau_year_warranties | False | 0 | 1 | Commandes bureautiques avec garantie en années :
+| Commande | Type | Durée | ... | 2025-08-18 19:17:33
+2422 | web_session | Y a-t-il des commandes sans garantie spécifiée ? | orders_without_warranty | False | 0 | 1 | Aucune commande sans garantie spécifiée. (3/3 avec garantie)
+- AOO2025 : 1 an... | 2025-08-18 19:17:24
+2421 | web_session | Quel est le code d’inventaire de la Baie ? | codes_by_designation | False | 0 | 1 | Codes d'inventaire (code) pour Baie :
+- ADD/INFO/010 (IT) — Série: 123456 — C... | 2025-08-18 19:17:19
+2420 | web_session | Liste les matériels bureautiques dont la garantie expire bientôt. | materials_expiring_soon | False | 0 | 1 | Aucun matériel bureautique avec garantie expirant d'ici 30 jours. | 2025-08-18 19:17:13
+2419 | web_session | La garantie du matériel avec le code d’inventaire ADD/INFO/01094 est-elle tou... | material_warranty_status | False | 0 | 1 | Matériel ADD/INFO/01094 — Commande AOO2025 — Fin de garantie: 28/07/2026 — Ac... | 2025-08-18 19:17:07
+2418 | web_session | Quels matériels informatiques sont encore sous garantie ? | material_warranty_status | False | 0 | 1 | Matériels sous garantie actifs:
+• ADD/INFO/010 (Informatique) — Cmd 123 — Fin... | 2025-08-18 19:17:01
+2417 | web_session | Quel est le numéro de série de la fourniture 'cable' ? | supplies_query | False | 0 | 1 | Numéro de série de la fourniture 'cable' : sn1230 | 2025-08-18 19:16:54
+2416 | web_session | Quel matériel a été affecté à la demande de 'superadmin' ? | materials_for_user_requests | False | 0 | 1 | Matériels affectés à superadmin :
+- cd14 (IT) — Série: sn14 — Cmd: BC23 | 2025-08-18 19:16:44
+2415 | web_session | Quel matériel a été affecté à la demande de 'superadmin' ? | fallback | False | 0 | 1 | • *Matériel affecté :** Aucun matériel n'a été affecté spécifiquement à la de... | 2025-08-18 18:40:43
+2414 | web_session | Quel est le numéro de série de la fourniture 'cable' ? | serial_by_designation | False | 0 | 1 | Aucun matériel trouvé pour la désignation 'fourniture'. | 2025-08-18 18:40:03
+2413 | web_session | Quels matériels informatiques sont encore sous garantie ? | material_warranty_status | False | 0 | 1 | Matériels sous garantie actifs:
+• ADD/INFO/010 (Informatique) — Cmd 123 — Fin... | 2025-08-18 18:39:52
+2412 | web_session | La garantie du matériel avec le code d’inventaire ADD/INFO/01094 est-elle tou... | warranty_details | False | 0 | 1 | Aucune commande trouvée pour 01094. | 2025-08-18 18:39:38
+2411 | web_session | Liste les matériels bureautiques dont la garantie expire bientôt | material_warranty_status | False | 0 | 1 | Matériels sous garantie actifs:
+• ADD/INFO/01094 (Bureau) — Cmd AOO2025 — Fin... | 2025-08-18 18:39:22
+2410 | web_session | Quel matériel informatique avec le numéro de série sn12 a une garantie associ... | serial_by_designation | False | 0 | 1 | Aucun matériel trouvé pour la désignation 'Quel matériel informatique avec le... | 2025-08-18 18:39:05
+2409 | web_session | Y a-t-il des matériels affectés à 'superadmin' encore sous garantie | user_materials_under_warranty | False | 0 | 1 | Matériels sous garantie affectés à superadmin :
+• cd14 (Informatique) — Cmd B... | 2025-08-18 18:38:48
+
+... et 2404 autres enregistrements (limite d'affichage atteinte)
+
+Total exporté : 500 enregistrements
+
+
+================================================================================
+STATISTIQUES D'EXPORT FINAL
+================================================================================
+Total d'enregistrements exportés : 3216
+Date de fin d'export : 2025-09-04 20:06:37
+================================================================================

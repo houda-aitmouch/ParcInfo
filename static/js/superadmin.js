@@ -380,14 +380,26 @@ class Dashboard {
      * Configuration du Service Worker
      */
     setupServiceWorker() {
-        if ('serviceWorker' in navigator) {
+        if (!('serviceWorker' in navigator)) {
+            return;
+        }
+
+        if (location.protocol === 'https:') {
             navigator.serviceWorker.register('/sw.js')
-                .then(registration => {
+                .then(() => {
                     console.log('✅ Service Worker registered');
                 })
-                .catch(error => {
+                .catch(() => {
                     console.log('❌ Service Worker registration failed');
                 });
+        } else {
+            // On HTTP dev, unregister any existing SW and clear caches to prevent HTTPS attempts
+            navigator.serviceWorker.getRegistrations()
+                .then(registrations => registrations.forEach(r => r.unregister()))
+                .catch(() => {});
+            if (window.caches && typeof caches.keys === 'function') {
+                caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {});
+            }
         }
     }
 

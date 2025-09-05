@@ -40,10 +40,10 @@
                 <select x-model="filterStatus" 
                         class="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200">
                     <option value="all">Tous les statuts</option>
-                    <option value="Opérationnel">Opérationnel</option>
+                    <option value="operationnel">Opérationnel</option>
                     <option value="affecte">Affecté</option>
-                    <option value="Réparation">En réparation</option>
-                    <option value="Hors service">Hors service</option>
+                    <option value="reparation">Réparation</option>
+                    <option value="reforme">Réforme</option>
                 </select>
                 
                 <!-- Barre de recherche -->
@@ -167,7 +167,7 @@
                             </div>
                         </td>
                         <td class="px-2 py-4">
-                            {% if materiel.statut == 'Opérationnel' %}
+                            {% if materiel.statut == 'operationnel' %}
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     <span class="w-2 h-2 bg-green-400 rounded-full mr-1.5"></span>
                                     Opérationnel
@@ -177,15 +177,15 @@
                                     <span class="w-2 h-2 bg-blue-400 rounded-full mr-1.5"></span>
                                     Affecté
                                 </span>
-                            {% elif materiel.statut == 'Réparation' %}
+                            {% elif materiel.statut == 'reparation' %}
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                     <span class="w-2 h-2 bg-yellow-400 rounded-full mr-1.5"></span>
-                                    En réparation
+                                    Réparation
                                 </span>
-                            {% elif materiel.statut == 'Hors service' %}
+                            {% elif materiel.statut == 'reforme' %}
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                     <span class="w-2 h-2 bg-red-400 rounded-full mr-1.5"></span>
-                                    Hors service
+                                    Réforme
                                 </span>
                             {% else %}
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -196,7 +196,7 @@
                         </td>
                         <td class="px-2 py-4">
                             <div class="text-sm text-gray-900">
-                                {% if materiel.utilisateur %}
+                                {% if materiel.statut == 'affecte' and materiel.utilisateur %}
                                     <div class="flex items-center">
                                         <svg class="w-3 h-3 mr-1 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -204,7 +204,7 @@
                                         <span class="truncate">{{ materiel.utilisateur }}</span>
                                     </div>
                                 {% else %}
-                                    <span class="text-gray-400">-</span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">En stock</span>
                                 {% endif %}
                             </div>
                         </td>

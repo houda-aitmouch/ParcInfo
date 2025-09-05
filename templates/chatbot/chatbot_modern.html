@@ -146,8 +146,8 @@
                                             <div class="mt-1 flex items-center gap-2 text-xs text-gray-500"
                                                  :class="message.isUser ? 'justify-end' : ''">
                                                 <button class="hover:text-gray-700" @click="copyMessage(index)"><i class="far fa-copy mr-1"></i>Copier</button>
-                                                <button class="hover:text-gray-700"><i class="far fa-thumbs-up mr-1"></i></button>
-                                                <button class="hover:text-gray-700"><i class="far fa-thumbs-down mr-1"></i></button>
+                                                <button class="hover:text-gray-700" @click="giveFeedback(index, 'positive')" x-show="!message.isUser"><i class="far fa-thumbs-up mr-1"></i>Like</button>
+                                                <button class="hover:text-gray-700" @click="giveFeedback(index, 'negative')" x-show="!message.isUser"><i class="far fa-thumbs-down mr-1"></i>Dislike</button>
                                             </div>
                                         </div>
                                     </div>
@@ -250,6 +250,8 @@
                 </div>
             </div>
         </div>
+
+
     </div>
 
     <script>
@@ -260,6 +262,7 @@
                 isTyping: false,
                 isOnline: true,
                 showHelp: false,
+                
                 recentQueries: [],
 
                 init() {
@@ -370,6 +373,128 @@
 
                 saveRecentQueries() {
                     localStorage.setItem('recentQueries', JSON.stringify(this.recentQueries));
+                },
+
+
+
+                async giveFeedback(messageIndex, feedbackType) {
+                    const message = this.messages[messageIndex];
+                    if (!message) return;
+                    
+                    try {
+                        const response = await fetch('/chatbot/feedback/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': this.getCSRFToken()
+                            },
+                            body: JSON.stringify({
+                                message_index: messageIndex,
+                                feedback_type: feedbackType,
+                                content: message.content,
+                                timestamp: message.timestamp
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            // Afficher une confirmation
+                            const button = event.target.closest('button');
+                            if (button) {
+                                const originalText = button.innerHTML;
+                                const originalClass = button.className;
+                                
+                                // Changer temporairement l'apparence
+                                if (feedbackType === 'positive') {
+                                    button.innerHTML = '<i class="fas fa-thumbs-up mr-1"></i>Liked';
+                                    button.classList.add('text-green-500');
+                                } else {
+                                    button.innerHTML = '<i class="fas fa-thumbs-down mr-1"></i>Disliked';
+                                    button.classList.add('text-red-500');
+                                }
+                                
+                                // Restaurer après 2 secondes
+                                setTimeout(() => {
+                                    button.innerHTML = originalText;
+                                    button.className = originalClass;
+                                }, 2000);
+                            }
+                        } else {
+                            console.error('Feedback response not ok:', response.status);
+                            alert('Erreur lors de l\'envoi du feedback');
+                        }
+                    } catch (error) {
+                        console.error('Feedback error:', error);
+                        alert('Erreur lors de l\'envoi du feedback');
+                    }
+                },
+
+                // Fonction copyMessage corrigée
+                async copyMessage(messageIndex) {
+                    const message = this.messages[messageIndex];
+                    if (!message) return;
+                    
+                    try {
+                        // Nettoyer le contenu pour la copie
+                        const cleanContent = message.content
+                            .replace(/<[^>]*>/g, '') // Enlever les balises HTML
+                            .replace(/\*\*(.*?)\*\*/g, '$1') // Enlever le markdown bold
+                            .replace(/\*(.*?)\*/g, '$1'); // Enlever le markdown italic
+                        
+                        // Utiliser l'API clipboard moderne ou fallback
+                        if (navigator.clipboard && window.isSecureContext) {
+                            await navigator.clipboard.writeText(cleanContent);
+                        } else {
+                            // Fallback pour les contextes non sécurisés
+                            const textArea = document.createElement('textarea');
+                            textArea.value = cleanContent;
+                            textArea.style.position = 'fixed';
+                            textArea.style.left = '-999999px';
+                            textArea.style.top = '-999999px';
+                            document.body.appendChild(textArea);
+                            textArea.focus();
+                            textArea.select();
+                            document.execCommand('copy');
+                            textArea.remove();
+                        }
+                        
+                        // Feedback visuel
+                        const button = event.target.closest('button');
+                        if (button) {
+                            const originalText = button.innerHTML;
+                            button.innerHTML = '<i class="fas fa-check mr-1"></i>Copié';
+                            button.classList.add('text-green-500');
+                            
+                            setTimeout(() => {
+                                button.innerHTML = originalText;
+                                button.classList.remove('text-green-500');
+                            }, 2000);
+                        }
+                    } catch (error) {
+                        console.error('Copy error:', error);
+                        // Fallback simple
+                        try {
+                            const textArea = document.createElement('textarea');
+                            textArea.value = message.content.replace(/<[^>]*>/g, '');
+                            document.body.appendChild(textArea);
+                            textArea.select();
+                            document.execCommand('copy');
+                            textArea.remove();
+                            
+                            // Feedback visuel même en cas d'erreur
+                            const button = event.target.closest('button');
+                            if (button) {
+                                button.innerHTML = '<i class="fas fa-check mr-1"></i>Copié';
+                                button.classList.add('text-green-500');
+                                setTimeout(() => {
+                                    button.innerHTML = '<i class="far fa-copy mr-1"></i>Copier';
+                                    button.classList.remove('text-green-500');
+                                }, 2000);
+                            }
+                        } catch (fallbackError) {
+                            console.error('Fallback copy error:', fallbackError);
+                            alert('Erreur lors de la copie. Essayez de sélectionner le texte manuellement.');
+                        }
+                    }
                 }
             }
         }

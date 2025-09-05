@@ -19,13 +19,25 @@ load_dotenv()
 
 from django.contrib import staticfiles
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Static files configuration
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Pour collectstatic en production
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+# WhiteNoise: compressed manifest storage for cache-busting and gzip/brotli
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Serve files from STATICFILES_DIRS via WhiteNoise too (useful for local Docker tests)
+WHITENOISE_USE_FINDERS = True
+# Reduce cache to avoid stale assets during local testing
+WHITENOISE_MAX_AGE = 0
+
+# Media files (uploads, PDFs, etc.)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -34,22 +46,42 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-m5semzag-n43pupk0jfsh!x2%vpb53&-=zn4bu+mo_cdw694g0')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+# Read DEBUG from environment (default False for Docker/prod-like runs)
+DEBUG = os.getenv('DEBUG', '0') in ['1', 'true', 'True']
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,0.0.0.0').split(',')
 AUTH_USER_MODEL = 'users.CustomUser'
 
-# Security settings for production
-if not DEBUG:
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    X_FRAME_OPTIONS = 'DENY'
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+# Optional: CSRF trusted origins (comma-separated)
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if origin.strip()]
+
+# FORCER HTTP UNIQUEMENT - Supprimer HTTPS définitivement
+SECURE_SSL_REDIRECT = False
+SECURE_PROXY_SSL_HEADER = None
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# Désactiver complètement HTTPS
+SECURE_SSL_REDIRECT = False
+SECURE_PROXY_SSL_HEADER = None
+SECURE_BROWSER_XSS_FILTER = False
+SECURE_CONTENT_TYPE_NOSNIFF = False
+
+# Security settings - HTTP uniquement (même en production)
+# Supprimer HTTPS définitivement
+SECURE_BROWSER_XSS_FILTER = False
+SECURE_CONTENT_TYPE_NOSNIFF = False
+SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 
 # Application definition
@@ -73,19 +105,35 @@ INSTALLED_APPS = [
     "widget_tweaks",
     'django.contrib.humanize',
     'pgvector',
+    # 'django_extensions',  # Supprimé pour éviter HTTPS
 ]
 
 
-MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.locale.LocaleMiddleware",  # Add this for language switching
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-]
+# Middleware configuration - SecurityMiddleware only in production
+if DEBUG:
+    # En mode développement, pas de SecurityMiddleware pour éviter les redirections HTTPS
+    MIDDLEWARE = [
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.locale.LocaleMiddleware",  # Add this for language switching
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    ]
+else:
+    # En production, SecurityMiddleware activé + WhiteNoise pour les fichiers statiques
+    MIDDLEWARE = [
+        "django.middleware.security.SecurityMiddleware",
+        "whitenoise.middleware.WhiteNoiseMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.locale.LocaleMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    ]
 
 ROOT_URLCONF = "ParcInfo.urls"
 
@@ -119,7 +167,7 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME', 'parcinfo_db'),
         'USER': os.getenv('DB_USER', 'Houda'),
         'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'HOST': os.getenv('DB_HOST', 'host.docker.internal'),
         'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
@@ -159,18 +207,6 @@ USE_I18N = True  # Enable internationalization
 USE_L10N = True  # Enable localization (important for date formatting)
 USE_TZ = True  # Enable timezone support
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-
-# Media files (uploads, PDFs, etc.)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
 
 # Authentication settings
 LOGIN_REDIRECT_URL = '/redirect-user/'

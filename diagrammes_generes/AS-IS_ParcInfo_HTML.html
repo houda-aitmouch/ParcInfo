@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParcInfo AS-IS Activity Diagram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .diagram-container {
+            padding: 30px;
+            position: relative;
+        }
+
+        .swimlanes {
+            display: grid;
+            grid-template-rows: 1fr 1fr 1fr 1fr;
+            gap: 0;
+            height: 800px;
+        }
+
+        .swimlane {
+            border: 2px solid #e0e0e0;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .swimlane-header {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 120px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            z-index: 10;
+        }
+
+        .swimlane-content {
+            margin-left: 120px;
+            padding: 20px;
+            width: calc(100% - 120px);
+            height: 100%;
+            position: relative;
+        }
+
+        .swimlane.employe { background-color: #E3F2FD; }
+        .swimlane.gestionnaire { background-color: #F3E5F5; }
+        .swimlane.super-admin { background-color: #E8F5E8; }
+        .swimlane.system { background-color: #FFF3E0; }
+
+        .activity {
+            position: absolute;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: 500;
+            min-width: 120px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 5;
+        }
+
+        .decision {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-bottom: 60px solid #FFEBEE;
+            border-top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: 500;
+            z-index: 5;
+        }
+
+        .decision::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 20px;
+            left: -25px;
+            width: 50px;
+            text-align: center;
+            color: #333;
+        }
+
+        .start-end {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #424242;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            z-index: 5;
+        }
+
+        .arrow {
+            position: absolute;
+            height: 2px;
+            background: #333;
+            z-index: 1;
+        }
+
+        .arrow::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: -3px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid #333;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+
+        .arrow.return {
+            background: #f44336;
+            border-style: dashed;
+        }
+
+        .arrow.return::after {
+            border-left-color: #f44336;
+        }
+
+        .legend {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-symbol {
+            width: 30px;
+            height: 20px;
+            border: 2px solid #333;
+            border-radius: 5px;
+            background: white;
+        }
+
+        .legend-symbol.diamond {
+            width: 0;
+            height: 0;
+            border: 15px solid transparent;
+            border-bottom: 30px solid #FFEBEE;
+            border-top: 0;
+            background: transparent;
+        }
+
+        .legend-symbol.circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #424242;
+        }
+
+        .info-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background: #e3f2fd;
+            border-radius: 10px;
+            border-left: 5px solid #2196f3;
+        }
+
+        .info-panel h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .info-panel ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .info-panel li {
+            padding: 5px 0;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .info-panel li::before {
+            content: '•';
+            color: #2196f3;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        @media (max-width: 1200px) {
+            .diagram-container {
+                padding: 15px;
+            }
+            
+            .activity {
+                font-size: 0.8em;
+                padding: 10px;
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Activity1: ParcInfo (AS-IS)</h1>
+            <p>Diagramme d'activité - Processus actuels de gestion de parc informatique</p>
+        </div>
+
+        <div class="diagram-container">
+            <div class="swimlanes">
+                <!-- Swimlane Employé -->
+                <div class="swimlane employe">
+                    <div class="swimlane-header">Employé</div>
+                    <div class="swimlane-content">
+                        <!-- Start -->
+                        <div class="start-end" style="left: 50px; top: 20px;">Start</div>
+                        
+                        <!-- Activités -->
+                        <div class="activity" style="left: 150px; top: 20px;">
+                            Créer demande<br>d'équipement
+                        </div>
+                        
+                        <div class="activity" style="left: 350px; top: 20px;">
+                            Consulter statut<br>demande
+                        </div>
+                        
+                        <div class="activity" style="left: 550px; top: 20px;">
+                            Signer décharge<br>digitale
+                        </div>
+                        
+                        <div class="activity" style="left: 750px; top: 20px;">
+                            Réceptionner<br>matériel
+                        </div>
+                        
+                        <!-- Décisions -->
+                        <div class="decision" style="left: 250px; top: 60px;" data-text="Demande conforme ?"></div>
+                        <div class="decision" style="left: 450px; top: 60px;" data-text="Matériel disponible ?"></div>
+                        
+                        <!-- Flèches -->
+                        <div class="arrow" style="left: 90px; top: 40px; width: 60px;"></div>
+                        <div class="arrow" style="left: 150px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 250px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 350px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 450px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 550px; top: 40px; width: 200px;"></div>
+                        
+                        <!-- Flèches de retour -->
+                        <div class="arrow return" style="left: 250px; top: 120px; width: 100px; transform: rotate(180deg);"></div>
+                        <div class="arrow return" style="left: 450px; top: 120px; width: 100px; transform: rotate(180deg);"></div>
+                    </div>
+                </div>
+
+                <!-- Swimlane Gestionnaire -->
+                <div class="swimlane gestionnaire">
+                    <div class="swimlane-header">Gestionnaire</div>
+                    <div class="swimlane-content">
+                        <!-- Activités -->
+                        <div class="activity" style="left: 150px; top: 20px;">
+                            Recevoir notification<br>demande
+                        </div>
+                        
+                        <div class="activity" style="left: 350px; top: 20px;">
+                            Analyser demande<br>et budget
+                        </div>
+                        
+                        <div class="activity" style="left: 550px; top: 20px;">
+                            Approuver/Refuser<br>demande
+                        </div>
+                        
+                        <div class="activity" style="left: 750px; top: 20px;">
+                            Sélectionner<br>matériel
+                        </div>
+                        
+                        <!-- Décisions -->
+                        <div class="decision" style="left: 250px; top: 60px;" data-text="Budget suffisant ?"></div>
+                        <div class="decision" style="left: 450px; top: 60px;" data-text="Demande justifiée ?"></div>
+                        <div class="decision" style="left: 650px; top: 60px;" data-text="Stock disponible ?"></div>
+                        
+                        <!-- Flèches -->
+                        <div class="arrow" style="left: 150px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 250px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 350px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 450px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 550px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 650px; top: 40px; width: 100px;"></div>
+                        
+                        <!-- Flèches de retour -->
+                        <div class="arrow return" style="left: 250px; top: 120px; width: 100px; transform: rotate(180deg);"></div>
+                        <div class="arrow return" style="left: 450px; top: 120px; width: 100px; transform: rotate(180deg);"></div>
+                        <div class="arrow return" style="left: 650px; top: 120px; width: 100px; transform: rotate(180deg);"></div>
+                    </div>
+                </div>
+
+                <!-- Swimlane Super Admin -->
+                <div class="swimlane super-admin">
+                    <div class="swimlane-header">Super Admin</div>
+                    <div class="swimlane-content">
+                        <!-- Activités -->
+                        <div class="activity" style="left: 150px; top: 20px;">
+                            Superviser<br>processus
+                        </div>
+                        
+                        <div class="activity" style="left: 350px; top: 20px;">
+                            Valider commandes<br>importantes
+                        </div>
+                        
+                        <div class="activity" style="left: 550px; top: 20px;">
+                            Gérer fournisseurs<br>et contrats
+                        </div>
+                        
+                        <div class="activity" style="left: 750px; top: 20px;">
+                            Analyser rapports<br>et KPIs
+                        </div>
+                        
+                        <!-- Décisions -->
+                        <div class="decision" style="left: 250px; top: 60px;" data-text="Commande > seuil ?"></div>
+                        <div class="decision" style="left: 450px; top: 60px;" data-text="Fournisseur approuvé ?"></div>
+                        
+                        <!-- Flèches -->
+                        <div class="arrow" style="left: 150px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 250px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 350px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 450px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 550px; top: 40px; width: 200px;"></div>
+                    </div>
+                </div>
+
+                <!-- Swimlane Système -->
+                <div class="swimlane system">
+                    <div class="swimlane-header">Système</div>
+                    <div class="swimlane-content">
+                        <!-- Activités -->
+                        <div class="activity" style="left: 150px; top: 20px;">
+                            Vérifier stock<br>et disponibilité
+                        </div>
+                        
+                        <div class="activity" style="left: 350px; top: 20px;">
+                            Générer notifications<br>automatiques
+                        </div>
+                        
+                        <div class="activity" style="left: 550px; top: 20px;">
+                            Mettre à jour<br>statuts
+                        </div>
+                        
+                        <div class="activity" style="left: 750px; top: 20px;">
+                            Archiver données<br>et historique
+                        </div>
+                        
+                        <!-- Décisions -->
+                        <div class="decision" style="left: 250px; top: 60px;" data-text="Stock suffisant ?"></div>
+                        <div class="decision" style="left: 450px; top: 60px;" data-text="Notification requise ?"></div>
+                        
+                        <!-- End -->
+                        <div class="start-end" style="left: 750px; top: 20px;">End</div>
+                        
+                        <!-- Flèches -->
+                        <div class="arrow" style="left: 150px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 250px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 350px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 450px; top: 40px; width: 100px;"></div>
+                        <div class="arrow" style="left: 550px; top: 40px; width: 200px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Légende -->
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-symbol"></div>
+                    <span>Activité</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol diamond"></div>
+                    <span>Décision</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol circle"></div>
+                    <span>Début/Fin</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 30px; height: 2px; background: #f44336; border-style: dashed;"></div>
+                    <span>Retour/Erreur</span>
+                </div>
+            </div>
+
+            <!-- Informations -->
+            <div class="info-panel">
+                <h3>📋 Description du Processus AS-IS ParcInfo</h3>
+                <ul>
+                    <li><strong>Workflow des demandes d'équipement :</strong> Création, validation hiérarchique, approbation et affectation</li>
+                    <li><strong>Processus d'approbation :</strong> Vérification budget, justification, disponibilité stock</li>
+                    <li><strong>Gestion des fournisseurs :</strong> Validation des commandes importantes et contrats</li>
+                    <li><strong>Système automatisé :</strong> Notifications, mise à jour statuts, archivage</li>
+                    <li><strong>Contrôles qualité :</strong> Vérifications à chaque étape avec possibilité de retour</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

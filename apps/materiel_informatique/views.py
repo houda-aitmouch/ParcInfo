@@ -24,8 +24,23 @@ def is_superadmin(user):
 def liste_materiels(request):
     if not is_gestionnaire_ou_superadmin(request.user):
         raise PermissionDenied
+    
+    # Récupérer le filtre de statut depuis les paramètres GET
+    statut_filter = request.GET.get('statut', '')
+    
+    # Filtrer les matériels selon le statut
     materiels = MaterielInformatique.objects.all()
-    return render(request, 'materiel_informatique/liste_materiels.html', {'materiels': materiels})
+    if statut_filter:
+        materiels = materiels.filter(statut=statut_filter)
+    
+    # Récupérer tous les statuts disponibles pour le filtre
+    statuts_disponibles = MaterielInformatique.objects.values_list('statut', flat=True).distinct().order_by('statut')
+    
+    return render(request, 'materiel_informatique/liste_materiels.html', {
+        'materiels': materiels,
+        'statuts_disponibles': statuts_disponibles,
+        'statut_filter': statut_filter
+    })
 
 def ajouter_materiel(request):
     if not is_gestionnaire_ou_superadmin(request.user):
@@ -47,6 +62,13 @@ def modifier_materiel(request, pk):
         form = MaterielInformatiqueForm(request.POST, instance=materiel)
         if form.is_valid():
             materiel = form.save()
+            # Harmoniser statut et utilisateur
+            if materiel.utilisateur is None and materiel.statut == 'affecte':
+                materiel.statut = 'nouveau'
+                materiel.save(update_fields=['statut'])
+            elif materiel.utilisateur is not None and materiel.statut != 'affecte':
+                materiel.statut = 'affecte'
+                materiel.save(update_fields=['statut'])
             return redirect('materiel_informatique:liste_materiels')
     else:
         form = MaterielInformatiqueForm(instance=materiel)
@@ -66,7 +88,15 @@ def supprimer_materiel(request, pk):
     return render(request, 'materiel_informatique/confirmer_suppression.html', {'materiel': materiel})
 
 def lignes_commande_par_commande(request, commande_id):
-    lignes = LigneCommande.objects.filter(commande_id=commande_id).select_related('designation', 'description', 'commande__fournisseur', 'commande')
+    lignes_qs = LigneCommande.objects.filter(commande_id=commande_id).select_related('designation', 'description', 'commande__fournisseur', 'commande')
+    # Si l'utilisateur est un employé (non gestionnaire/superadmin), ne retourner que les descriptions publiques
+    try:
+        is_employee = (not request.user.is_superuser) and not is_gestionnaire_ou_superadmin(request.user) and request.user.groups.filter(name__in=['Employé', 'Employe']).exists()
+    except Exception:
+        is_employee = False
+    if is_employee:
+        lignes_qs = lignes_qs.filter(description__public=True)
+    lignes = lignes_qs
     data = [
         {
             'id': ligne.id,
@@ -74,6 +104,7 @@ def lignes_commande_par_commande(request, commande_id):
             'designation_id': ligne.designation.id,
             'description': ligne.description.nom,
             'description_id': ligne.description.id,
+            'description_public': bool(getattr(ligne.description, 'public', True)),
             'prix_unitaire': str(ligne.prix_unitaire),
             'fournisseur': ligne.commande.fournisseur.nom if ligne.commande.fournisseur else '',
             'numero_facture': ligne.commande.numero_facture or '',
@@ -326,6 +357,12 @@ def modifier_materiel_superadmin(request, pk):
         form = MaterielInformatiqueForm(request.POST, instance=materiel)
         if form.is_valid():
             materiel = form.save()
+            if materiel.utilisateur is None and materiel.statut == 'affecte':
+                materiel.statut = 'nouveau'
+                materiel.save(update_fields=['statut'])
+            elif materiel.utilisateur is not None and materiel.statut != 'affecte':
+                materiel.statut = 'affecte'
+                materiel.save(update_fields=['statut'])
             return redirect('materiel_informatique:liste_materiels_superadmin')
     else:
         form = MaterielInformatiqueForm(instance=materiel)
@@ -470,7 +507,13 @@ def modifier_materiel_gestionnaire_info(request, pk: int):
     if request.method == 'POST':
         form = MaterielInformatiqueForm(request.POST, instance=materiel)
         if form.is_valid():
-            form.save()
+            materiel = form.save()
+            if materiel.utilisateur is None and materiel.statut == 'affecte':
+                materiel.statut = 'nouveau'
+                materiel.save(update_fields=['statut'])
+            elif materiel.utilisateur is not None and materiel.statut != 'affecte':
+                materiel.statut = 'affecte'
+                materiel.save(update_fields=['statut'])
             return redirect('materiel_informatique:liste_materiels_gestionnaire_info')
     else:
         form = MaterielInformatiqueForm(instance=materiel)
@@ -531,7 +574,13 @@ def modifier_materiel_gestionnaire_bureau(request, pk: int):
     if request.method == 'POST':
         form = MaterielInformatiqueForm(request.POST, instance=materiel)
         if form.is_valid():
-            form.save()
+            materiel = form.save()
+            if materiel.utilisateur is None and materiel.statut == 'affecte':
+                materiel.statut = 'nouveau'
+                materiel.save(update_fields=['statut'])
+            elif materiel.utilisateur is not None and materiel.statut != 'affecte':
+                materiel.statut = 'affecte'
+                materiel.save(update_fields=['statut'])
             return redirect('materiel_informatique:liste_materiels_gestionnaire_bureau')
     else:
         form = MaterielInformatiqueForm(instance=materiel)

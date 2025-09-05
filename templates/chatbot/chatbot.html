@@ -378,15 +378,23 @@
             if (parts.length === 2) return parts.pop().split(';').shift();
         }
 
-        // Add service worker for PWA capabilities
+        // Service Worker handling: register only on HTTPS; on HTTP, clean up any existing SW/caches
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(registration => {
-                    console.log('ServiceWorker registration successful');
-                }).catch(err => {
-                    console.log('ServiceWorker registration failed: ', err);
+            if (location.protocol === 'https:') {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(() => console.log('ServiceWorker registration successful'))
+                        .catch(err => console.log('ServiceWorker registration failed:', err));
                 });
-            });
+            } else {
+                // Ensure no SW is active on HTTP to avoid mixed content/redirect issues during development
+                navigator.serviceWorker.getRegistrations()
+                    .then(registrations => registrations.forEach(r => r.unregister()))
+                    .catch(() => {});
+                if (window.caches && typeof caches.keys === 'function') {
+                    caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {});
+                }
+            }
         }
     </script>
 </body>

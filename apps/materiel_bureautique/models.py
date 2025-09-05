@@ -14,12 +14,12 @@ class MaterielBureau(models.Model):
     statut = models.CharField(
         max_length=50,
         choices=[
-            ('Opérationnel', 'Opérationnel'),
+            ('operationnel', 'Opérationnel'),
             ('affecte', 'Affecté'),
-            ('Réparation', 'Réparation'),
-            ('Réforme', 'Réforme'),
+            ('reparation', 'Réparation'),
+            ('reforme', 'Réforme'),
         ],
-        default='Opérationnel'
+        default='operationnel'
     )
     lieu_stockage = models.CharField(
         max_length=20,

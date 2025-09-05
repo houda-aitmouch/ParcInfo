@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personas ParcInfo - Design Thinking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            line-height: 1.6;
+        }
+
+        .introduction {
+            background: #f8fafc;
+            padding: 40px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .introduction h2 {
+            color: #1f2937;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .introduction p {
+            color: #4b5563;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .personas-grid {
+            padding: 40px;
+            display: grid;
+            gap: 40px;
+        }
+
+        .persona-card {
+            background: #f8fafc;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            border-left: 8px solid #FF6B35;
+        }
+
+        .persona-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        .persona-header {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .persona-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .persona-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        .persona-content {
+            padding: 35px;
+        }
+
+        .columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 25px;
+        }
+
+        .column {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+            border-top: 5px solid;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .column:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.1);
+        }
+
+        .column.qui { border-top-color: #10b981; }
+        .column.pain-points { border-top-color: #ef4444; }
+        .column.attentes { border-top-color: #3b82f6; }
+
+        .column-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #1f2937;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .qui .column-title { color: #10b981; }
+        .pain-points .column-title { color: #ef4444; }
+        .attentes .column-title { color: #3b82f6; }
+
+        .column-content {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #4b5563;
+        }
+
+        .column-content p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .pain-point-item, .attente-item {
+            background: #f3f4f6;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            border-left: 4px solid;
+            transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .pain-point-item {
+            border-left-color: #ef4444;
+        }
+
+        .pain-point-item:hover {
+            background: #fee2e2;
+            transform: translateX(8px);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+        }
+
+        .attente-item {
+            border-left-color: #3b82f6;
+        }
+
+        .attente-item:hover {
+            background: #dbeafe;
+            transform: translateX(8px);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+        }
+
+        .footer {
+            background: #1f2937;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            font-size: 1rem;
+        }
+
+        .footer p {
+            line-height: 1.6;
+        }
+
+        .design-thinking-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(10px);
+        }
+
+        @media (max-width: 1024px) {
+            .columns {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .header h1 {
+                font-size: 2.2rem;
+            }
+
+            .persona-title {
+                font-size: 1.6rem;
+            }
+
+            .column {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 1.1rem;
+            }
+
+            .personas-grid {
+                padding: 20px;
+            }
+
+            .persona-content {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <section class="personas-grid" role="region" aria-label="Personas">
+            <!-- Super Admin -->
+            <article class="persona-card" role="article">
+                <div class="persona-header">
+                    <div class="persona-title">Super Administrateur</div>
+                </div>
+                <div class="persona-content">
+                    <div class="columns">
+                        <div class="column qui">
+                            <div class="column-title">Qui ?</div>
+                            <div class="column-content">
+                                <p>
+                                    Le Super Administrateur occupe un rôle central en tant qu'administrateur disposant d'un contrôle 
+                                    complet. Ses responsabilités incluent le suivi des matériels informatiques et bureautiques, 
+                                    ainsi que la gestion des commandes, fournisseurs et demandes d'équipement.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="column pain-points">
+                            <div class="column-title">Pain Points</div>
+                            <div class="column-content">
+                                <div class="pain-point-item">Gestion complexe des bons de commande, factures, contrats et garanties bureautiques, éparpillés dans divers dossiers et systèmes.</div>
+                                <div class="pain-point-item">Risque d'incohérences ou de doublons dans les données bureautiques entre différents documents et applications.</div>
+                                <div class="pain-point-item">Perte de temps significative pour retrouver des informations fiables sur les ressources bureautiques (contrats, fournisseurs, dates d'échéance).</div>
+                                <div class="pain-point-item">Absence de tableau de bord clair pour suivre et anticiper les échéances critiques des équipements bureautiques (fin de garantie, renouvellement de contrats).</div>
+                                <div class="pain-point-item">Manque de visibilité globale pour planifier les interventions et le remplacement des outils et matériels bureautiques.</div>
+                                <div class="pain-point-item">Processus d'approbation des demandes d'équipements bureautiques lent et complexe, absence d’une solution fluide de signatures électroniques.</div>
+                            </div>
+                        </div>
+                        <div class="column attentes">
+                            <div class="column-title">Attentes</div>
+                            <div class="column-content">
+                                <div class="attente-item">Gestion des comptes et rôles : Création/modification/suppression des utilisateurs</div>
+                                <div class="attente-item">Disposer d’indicateurs fiables pour superviser le parc et les dépenses</div>
+                                <div class="attente-item">Tableaux de bord : KPIs et indicateurs de performance consolidés</div>
+                                <div class="attente-item">Audit et traçabilité : Historique complet des actions et modifications</div>
+                                <div class="attente-item">Export et reporting : Rapports détaillés et exports normalisés</div>
+                                <div class="attente-item">Notifications critiques : Alertes sur les échéances importantes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Gestionnaire Informatique -->
+            <article class="persona-card" role="article">
+                <div class="persona-header">
+                    <div class="persona-title">Gestionnaire Informatique</div>
+                </div>
+                <div class="persona-content">
+                    <div class="columns">
+                        <div class="column qui">
+                            <div class="column-title">Qui ?</div>
+                            <div class="column-content">
+                                <p>
+                                    Le Gestionnaire Informatique est responsable de la gestion complète du parc informatique de l'organisation. 
+                                    Son rôle couvre l'ensemble du cycle de vie des équipements, depuis la demande initiale jusqu'à leur mise hors service. 
+                                    Il assure également l'inventaire du matériel, l'affectation aux utilisateurs, le suivi des opérations de maintenance et des garanties, 
+                                    ainsi que le contrôle des livraisons et des procès-verbaux de réception.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="column pain-points">
+                            <div class="column-title">Pain Points</div>
+                            <div class="column-content">
+                                <div class="pain-point-item">Suivi complexe des bons de commande, factures, contrats et garanties informatiques dispersés dans différents fichiers.</div>
+                                <div class="pain-point-item">Risque de doublons ou incohérences dans les informations entre documents et applications.</div>
+                                <div class="pain-point-item">Perte de temps importante pour rechercher des informations fiables sur les actifs informatiques (contrat, fournisseur, date de garantie).</div>
+                                <div class="pain-point-item">Absence de tableau de bord clair pour anticiper les échéances critiques (fin de garantie, renouvellement contrat).</div>
+                                <div class="pain-point-item">Manque de visibilité globale pour planifier interventions et remplacements des matériels informatiques.</div>
+                                <div class="pain-point-item">Processus : Lenteur et complexité du workflow d’approbation des demandes des équipements informatiques, absence d’une solution fluide de signatures électroniques.</div>
+                            </div>
+                        </div>
+                        <div class="column attentes">
+                            <div class="column-title">Attentes</div>
+                            <div class="column-content">
+                                <div class="attente-item">Gestion des commandes IT : Création et suivi des achats informatiques</div>
+                                <div class="attente-item">Approbation des demandes : Validation des demandes d'équipement IT</div>
+                                <div class="attente-item">Suivi des livraisons : Réception et affectation des équipements IT</div>
+                                <div class="attente-item">Gestion des fournitures IT : Stock et réapprovisionnement automatique</div>
+                                <div class="attente-item">Visibilité globale : Suivi complet du cycle de vie des équipements (acquisition → affectation → maintenance → fin de vie).</div>
+                                <div class="attente-item">Suivi des garanties des équipements IT : Alertes et renouvellements automatiques</div>
+                                <div class="attente-item">Gestion des fournisseurs : Performance et relations partenariales</div>
+                                <div class="attente-item">Dashboard garanties : Supervision via interface dédiée</div>
+                                <div class="attente-item">Alertes : Être notifié sur les échéances critiques (fin de contrat, renouvellement garantie).</div>
+                                <div class="attente-item">Support automatisé : Gain de temps grâce au chatbot et à la recherche intelligente</div>
+                                <div class="attente-item">Traçabilité : Suivre toutes les étapes d’une commande IT jusqu’à la livraison</div>
+                                <div class="attente-item">Efficacité : Gagner du temps grâce aux exports Excel, au reporting automatique et aux workflows digitalisés (signatures électroniques).</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Gestionnaire Bureautique -->
+            <article class="persona-card" role="article">
+                <div class="persona-header">
+                    <div class="persona-title">Gestionnaire Bureautique</div>
+                </div>
+                <div class="persona-content">
+                    <div class="columns">
+                        <div class="column qui">
+                            <div class="column-title">Qui ?</div>
+                            <div class="column-content">
+                                <p>
+                                    Le Gestionnaire Bureautique est responsable de la supervision complète des matériels bureautiques de l'organisation. 
+                                    Ses missions incluent le suivi des commandes, le contrôle des livraisons et des procès-verbaux de réception, 
+                                    la tenue de l’inventaire, le suivi des statuts des équipements (opérationnel, affecté, en réparation, en réforme), 
+                                    l’affectation aux utilisateurs, ainsi que la gestion des opérations de maintenance et le suivi des garanties.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="column pain-points">
+                            <div class="column-title">Pain Points</div>
+                            <div class="column-content">
+                                <div class="pain-point-item">Suivi complexe des bons de commande, factures, contrats et garanties dispersés dans différents fichiers.</div>
+                                <div class="pain-point-item">Risque de doublons ou incohérences dans les informations entre documents et applications.</div>
+                                <div class="pain-point-item">Perte de temps importante pour rechercher une donnée fiable (contrat, fournisseur, date de garantie).</div>
+                                <div class="pain-point-item">Absence de tableau de bord clair pour anticiper les échéances critiques (fin de garantie, renouvellement contrat).</div>
+                                <div class="pain-point-item">Manque de visibilité globale pour planifier interventions et remplacements des matériels bureautiques.</div>
+                                <div class="pain-point-item">Processus : Lenteur et complexité du workflow d’approbation des demandes des équipements bureautiques, absence d’une solution fluide de signatures électroniques.</div>
+                            </div>
+                        </div>
+                        <div class="column attentes">
+                            <div class="column-title">Attentes</div>
+                            <div class="column-content">
+                                <div class="attente-item">Gestion des commandes bureau : Achats de matériel et fournitures</div>
+                                <div class="attente-item">Approbation des demandes : Validation des demandes bureautiques</div>
+                                <div class="attente-item">Suivi des livraisons : Réception et affectation des équipements bureautiques</div>
+                                <div class="attente-item">Gestion des fournitures : Stock et réapprovisionnement automatique</div>
+                                <div class="attente-item">Dashboard garanties : Supervision via interface dédiée</div>
+                                <div class="attente-item">Support automatisé : Gain de temps grâce au chatbot et à la recherche intelligente</div>
+                                <div class="attente-item">Alertes : Être notifié sur les échéances critiques (fin de contrat, renouvellement garantie).</div>
+                                <div class="attente-item">Efficacité : Gagner du temps grâce aux exports Excel, au reporting automatique et aux workflows digitalisés (signatures électroniques).</div>
+                                <div class="attente-item">Traçabilité : Suivre toutes les étapes d’une commande bureautique jusqu’à la livraison</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Employé -->
+            <article class="persona-card" role="article">
+                <div class="persona-header">
+                    <div class="persona-title">Employé</div>
+                </div>
+                <div class="persona-content">
+                    <div class="columns">
+                        <div class="column qui">
+                            <div class="column-title">Qui ?</div>
+                            <div class="column-content">
+                                <p>
+                                    L'Employé interagit avec le parc informatique et bureautique de l'organisation de manière entièrement manuelle. 
+                                    Il consulte des registres ou carnets papier pour connaître les équipements qui lui sont attribués ainsi que leur état 
+                                    (nouveau, en panne, en maintenance). 
+                                    Pour obtenir un nouvel équipement ou signaler un problème, il remplit des formulaires papier et soumet ses demandes directement aux gestionnaires.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="column pain-points">
+                            <div class="column-title">Pain Points</div>
+                            <div class="column-content">
+                                <div class="pain-point-item">Processus complexe : Difficulté à comprendre les étapes de demande.</div>
+                                <div class="pain-point-item">Délais d'attente : Temps de traitement des demandes non transparent.</div>
+                                <div class="pain-point-item">Manque d'information : Statut des demandes non clair.</div>
+                                <div class="pain-point-item">Difficulté à savoir quel matériel lui est attribué et son état (nouveau, en panne, en maintenance).</div>
+                                <div class="pain-point-item">Décharges : Processus de signature électronique complexe.</div>
+                                <div class="pain-point-item">Délais longs pour signaler une panne ou obtenir un remplacement.</div>
+                            </div>
+                        </div>
+                        <div class="column attentes">
+                            <div class="column-title">Attentes</div>
+                            <div class="column-content">
+                                <div class="attente-item">Création de demandes : Formulaire simple et intuitif</div>
+                                <div class="attente-item">Suivi des demandes : Statut en temps réel et notifications</div>
+                                <div class="attente-item">Consultation équipements : Liste claire de ses affectations</div>
+                                <div class="attente-item">Signature électronique : Décharges numériques simplifiées</div>
+                                <div class="attente-item">Notifications : Alertes sur les problèmes et maintenances</div>
+                                <div class="attente-item">Interface responsive : Accès optimal sur tous les appareils</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </div>
+
+    <script>
+        // Animation d'apparition progressive des cartes
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.persona-card');
+            if (cards.length) {
+                cards.forEach((card, index) => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(60px)';
+                    requestAnimationFrame(() => {
+                        setTimeout(() => {
+                            card.style.transition = 'all 0.8s ease';
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, index * 300);
+                    });
+                });
+            }
+        });
+
+        // Effet de hover interactif amélioré
+        const items = document.querySelectorAll('.pain-point-item, .attente-item');
+        if (items.length) {
+            items.forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    item.style.transform = 'translateX(8px) scale(1.03)';
+                    item.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+                });
+                item.addEventListener('mouseleave', () => {
+                    item.style.transform = 'translateX(0) scale(1)';
+                    item.style.boxShadow = 'none';
+                });
+            });
+        }
+
+        // Animation des colonnes au scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        const columns = document.querySelectorAll('.column');
+        if (columns.length) {
+            columns.forEach(column => {
+                column.style.opacity = '0';
+                column.style.transform = 'translateY(30px)';
+                column.style.transition = 'all 0.6s ease';
+                observer.observe(column);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -24,6 +24,9 @@ def liste_materiels(request):
     if not is_gestionnaire_ou_superadmin(request.user):
         raise PermissionDenied
     
+    # Récupérer le filtre de statut depuis les paramètres GET
+    statut_filter = request.GET.get('statut', '')
+    
     # Récupérer tous les matériels avec leurs informations liées
     materiels = MaterielBureau.objects.select_related(
         'utilisateur', 
@@ -31,6 +34,13 @@ def liste_materiels(request):
         'ligne_commande__description',
         'commande__fournisseur'
     ).all()
+    
+    # Filtrer les matériels selon le statut
+    if statut_filter:
+        materiels = materiels.filter(statut=statut_filter)
+    
+    # Récupérer tous les statuts disponibles pour le filtre
+    statuts_disponibles = MaterielBureau.objects.values_list('statut', flat=True).distinct().order_by('statut')
     
     # Compter par statut
     stats = {}
@@ -47,7 +57,9 @@ def liste_materiels(request):
         'materiels': materiels,
         'stats': stats,
         'materiels_affectes': materiels_affectes,
-        'total_materiels': materiels.count()
+        'total_materiels': materiels.count(),
+        'statuts_disponibles': statuts_disponibles,
+        'statut_filter': statut_filter
     }
     
     return render(request, 'materiel_bureautique/liste_materiels.html', context)
@@ -101,8 +113,14 @@ def modifier_materiel(request, pk):
     if request.method == 'POST':
         form = MaterielBureauForm(request.POST, instance=materiel)
         if form.is_valid():
-            # Sauvegarder directement le matériel avec les données du formulaire
             materiel = form.save()
+            # Harmoniser statut et utilisateur (en stock si désaffecté)
+            if materiel.utilisateur is None and materiel.statut == 'affecte':
+                materiel.statut = 'Opérationnel'
+                materiel.save(update_fields=['statut'])
+            elif materiel.utilisateur is not None and materiel.statut != 'affecte':
+                materiel.statut = 'affecte'
+                materiel.save(update_fields=['statut'])
             return redirect('materiel_bureautique:liste_materiels')
     else:
         form = MaterielBureauForm(instance=materiel)
@@ -467,6 +485,12 @@ def modifier_materiel_gestionnaire_bureau(request, pk):
         form = MaterielBureauForm(request.POST, instance=materiel)
         if form.is_valid():
             materiel = form.save()
+            if materiel.utilisateur is None and materiel.statut == 'affecte':
+                materiel.statut = 'Opérationnel'
+                materiel.save(update_fields=['statut'])
+            elif materiel.utilisateur is not None and materiel.statut != 'affecte':
+                materiel.statut = 'affecte'
+                materiel.save(update_fields=['statut'])
             return redirect('materiel_bureautique:liste_materiels_gestionnaire_bureau')
     else:
         form = MaterielBureauForm(instance=materiel)
@@ -527,6 +551,12 @@ def modifier_materiel_superadmin(request, pk):
         form = MaterielBureauForm(request.POST, instance=materiel)
         if form.is_valid():
             materiel = form.save()
+            if materiel.utilisateur is None and materiel.statut == 'affecte':
+                materiel.statut = 'Opérationnel'
+                materiel.save(update_fields=['statut'])
+            elif materiel.utilisateur is not None and materiel.statut != 'affecte':
+                materiel.statut = 'affecte'
+                materiel.save(update_fields=['statut'])
             return redirect('materiel_bureautique:liste_materiels_superadmin')
     else:
         form = MaterielBureauForm(instance=materiel)

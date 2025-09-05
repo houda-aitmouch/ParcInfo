@@ -233,8 +233,10 @@ def vectorize_all_models():
         return 0
 
     try:
-        embedding_model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
-        logger.info("✅ Modèle d'embedding initialisé")
+        import torch
+        device = 'mps' if torch.backends.mps.is_available() else 'cpu'
+        embedding_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2', device=device)
+        logger.info(f"✅ Modèle d'embedding initialisé sur device: {device}")
     except Exception as e:
         logger.error(f"❌ Erreur initialisation embedding: {e}")
         return 0

@@ -63,187 +63,31 @@ Comment puis-je vous aider aujourd'hui ?`,
     }
   }, [isOpen, user, messages.length]);
 
-  const simulateBotResponse = async (userMessage: string): Promise<ChatMessage> => {
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-
-    let response = '';
-    let sources: string[] = [];
-
-    if (userMessage.toLowerCase().includes('garantie')) {
-      response = `📊 **Rapport de garanties - ADD**
-
-J'ai analysé votre parc informatique et trouvé **15 équipements** dont la garantie expire dans les 30 prochains jours :
-
-🔴 **Priorité Haute :**
-• Dell Latitude 7520 (INV-2024-001) - Expire le 25 août 2024
-• HP ProBook 450 (INV-2024-002) - Expire le 20 août 2024
-
-🟡 **Attention :**
-• MacBook Pro M2 (INV-2024-003) - Expire le 10 septembre 2024
-• Surface Pro 9 (INV-2024-004) - Expire le 15 septembre 2024
-
-💡 **Recommandations ADD :**
-• Planifier le renouvellement ou extension de garantie
-• Contacter les fournisseurs agréés
-• Budgétiser les remplacements éventuels
-
-Voulez-vous que je génère un rapport détaillé ou programme des alertes automatiques ?`;
-      sources = ['Base matériels ADD', 'Contrats fournisseurs', 'Système de monitoring'];
-    } else if (userMessage.toLowerCase().includes('livraison')) {
-      response = `🚚 **État des livraisons - Plateforme ADD**
-
-**Situation actuelle :**
-
-🔴 **En retard (3 commandes) :**
-• Commande BC-2024-015 - Retard de 5 jours (TechnoMaroc)
-• Commande CT-2024-008 - Retard de 2 jours (InfoSupply)
-• Commande MP-2024-003 - Retard de 1 jour (DigitalPro)
-
-🟡 **Prévues cette semaine (7 commandes) :**
-• BC-2024-018 - Prévue demain (25 PC portables)
-• BC-2024-019 - Prévue vendredi (imprimantes multifonctions)
-
-✅ **Livrées récemment (12 cette semaine)**
-
-📞 **Actions suggérées :**
-• Contacter les fournisseurs en retard
-• Programmer les réceptions prévues
-• Mettre à jour le planning logistique
-
-Souhaitez-vous que je contacte automatiquement les fournisseurs concernés ?`;
-      sources = ['Module livraisons ADD', 'Planning fournisseurs', 'Système de suivi'];
-    } else if (userMessage.toLowerCase().includes('commande')) {
-      response = `📋 **Tableau de bord commandes - ADD**
-
-**Résumé financier 2024 :**
-• 💰 Budget total : 1,200,000 DH
-• 💸 Engagé : 876,000 DH (73%)
-• 💳 Disponible : 324,000 DH
-
-**Commandes en cours :**
-📊 **Par statut :**
-• ⏳ En attente de validation : 12 commandes
-• 🚀 En cours de livraison : 8 commandes  
-• ✅ Livrées ce mois : 23 commandes
-
-📋 **Actions prioritaires :**
-• 3 factures à valider (montant : 45,800 DH)
-• 2 PV de réception en attente
-• 1 commande urgente à traiter
-
-**Performance fournisseurs :**
-• 🥇 TechnoMaroc : 98% de ponctualité
-• 🥈 InfoSupply : 87% de conformité
-• 🥉 DigitalPro : 92% satisfaction
-
-Voulez-vous consulter une commande spécifique ou analyser un fournisseur ?`;
-      sources = ['Module commandes ADD', 'Base fournisseurs', 'Système comptable'];
-    } else if (userMessage.toLowerCase().includes('fournisseur')) {
-      response = `🏢 **Annuaire fournisseurs ADD - 2024**
-
-**Fournisseurs actifs (certifiés ADD) :**
-
-🏆 **Top performance :**
-1. **TechnoMaroc** - Partenaire privilégié
-   • 25 commandes (287,500 DH)
-   • Taux de livraison : 98%
-   • Note satisfaction : 4.8/5
-
-2. **InfoSupply** - Fournisseur agréé
-   • 18 commandes (156,800 DH)
-   • Taux de livraison : 87%
-   • Note satisfaction : 4.2/5
-
-3. **DigitalPro** - Partenaire technique
-   • 12 commandes (98,200 DH)
-   • Taux de livraison : 92%
-   • Note satisfaction : 4.5/5
-
-📈 **Statistiques globales :**
-• Fournisseurs actifs : 15
-• Taux moyen de ponctualité : 89%
-• Économies réalisées : 125,000 DH
-• Certifications ADD : 100%
-
-🔍 **Services disponibles :**
-• Évaluation qualité automatique
-• Suivi performance temps réel
-• Gestion contractuelle intégrée
-
-Besoin d'informations détaillées sur un fournisseur particulier ?`;
-      sources = ['Registre fournisseurs ADD', 'Évaluations qualité', 'Base contractuelle'];
-    } else if (userMessage.toLowerCase().includes('demande')) {
-      response = `📝 **Gestionnaire de demandes ADD**
-
-**Demandes d'équipement en attente :**
-
-⏳ **Non traitées (5 demandes) :**
-• DEQ-2024-045 - Ordinateur portable (Mohammed A., Développement)
-• DEQ-2024-046 - Écran 24" (Fatima Z., Comptabilité)  
-• DEQ-2024-047 - Souris ergonomique (Ahmed B., RH)
-• DEQ-2024-048 - Imprimante laser (Rachid M., Communication)
-• DEQ-2024-049 - Tablette iPad (Khadija L., Direction)
-
-✅ **Traitées cette semaine (8 demandes) :**
-• DEQ-2024-042 - Approuvée, en cours de commande
-• DEQ-2024-043 - Matériel affecté et livré
-• DEQ-2024-044 - Budget validé, commande lancée
-
-📊 **Statistiques mensuelles :**
-• Demandes reçues : 47
-• Taux d'approbation : 85%
-• Délai moyen de traitement : 3.2 jours
-• Budget consommé : 89,500 DH
-
-🎯 **Actions recommandées :**
-• Prioriser les demandes urgentes
-• Vérifier la disponibilité budgétaire
-• Optimiser les délais de traitement
-
-Voulez-vous traiter une demande spécifique ou consulter le budget disponible ?`;
-      sources = ['Module demandes ADD', 'Stock disponible', 'Budget alloué'];
-    } else {
-      response = `🤖 **Assistant IA ADD - Services disponibles**
-
-Je peux vous accompagner dans la gestion de votre parc informatique :
-
-🔍 **Recherche & Analyse :**
-• État des équipements et garanties
-• Suivi des commandes et livraisons  
-• Analyse des performances fournisseurs
-• Gestion des demandes utilisateurs
-• Tableaux de bord personnalisés
-
-💡 **Actions intelligentes :**
-• Génération de rapports automatiques
-• Alertes préventives personnalisées
-• Optimisation des achats et budgets
-• Prédictions de maintenance
-• Recommandations d'amélioration
-
-🎯 **Spécialités ADD :**
-• Conformité aux procédures gouvernementales
-• Suivi budgétaire en temps réel
-• Gestion multi-sites et services
-• Traçabilité complète des actifs
-
-📞 **Support technique :**
-• Disponible 24h/7j
-• Base de connaissances intégrée
-• Escalade vers équipes spécialisées
-
-Posez-moi une question spécifique ou choisissez une suggestion ci-dessous ! 👇`;
+  const callBackend = async (userMessage: string): Promise<ChatMessage> => {
+    try {
+      const res = await fetch('/chatbot/api/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: userMessage })
+      });
+      const data = await res.json();
+      const content = data?.response || "Désolé, je n'ai pas pu traiter la demande.";
+      return {
+        id: Date.now().toString(),
+        type: 'bot',
+        content,
+        timestamp: new Date(),
+        quickActions: quickSuggestions
+      };
+    } catch (e) {
+      return {
+        id: Date.now().toString(),
+        type: 'bot',
+        content: "Une erreur est survenue. Veuillez réessayer.",
+        timestamp: new Date(),
+        quickActions: quickSuggestions
+      };
     }
-
-    return {
-      id: Date.now().toString(),
-      type: 'bot',
-      content: response,
-      timestamp: new Date(),
-      sources,
-      quickActions: quickSuggestions.filter(s => !userMessage.toLowerCase().includes(s.toLowerCase().split(' ')[0]))
-    };
   };
 
   const handleSendMessage = async () => {
@@ -261,7 +105,7 @@ Posez-moi une question spécifique ou choisissez une suggestion ci-dessous ! �
     setIsLoading(true);
 
     try {
-      const botResponse = await simulateBotResponse(inputValue);
+      const botResponse = await callBackend(inputValue);
       setMessages(prev => [...prev, botResponse]);
     } catch (error) {
       const errorMessage: ChatMessage = {
@@ -305,7 +149,7 @@ Posez-moi une question spécifique ou choisissez une suggestion ci-dessous ! �
         {/* ADD Badge */}
         <div className="px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 border-b">
           <div className="flex items-center gap-2">
-            <img src={addLogo} alt="ADD" className="h-4 w-auto" />
+            <img src={addLogo} alt="ADD" className="h-5 w-auto" />
             <span className="text-xs text-gray-600">Agence de Développement du Digital</span>
           </div>
         </div>

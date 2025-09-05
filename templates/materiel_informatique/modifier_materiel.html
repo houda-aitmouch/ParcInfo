@@ -74,7 +74,7 @@
       <div class="mb-4">
         <label class="block text-gray-700 font-medium mb-1">Statut</label>
         <select name="statut" class="w-full border rounded px-3 py-2" required>
-          <option value="nouveau" {% if form.instance.statut == 'nouveau' %}selected{% endif %}>Nouveau</option>
+          <option value="nouveau" {% if form.instance.statut == 'nouveau' or not form.instance.pk %}selected{% endif %}>En stock</option>
           <option value="affecte" {% if form.instance.statut == 'affecte' %}selected{% endif %}>Affecté</option>
           <option value="en panne" {% if form.instance.statut == 'en panne' %}selected{% endif %}>En panne</option>
           <option value="en maintenance" {% if form.instance.statut == 'en maintenance' %}selected{% endif %}>En maintenance</option>
