@@ -1,0 +1,32 @@
+# Dockerfile pour le frontend React
+FROM node:18-alpine
+
+# Variables d'environnement
+ENV NODE_ENV=production
+ENV GENERATE_SOURCEMAP=false
+
+# Création du répertoire de travail
+WORKDIR /app
+
+# Copie des fichiers package
+COPY package*.json /app/
+
+# Installation des dépendances
+RUN npm ci --only=production
+
+# Copie du code source frontend
+COPY frontend/ /app/frontend/
+COPY static/ /app/static/
+
+# Construction de l'application React
+WORKDIR /app/frontend
+RUN npm run build
+
+# Retour au répertoire principal
+WORKDIR /app
+
+# Exposition du port
+EXPOSE 3000
+
+# Commande de démarrage
+CMD ["npm", "start"]

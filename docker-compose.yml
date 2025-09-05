@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Base de données PostgreSQL
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: parcinfo
+      POSTGRES_USER: parcinfo
+      POSTGRES_PASSWORD: parcinfo_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # Backend Django
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      - DEBUG=False
+      - DATABASE_URL=postgresql://parcinfo:parcinfo_password@db:5432/parcinfo
+      - SECRET_KEY=your-secret-key-here
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    restart: unless-stopped
+
+  # Frontend React
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Service Chatbot
+  chatbot:
+    build:
+      context: .
+      dockerfile: Dockerfile.chatbot
+    environment:
+      - DEBUG=False
+      - DATABASE_URL=postgresql://parcinfo:parcinfo_password@db:5432/parcinfo
+      - SECRET_KEY=your-secret-key-here
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+      - backend
+    restart: unless-stopped
+
+  # Nginx (reverse proxy)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:

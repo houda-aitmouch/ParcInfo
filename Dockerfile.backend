@@ -1,0 +1,40 @@
+# Dockerfile pour le backend Django
+FROM python:3.11-slim
+
+# Variables d'environnement
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Installation des dépendances système
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    gettext \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Création du répertoire de travail
+WORKDIR /app
+
+# Copie des fichiers de requirements
+COPY requirements.txt /app/
+
+# Installation des dépendances Python
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copie du code source
+COPY . /app/
+
+# Collecte des fichiers statiques
+RUN python manage.py collectstatic --noinput --settings=ParcInfo.settings
+
+# Exposition du port
+EXPOSE 8000
+
+# Script de démarrage
+COPY entrypoint.sh /app/
+RUN chmod +x /app/entrypoint.sh
+
+# Commande par défaut
+CMD ["/app/entrypoint.sh"]
