@@ -9,9 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
-      IMAGE_BACKEND: ghcr.io/${{ github.repository }}-backend
-      IMAGE_FRONTEND: ghcr.io/${{ github.repository }}-frontend
-      IMAGE_CHATBOT: ghcr.io/${{ github.repository }}-chatbot
+      IMAGE_BACKEND: ghcr.io/${{ github.repository_owner }}/parcinfo-backend
+      IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/parcinfo-frontend
+      IMAGE_CHATBOT: ghcr.io/${{ github.repository_owner }}/parcinfo-chatbot
     steps:
       - uses: actions/checkout@v4
 
