@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # Application principale (Django + Chatbot intégré)
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.railway.optimized
+    environment:
+      - DEBUG=False
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=*.railway.app
+      - HUGGINGFACE_HUB_CACHE=/root/.cache/huggingface
+    ports:
+      - "8000:8000"
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    restart: unless-stopped
+    # Optimisations pour Railway
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+
+volumes:
+  static_volume:
+  media_volume:
