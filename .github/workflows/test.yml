@@ -1,8 +1,8 @@
-name: Test
+name: Test ParcInfo
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -10,39 +10,31 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
+    strategy:
+      matrix:
+        python-version: [3.11]
+    
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      
-      - name: Run Django tests
-        run: |
-          python manage.py check --settings=ParcInfo.settings
-          echo "✅ Django configuration OK"
-      
-      - name: Check Docker files
-        run: |
-          test -f Dockerfile.backend && echo "✅ Dockerfile.backend exists" || echo "❌ Dockerfile.backend missing"
-          test -f Dockerfile.frontend && echo "✅ Dockerfile.frontend exists" || echo "❌ Dockerfile.frontend missing"
-          test -f Dockerfile.chatbot && echo "✅ Dockerfile.chatbot exists" || echo "❌ Dockerfile.chatbot missing"
-          test -f docker-compose.yml && echo "✅ docker-compose.yml exists" || echo "❌ docker-compose.yml missing"
-          test -f railway.json && echo "✅ Railway configuration ready" || echo "❌ Railway configuration missing"
-      
-      - name: Check Python syntax
-        run: |
-          python -m py_compile manage.py
-          find . -name "*.py" -path "./apps/*" -exec python -m py_compile {} \;
-          echo "✅ Python syntax OK"
-      
-      - name: Check requirements
-        run: |
-          pip check
-          echo "✅ Dependencies OK"
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Test Django configuration
+      run: |
+        python manage.py check --settings=ParcInfo.settings
+    
+    - name: Test basic imports
+      run: |
+        python test_basic.py
+    
+    - name: Test Docker Compose
+      run: |
+        docker-compose config
