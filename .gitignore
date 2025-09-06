@@ -211,6 +211,7 @@ dump.rdb
 
 # Text files (temporaires)
 *.txt
+!requirements.txt
 
 # JSON files (temporaires)
 *.json
