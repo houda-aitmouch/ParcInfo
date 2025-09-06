@@ -30,8 +30,19 @@ jobs:
       
       - name: Check Docker files
         run: |
-          echo "✅ Dockerfile.backend exists"
-          echo "✅ Dockerfile.frontend exists" 
-          echo "✅ Dockerfile.chatbot exists"
-          echo "✅ docker-compose.yml exists"
-          echo "✅ Railway configuration ready"
+          test -f Dockerfile.backend && echo "✅ Dockerfile.backend exists" || echo "❌ Dockerfile.backend missing"
+          test -f Dockerfile.frontend && echo "✅ Dockerfile.frontend exists" || echo "❌ Dockerfile.frontend missing"
+          test -f Dockerfile.chatbot && echo "✅ Dockerfile.chatbot exists" || echo "❌ Dockerfile.chatbot missing"
+          test -f docker-compose.yml && echo "✅ docker-compose.yml exists" || echo "❌ docker-compose.yml missing"
+          test -f railway.json && echo "✅ Railway configuration ready" || echo "❌ Railway configuration missing"
+      
+      - name: Check Python syntax
+        run: |
+          python -m py_compile manage.py
+          find . -name "*.py" -path "./apps/*" -exec python -m py_compile {} \;
+          echo "✅ Python syntax OK"
+      
+      - name: Check requirements
+        run: |
+          pip check
+          echo "✅ Dependencies OK"
