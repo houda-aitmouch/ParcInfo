@@ -31,6 +31,21 @@ else:
     print('Superutilisateur admin existe déjà')
 EOF
 
+# Préchargement des modèles IA (en arrière-plan)
+echo "🤖 Préchargement des modèles IA..."
+python -c "
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ParcInfo.settings')
+import django
+django.setup()
+from apps.chatbot.core_chatbot import ParcInfoChatbot
+try:
+    chatbot = ParcInfoChatbot()
+    print('✅ Modèles IA chargés')
+except Exception as e:
+    print(f'⚠️ Erreur chargement IA: {e}')
+" &
+
 # Démarrage de Nginx en arrière-plan
 echo "🌐 Démarrage de Nginx..."
 nginx -g "daemon off;" &
@@ -39,4 +54,4 @@ nginx -g "daemon off;" &
 echo "🐍 Démarrage de Django..."
 python manage.py runserver 0.0.0.0:8001 --settings=ParcInfo.settings
 
-echo "✅ ParcInfo démarré avec succès sur Railway!"
+echo "✅ ParcInfo avec chatbot démarré avec succès sur Railway!"
