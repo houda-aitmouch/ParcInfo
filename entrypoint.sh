@@ -2,7 +2,7 @@
 
 # Attendre que la base de données soit prête
 echo "Attente de la base de données..."
-while ! nc -z db 5432; do
+while ! python -c "import socket; socket.create_connection(('db', 5432))" 2>/dev/null; do
   sleep 1
 done
 echo "Base de données prête!"
