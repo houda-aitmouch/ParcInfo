@@ -1,0 +1,39 @@
+{
+  "name": "ParcInfo - Gestion de Parc Informatique",
+  "description": "Système de gestion de parc informatique avec IA",
+  "repository": "https://github.com/houda-aitmouch/ParcInfo",
+  "logo": "https://raw.githubusercontent.com/houda-aitmouch/ParcInfo/main/static/images/ADD.png",
+  "keywords": ["django", "python", "postgresql", "chatbot", "ia", "parc-informatique"],
+  "success_url": "/admin/",
+  "scripts": {
+    "postdeploy": "python manage.py migrate && python manage.py collectstatic --noinput"
+  },
+  "env": {
+    "SECRET_KEY": {
+      "description": "Clé secrète Django",
+      "generator": "secret"
+    },
+    "DEBUG": {
+      "description": "Mode debug",
+      "value": "False"
+    },
+    "ALLOWED_HOSTS": {
+      "description": "Hôtes autorisés",
+      "value": "*.herokuapp.com"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:mini",
+      "as": "DATABASE"
+    }
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nginx"
+    }
+  ]
+}
