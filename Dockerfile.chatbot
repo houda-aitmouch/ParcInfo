@@ -34,6 +34,9 @@ RUN pip install --no-cache-dir \
 # Copie du code source
 COPY . /app/
 
+# Création du répertoire pour les modèles
+RUN mkdir -p /root/.cache/huggingface/hub
+
 # Exposition du port
 EXPOSE 8001
 

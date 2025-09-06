@@ -57,6 +57,8 @@ services:
     depends_on:
       - db
       - backend
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
     restart: unless-stopped
 
   # Nginx (reverse proxy)
