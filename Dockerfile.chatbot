@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     gettext \
     curl \
+    gcc \
+    g++ \
+    make \
     && rm -rf /var/lib/apt/lists/*
 
 # Création du répertoire de travail
@@ -37,11 +40,18 @@ COPY . /app/
 # Création des répertoires nécessaires
 RUN mkdir -p /root/.cache/huggingface/hub /app/staticfiles /app/media
 
-# Collecte des fichiers statiques
-RUN python manage.py collectstatic --noinput --settings=ParcInfo.settings
+# Copie du fichier d'environnement Docker
+COPY env.docker /app/.env
+
+# Collecte des fichiers statiques (sera fait dans entrypoint.sh)
+# RUN python manage.py collectstatic --noinput --settings=ParcInfo.settings
 
 # Exposition du port
 EXPOSE 8001
 
 # Script de démarrage pour le chatbot
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8001", "--settings=ParcInfo.settings"]
+COPY entrypoint_chatbot.sh /app/
+RUN chmod +x /app/entrypoint_chatbot.sh
+
+# Commande par défaut
+CMD ["/app/entrypoint_chatbot.sh"]

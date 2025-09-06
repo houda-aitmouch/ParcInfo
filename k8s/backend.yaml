@@ -6,9 +6,11 @@ metadata:
   labels:
     app: backend
 spec:
+  type: NodePort
   ports:
   - port: 8000
     targetPort: 8000
+    nodePort: 30080
   selector:
     app: backend
 ---
@@ -20,7 +22,7 @@ metadata:
   labels:
     app: backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -31,20 +33,42 @@ spec:
     spec:
       containers:
       - name: backend
-        image: parcinfo/backend:latest
+        image: parcinfo-backend:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 8000
+          hostPort: 8000
         env:
         - name: DEBUG
           valueFrom:
             configMapKeyRef:
               name: parcinfo-config
               key: DEBUG
-        - name: DATABASE_URL
+        - name: DB_HOST
           valueFrom:
             configMapKeyRef:
               name: parcinfo-config
-              key: DATABASE_URL
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: DB_PASSWORD
         - name: SECRET_KEY
           valueFrom:
             configMapKeyRef:
@@ -67,15 +91,15 @@ spec:
           limits:
             memory: "2Gi"
             cpu: "1000m"
-        livenessProbe:
-          httpGet:
-            path: /health/
-            port: 8000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health/
-            port: 8000
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        # livenessProbe:
+        #   httpGet:
+        #     path: /health/
+        #     port: 8000
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 10
+        # readinessProbe:
+        #   httpGet:
+        #     path: /health/
+        #     port: 8000
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 5

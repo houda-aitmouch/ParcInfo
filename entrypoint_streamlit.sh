@@ -19,7 +19,6 @@ echo "DEBUG: ${DEBUG:-0}"
 echo "DB_HOST: ${DB_HOST:-host.docker.internal}"
 echo "DB_NAME: ${DB_NAME:-parcinfo_db}"
 echo "DB_USER: ${DB_USER:-Houda}"
-echo "ALLOWED_HOSTS: ${ALLOWED_HOSTS:-127.0.0.1,localhost,0.0.0.0}"
 
 # Exécuter les migrations
 echo "Exécution des migrations..."
@@ -29,6 +28,7 @@ python manage.py migrate --settings=ParcInfo.settings
 echo "Collecte des fichiers statiques..."
 python manage.py collectstatic --noinput --settings=ParcInfo.settings
 
-# Démarrer le serveur Django
-echo "Démarrage du serveur Django..."
-python manage.py runserver 0.0.0.0:8000 --settings=ParcInfo.settings
+# Démarrer Streamlit
+echo "Démarrage de Streamlit..."
+cd /app/dashboard_garantie
+streamlit run dashboard_garantie.py --server.port=8501 --server.address=0.0.0.0

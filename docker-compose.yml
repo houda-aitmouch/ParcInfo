@@ -1,32 +1,38 @@
 version: '3.8'
 
 services:
-  # Base de données PostgreSQL
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: parcinfo
-      POSTGRES_USER: parcinfo
-      POSTGRES_PASSWORD: parcinfo_password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    restart: unless-stopped
+  # Base de données PostgreSQL (désactivée - utilisation de la base locale)
+  # db:
+  #   image: pgvector/pgvector:pg15
+  #   environment:
+  #     POSTGRES_DB: parcinfo_db
+  #     POSTGRES_USER: Houda
+  #     POSTGRES_PASSWORD: "houda123"
+  #     POSTGRES_INITDB_ARGS: "--auth-host=trust --auth-local=trust"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #     - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+  #   ports:
+  #     - "5432:5432"
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U Houda -d parcinfo_db"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
 
   # Backend Django
   backend:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    environment:
-      - DEBUG=False
-      - DATABASE_URL=postgresql://parcinfo:parcinfo_password@db:5432/parcinfo
-      - SECRET_KEY=your-secret-key-here
+    env_file:
+      - env.docker
     ports:
       - "8000:8000"
-    depends_on:
-      - db
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
@@ -48,15 +54,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.chatbot
-    environment:
-      - DEBUG=False
-      - DATABASE_URL=postgresql://parcinfo:parcinfo_password@db:5432/parcinfo
-      - SECRET_KEY=your-secret-key-here
+    env_file:
+      - env.docker
     ports:
       - "8001:8001"
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
     depends_on:
-      - db
-      - backend
+      backend:
+        condition: service_started
     volumes:
       - ~/.cache/huggingface:/root/.cache/huggingface
     restart: unless-stopped
@@ -66,15 +73,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.streamlit
-    environment:
-      - DEBUG=False
-      - DATABASE_URL=postgresql://parcinfo:parcinfo_password@db:5432/parcinfo
-      - SECRET_KEY=your-secret-key-here
+    env_file:
+      - env.docker
     ports:
       - "8501:8501"
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
     depends_on:
-      - db
-      - backend
+      backend:
+        condition: service_started
     restart: unless-stopped
 
   # Nginx (reverse proxy)
@@ -93,6 +101,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  postgres_data:
+  # postgres_data:  # Désactivé - utilisation de la base locale
   static_volume:
   media_volume:

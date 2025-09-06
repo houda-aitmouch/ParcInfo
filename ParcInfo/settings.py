@@ -49,7 +49,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-m5semzag-n43pupk0jfsh!x2%v
 # Read DEBUG from environment (default False for Docker/prod-like runs)
 DEBUG = os.getenv('DEBUG', '0') in ['1', 'true', 'True']
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,0.0.0.0').split(',')
+ALLOWED_HOSTS = ['*'] if os.getenv('ALLOWED_HOSTS') == '*' else os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,0.0.0.0').split(',')
 AUTH_USER_MODEL = 'users.CustomUser'
 
 # Optional: CSRF trusted origins (comma-separated)
@@ -241,9 +241,12 @@ USE_TZ = True  # Enable timezone support
 
 
 # Authentication settings
-LOGIN_REDIRECT_URL = '/'  # Rediriger vers la page d'accueil (frontend React)
+LOGIN_REDIRECT_URL = '/redirect-user/'  # Rediriger vers la fonction de redirection des utilisateurs
 LOGIN_URL = '/accounts/login/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+# Admin settings
+ADMIN_LOGIN_URL = '/accounts/login/'
 
 # Utilisation du modèle User personnalisé
 AUTH_USER_MODEL = 'users.CustomUser'  # Utilise le modèle CustomUser

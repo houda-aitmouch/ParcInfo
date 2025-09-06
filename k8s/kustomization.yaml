@@ -6,7 +6,7 @@ namespace: parcinfo
 resources:
 - namespace.yaml
 - configmap.yaml
-- postgres.yaml
+# - postgres.yaml  # Désactivé - utilisation de la base locale
 - backend.yaml
 - frontend.yaml
 - chatbot.yaml

@@ -131,7 +131,7 @@
             <!-- Actions -->
             <div class="space-y-4">
                 <!-- Bouton de reconnexion -->
-                <a href="{% url 'login' %}" 
+                <a href="/accounts/login/" 
                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl transform hover:scale-105 animate-slide-up"
                    style="animation-delay: 0.5s;">
                     <i class="fas fa-sign-in-alt"></i>
@@ -163,7 +163,7 @@
     <script>
         // Redirection automatique après 30 secondes (optionnel)
         // setTimeout(() => {
-        //     window.location.href = "{% url 'login' %}";
+        //     window.location.href = "/accounts/login/";
         // }, 30000);
     </script>
 </body>

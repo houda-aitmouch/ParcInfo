@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     gettext \
     curl \
+    gcc \
+    g++ \
+    make \
     && rm -rf /var/lib/apt/lists/*
 
 # Création du répertoire de travail
@@ -29,8 +32,11 @@ COPY . /app/
 # Créer les répertoires nécessaires
 RUN mkdir -p /app/staticfiles /app/media
 
-# Collecte des fichiers statiques
-RUN python manage.py collectstatic --noinput --settings=ParcInfo.settings
+# Copie du fichier d'environnement Docker
+COPY env.docker /app/.env
+
+# Collecte des fichiers statiques (sera fait dans entrypoint.sh)
+# RUN python manage.py collectstatic --noinput --settings=ParcInfo.settings
 
 # Exposition du port
 EXPOSE 8000

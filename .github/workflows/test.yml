@@ -29,12 +29,33 @@ jobs:
     
     - name: Test Django configuration
       run: |
-        python manage.py check --settings=ParcInfo.settings
+        python manage.py check --settings=ParcInfo.settings_test
+    
+    - name: Test Django migrations
+      run: |
+        python manage.py makemigrations --dry-run --settings=ParcInfo.settings_test
     
     - name: Test basic imports
       run: |
         python test_basic.py
     
+    - name: Test GitHub Actions specific
+      run: |
+        python test_github_actions.py
+    
     - name: Test Docker Compose
       run: |
         docker-compose config
+    
+    - name: Test Kubernetes configurations
+      run: |
+        # Vérifier que les fichiers Kubernetes sont valides
+        if command -v kubectl &> /dev/null; then
+          echo "kubectl disponible, test des configurations..."
+        else
+          echo "kubectl non disponible, test des fichiers YAML..."
+        fi
+        
+        # Vérifier la syntaxe des fichiers YAML
+        python -c "import yaml; [yaml.safe_load(open(f)) for f in ['k8s/backend.yaml', 'k8s/streamlit.yaml', 'k8s/frontend.yaml', 'k8s/chatbot.yaml']]"
+        echo "✅ Tous les fichiers YAML Kubernetes sont valides"

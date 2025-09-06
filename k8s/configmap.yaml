@@ -5,7 +5,15 @@ metadata:
   namespace: parcinfo
 data:
   DEBUG: "False"
-  DATABASE_URL: "postgresql://parcinfo:parcinfo_password@postgres-service:5432/parcinfo"
-  SECRET_KEY: "your-secret-key-here-change-in-production"
-  ALLOWED_HOSTS: "localhost,127.0.0.1,parcinfo.local"
-  CSRF_TRUSTED_ORIGINS: "http://localhost,http://127.0.0.1,http://parcinfo.local"
+  # Configuration de la base de données PostgreSQL (locale)
+  DB_HOST: "host.docker.internal"
+  DB_PORT: "5432"
+  DB_NAME: "parcinfo_db"
+  DB_USER: "Houda"
+  DB_PASSWORD: ""
+  # Configuration Django
+  SECRET_KEY: "django-insecure-production-key-change-this-in-production-environment"
+  ALLOWED_HOSTS: "*"
+  CSRF_TRUSTED_ORIGINS: "http://localhost,http://127.0.0.1,http://parcinfo.local,https://parcinfo.local"
+  DJANGO_SETTINGS_MODULE: "ParcInfo.settings"
+  PYTHONPATH: "/app"

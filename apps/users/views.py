@@ -1102,8 +1102,13 @@ def dashboard_garantie(request):
         return redirect('users:profil')
     
     try:
-        # Essayer d'abord l'URL interne Docker, puis localhost
-        candidate_bases = ['http://streamlit:8501', 'http://localhost:8501']
+        # Essayer d'abord l'URL Kubernetes, puis Docker, puis localhost
+        candidate_bases = [
+            'http://streamlit-service.parcinfo.svc.cluster.local:8501',  # Kubernetes
+            'http://streamlit:8501',  # Docker
+            'http://localhost:8501',  # Local
+            'http://localhost:30085'  # Kubernetes NodePort
+        ]
 
         for base_url in candidate_bases:
             try:
@@ -1116,7 +1121,7 @@ def dashboard_garantie(request):
                 import urllib.parse
                 encoded_username = urllib.parse.quote(username)
                 # Utiliser l'URL publique pour la redirection
-                public_url = 'http://localhost:8501'
+                public_url = 'http://localhost:30085'  # Kubernetes NodePort
                 streamlit_url = f"{public_url}/?username={encoded_username}"
                 logger.info(
                     f"Redirection vers Streamlit {public_url} avec utilisateur: {username} (encodé: {encoded_username})"

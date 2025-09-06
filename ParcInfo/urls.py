@@ -11,15 +11,14 @@ from django.http import JsonResponse
 def health(request):
     return JsonResponse({"status": "ok"})
 
-def redirect_admin_login(request):
-    """Redirige /admin/login/ vers /login/login/"""
-    return redirect('login')
+def login_login_redirect(request):
+    """Redirige /login/login/ vers /accounts/login/"""
+    return redirect('/accounts/login/')
 
 urlpatterns = [
-    path('admin/login/', redirect_admin_login, name='admin_login_redirect'),
+    path('login/login/', login_login_redirect, name='login_login_redirect'),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('login/', include('django.contrib.auth.urls')),
     path('', include('apps.users.urls')),
     path('health', health),
 

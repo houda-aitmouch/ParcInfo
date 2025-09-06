@@ -29,6 +29,6 @@ python manage.py migrate --settings=ParcInfo.settings
 echo "Collecte des fichiers statiques..."
 python manage.py collectstatic --noinput --settings=ParcInfo.settings
 
-# Démarrer le serveur Django
-echo "Démarrage du serveur Django..."
-python manage.py runserver 0.0.0.0:8000 --settings=ParcInfo.settings
+# Démarrer le serveur Django pour le chatbot
+echo "Démarrage du serveur Django pour le chatbot..."
+python manage.py runserver 0.0.0.0:8001 --settings=ParcInfo.settings

@@ -181,7 +181,7 @@
                     {% endif %}
 
                     <!-- Formulaire avec design moderne -->
-                    <form method="post" action="{% url 'login' %}" class="space-y-6 relative z-10">
+                    <form method="post" action="/accounts/login/" class="space-y-6 relative z-10">
                         {% csrf_token %}
                         {% if next %}
                         <input type="hidden" name="next" value="{{ next }}">

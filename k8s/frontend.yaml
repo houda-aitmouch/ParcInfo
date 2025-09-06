@@ -20,7 +20,7 @@ metadata:
   labels:
     app: frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: frontend
@@ -31,7 +31,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: parcinfo/frontend:latest
+        image: parcinfo-frontend:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 3000
         resources:

@@ -13,8 +13,32 @@ warnings.filterwarnings('ignore')
 
 # Chargement des styles CSS personnalisés
 def load_custom_css():
-    with open('custom_styles.css', 'r') as f:
-        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    import os
+    # Essayer plusieurs chemins possibles pour le fichier CSS
+    css_paths = [
+        'custom_styles.css',  # Chemin relatif
+        'dashboard_garantie/custom_styles.css',  # Chemin depuis /app
+        '/app/dashboard_garantie/custom_styles.css',  # Chemin absolu
+        os.path.join(os.path.dirname(__file__), 'custom_styles.css')  # Chemin relatif au script
+    ]
+    
+    for css_path in css_paths:
+        try:
+            with open(css_path, 'r') as f:
+                st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+                print(f"✅ CSS chargé depuis: {css_path}")
+                return
+        except FileNotFoundError:
+            continue
+    
+    # Si aucun fichier CSS n'est trouvé, utiliser des styles par défaut
+    print("⚠️ Fichier CSS personnalisé non trouvé. Utilisation des styles par défaut.")
+    st.markdown("""
+    <style>
+    .main-header { color: #2563eb; font-weight: bold; }
+    .metric-card { background: #f8fafc; padding: 1rem; border-radius: 0.5rem; }
+    </style>
+    """, unsafe_allow_html=True)
 
 # Configuration Django sera faite dans la fonction main()
 
