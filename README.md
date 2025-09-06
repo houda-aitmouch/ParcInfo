@@ -44,22 +44,16 @@
 
 ### Solution Hybride Kubernetes + Docker
 
-┌─────────────────────────────────────────────────────────────┐
-│                    SOLUTION HYBRIDE                        │
-├─────────────────────────────────────────────────────────────┤
-│  KUBERNETES (Services principaux)                          │
-│  ├── Backend Django    : Port 8000                         │
-│  ├── Frontend React    : Port 3000                         │
-│  └── Streamlit Dashboard: Port 8501                        │
-│                                                             │
-│  DOCKER (Chatbot stable)                                   │
-│  └── Chatbot AI       : Port 8001                          │
-│                                                             │
-│  BASE DE DONNÉES                                           │
-│  └── PostgreSQL       : Port 5432 (partagée)              │
-└─────────────────────────────────────────────────────────────┘
-
-
+KUBERNETES (Services principaux)                          
+│  ├── Backend Django    : Port 8000                         
+│  ├── Frontend React    : Port 3000                         
+│  └── Streamlit Dashboard: Port 8501                        
+│                                                             
+│  DOCKER (Chatbot stable)                                   
+│  └── Chatbot AI       : Port 8001                          
+│                                                         
+│  BASE DE DONNÉES                                           
+│  └── PostgreSQL       : Port 5432 (partagée)   
 
 ##  Métriques et Performance
 
