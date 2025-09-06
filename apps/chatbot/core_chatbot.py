@@ -11002,7 +11002,7 @@ Bureautique : {etage1_office.count()} matériels
             
             for user in users:
                 # Statut de l'utilisateur
-                status = "✅ Actif" if user.is_active else "❌ Inactif"
+                status = "Actif" if user.is_active else "Inactif"
                 
                 # Groupes de l'utilisateur
                 groups = user.groups.all()
@@ -11012,17 +11012,17 @@ Bureautique : {etage1_office.count()} matériels
                 # Date de création
                 created_date = user.date_joined.strftime('%d/%m/%Y') if user.date_joined else "N/A"
                 
-                response += f"- **{user.username}** — {status}\n"
-                response += f"  📧 Email: {user.email}\n"
-                response += f"  👥 Rôles: {role_display}\n"
-                response += f"  📅 Créé le: {created_date}\n\n"
+                response += f"- {user.username} — {status}\n"
+                response += f"  Email: {user.email}\n"
+                response += f"  Rôles: {role_display}\n"
+                response += f"  Créé le: {created_date}\n\n"
             
             # Statistiques
             total_users = users.count()
             active_users = users.filter(is_active=True).count()
             inactive_users = total_users - active_users
             
-            response += f"\n**Résumé :**\n"
+            response += f"\nRésumé :\n"
             response += f"- Total: {total_users} utilisateurs\n"
             response += f"- Actifs: {active_users}\n"
             response += f"- Inactifs: {inactive_users}\n\n"
