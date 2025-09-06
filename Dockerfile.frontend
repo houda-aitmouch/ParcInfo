@@ -28,6 +28,9 @@ RUN mkdir -p /usr/share/nginx/html/static /usr/share/nginx/html/media
 # Copier les fichiers statiques Django
 COPY static/ /usr/share/nginx/html/static/
 
+# Copier les fichiers média Django (signatures, etc.)
+COPY media/ /usr/share/nginx/html/media/
+
 # Copier les fichiers construits React depuis le stage builder
 COPY --from=builder /app/../static/react/ /usr/share/nginx/html/static/react/
 

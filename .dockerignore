@@ -75,7 +75,6 @@ test-*.sh
 dist/
 build/
 staticfiles/
-media/
 
 # Fichiers de sauvegarde
 backup-important-files/

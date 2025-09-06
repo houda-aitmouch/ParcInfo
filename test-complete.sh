@@ -102,7 +102,7 @@ fi
 
 # Test 10: Test des fichiers statiques
 print_info "Test 10: Test des fichiers statiques..."
-if curl -s -o /dev/null -w "%{http_code}" http://localhost:80/static/admin/css/base.css | grep -q "200"; then
+if curl -s -o /dev/null -w "%{http_code}" http://localhost:80/static/css/login.css | grep -q "200"; then
     print_success "Fichiers statiques Django accessibles"
 else
     print_error "Fichiers statiques Django inaccessibles"
