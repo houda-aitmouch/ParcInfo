@@ -9,7 +9,6 @@
 ### 🔧 Gestion des Équipements
 - **Matériel Informatique** : Ordinateurs, serveurs, périphériques
 - **Matériel de Bureau** : Mobilier, accessoires
-- **Fournitures** : Consommables, accessoires
 - **Suivi d'Inventaire** : Codes d'inventaire, statuts, affectations
 
 ### 📝 Gestion des Demandes
@@ -59,16 +58,6 @@ ParcInfo/
 ```
 frontend/
 ├── components/                # Composants React
-│   ├── ui/                    # Composants UI réutilisables
-│   ├── Dashboard.tsx          # Tableau de bord
-│   ├── Demandes.tsx           # Gestion des demandes
-│   ├── CommandesIT.tsx        # Commandes informatiques
-│   ├── CommandesBureau.tsx    # Commandes bureau
-│   ├── MaterielsIT.tsx        # Matériel informatique
-│   ├── MaterielsBureau.tsx    # Matériel de bureau
-│   ├── Fournisseurs.tsx       # Gestion fournisseurs
-│   ├── Livraisons.tsx         # Suivi livraisons
-│   └── Chatbot.tsx            # Assistant IA
 ├── contexts/                  # Contextes React
 ├── styles/                    # Styles CSS
 └── assets/                    # Ressources
@@ -80,9 +69,9 @@ frontend/
 - Python 3.8+
 - Node.js 16+
 - PostgreSQL (recommandé) ou SQLite
-- Git
+- Docker (optionnel)
 
-### Installation Backend
+### Installation Rapide
 
 1. **Cloner le projet**
 ```bash
@@ -90,54 +79,84 @@ git clone https://github.com/votre-repo/parcinfo.git
 cd parcinfo
 ```
 
-2. **Créer l'environnement virtuel**
+2. **Installation Backend**
 ```bash
-python -m venv rag_env
-source rag_env/bin/activate  # Linux/Mac
+# Créer l'environnement virtuel
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
 # ou
-rag_env\Scripts\activate     # Windows
-```
+venv\Scripts\activate     # Windows
 
-3. **Installer les dépendances**
-```bash
+# Installer les dépendances
 pip install -r requirements.txt
-```
 
-4. **Configuration de la base de données**
-```bash
+# Configuration de la base de données
 python manage.py makemigrations
 python manage.py migrate
-```
 
-5. **Créer un super utilisateur**
-```bash
+# Créer un super utilisateur
 python manage.py createsuperuser
-```
 
-6. **Lancer le serveur de développement**
-```bash
+# Lancer le serveur
 python manage.py runserver
 ```
 
-### Installation Frontend
-
-1. **Installer les dépendances**
+3. **Installation Frontend**
 ```bash
 cd frontend
 npm install
-```
-
-2. **Lancer le serveur de développement**
-```bash
 npm run dev
 ```
+
+## 🐳 Déploiement Docker
+
+### Images Docker Disponibles
+- `parcinfo-backend:latest` (6.67 GB) - Backend Django complet
+- `parcinfo-chatbot:latest` (6.67 GB) - Chatbot IA intégré
+- `parcinfo-frontend:latest` (81.41 MB) - Frontend React optimisé
+- `postgres:15` (650.26 MB) - Base de données PostgreSQL
+- `nginx:alpine` (80.2 MB) - Serveur web Nginx
+
+### Démarrage Rapide
+```bash
+# Démarrer tous les services
+docker-compose up -d
+
+# Voir les logs
+docker-compose logs -f
+
+# Arrêter les services
+docker-compose down
+```
+
+### Scripts Utiles
+```bash
+# Script de déploiement
+./deploy.sh
+
+# Sauvegarde des images
+./save-images.sh
+
+# Restauration des images
+./restore-images.sh
+```
+
+## ☁️ Déploiement Cloud
+
+### Azure (Recommandé)
+- Guide complet : `AZURE_DEPLOYMENT.md`
+- Coût estimé : ~$20-30/mois
+- Crédit Azure for Students : $100
+
+### Railway
+- Guide : `RAILWAY_OPTIMIZED_DEPLOYMENT.md`
+- Gratuit : 5$ de crédit/mois
+- Image optimisée < 4GB
 
 ## 🔧 Configuration
 
 ### Variables d'Environnement
-
-Créer un fichier `.env` à la racine du projet :
-
+Créer un fichier `.env` :
 ```env
 # Django
 SECRET_KEY=votre-secret-key
@@ -158,280 +177,91 @@ EMAIL_HOST_PASSWORD=votre-mot-de-passe
 OPENAI_API_KEY=votre-clé-api-openai
 ```
 
-### Configuration du Chatbot
+## 🌐 URLs d'Accès
 
-1. **Installer les dépendances RAG**
+### Local
+- **Application** : http://localhost:8000
+- **Admin Django** : http://localhost:8000/admin/
+- **Frontend** : http://localhost:3000
+
+### Production
+- **Application** : https://votre-domaine.com
+- **Admin Django** : https://votre-domaine.com/admin/
+
+## 🔐 Identifiants par Défaut
+
+### Super Utilisateur Django
+- **Username** : admin
+- **Email** : admin@parcinfo.com
+- **Password** : admin123
+
+## 📊 Monitoring
+
+### Logs
 ```bash
-pip install -r requirements_chatbot.txt
+# Logs en temps réel
+docker-compose logs -f
+
+# Logs spécifiques
+docker-compose logs -f backend
+docker-compose logs -f frontend
 ```
 
-2. **Configurer l'index vectoriel**
+### Statut des Services
 ```bash
-python manage.py populate_rag_index
+# Liste des conteneurs
+docker-compose ps
+
+# Ressources utilisées
+docker stats
 ```
 
-## 📊 Structure des Données
-
-### Modèles Principaux
-
-#### Utilisateurs
-- **CustomUser** : Utilisateurs avec rôles et permissions
-- **NotificationDemande** : Notifications pour les demandes
-
-#### Équipements
-- **MaterielInformatique** : Matériel informatique
-- **MaterielBureau** : Matériel de bureau
-- **Fourniture** : Fournitures et consommables
-
-#### Demandes et Commandes
-- **DemandeEquipement** : Demandes d'équipement
-- **CommandeInformatique** : Commandes informatiques
-- **CommandeBureau** : Commandes bureau
-- **LigneCommande** : Lignes de commande
-
-#### Fournisseurs et Livraisons
-- **Fournisseur** : Fournisseurs
-- **Livraison** : Livraisons
-- **LigneLivraison** : Lignes de livraison
-
-## 🔐 Système de Permissions
-
-### Rôles Utilisateurs
-
-1. **Employé**
-   - Créer des demandes d'équipement
-   - Consulter ses équipements affectés
-   - Signer des décharges
-   - Recevoir des notifications
-
-2. **Gestionnaire Informatique**
-   - Gérer les demandes informatiques
-   - Approuver/rejeter les demandes
-   - Gérer le matériel informatique
-   - Suivre les commandes informatiques
-
-3. **Gestionnaire Bureau**
-   - Gérer les demandes bureau
-   - Approuver/rejeter les demandes
-   - Gérer le matériel de bureau
-   - Suivre les commandes bureau
-
-4. **Super Admin**
-   - Accès complet à toutes les fonctionnalités
-   - Gestion des utilisateurs
-   - Configuration système
-
-## 🔔 Système de Notifications
-
-### Fonctionnalités
-- **Notifications Automatiques** : Créées lors des changements de statut
-- **Messages Contextuels** : Détails spécifiques selon le type de demande
-- **Interface Optimisée** : Affichage propre sans duplication
-- **Filtrage par Rôle** : Seuls les employés reçoivent des notifications
-
-### Exemples de Messages
-- **Approbation** : "🎉 Votre demande de matériel informatique (Ordinateur portable) a été approuvée ! Veuillez signer la décharge pour recevoir l'équipement."
-- **Rejet** : "❌ Votre demande de matériel informatique a été rejetée. Contactez votre responsable pour plus de détails."
-
-## 🤖 Chatbot IA
-
-### Fonctionnalités
-- **Assistant Intelligent** : Réponses automatiques aux questions
-- **Base de Connaissances** : Documentation intégrée
-- **Recherche Sémantique** : RAG pour des réponses précises
-- **Interface Chat** : Interface utilisateur intuitive
-
-### Configuration
-```bash
-# Installer les dépendances IA
-pip install -r requirements_chatbot.txt
-
-# Configurer l'index vectoriel
-python manage.py populate_rag_index
-
-# Lancer le chatbot
-python manage.py runserver
-```
-
-## 📱 Interface Utilisateur
-
-### Technologies Frontend
-- **React 18** : Interface utilisateur moderne
-- **TypeScript** : Typage statique
-- **Tailwind CSS** : Styles utilitaires
-- **Alpine.js** : Interactivité légère
-- **Vite** : Build tool rapide
-
-### Composants Principaux
-- **Dashboard** : Vue d'ensemble personnalisée
-- **Demandes** : Gestion des demandes d'équipement
-- **Commandes** : Suivi des commandes
-- **Matériels** : Gestion des équipements
-- **Fournisseurs** : Catalogue des fournisseurs
-- **Chatbot** : Assistant IA intégré
-
-## 🧪 Tests
-
-### Tests Backend
-```bash
-# Tests unitaires
-python manage.py test
-
-# Tests spécifiques
-python manage.py test apps.demande_equipement
-python manage.py test apps.users
-```
-
-### Tests Frontend
-```bash
-cd frontend
-npm test
-```
-
-## 📈 Déploiement
-
-### Production avec Docker
-
-1. **Créer Dockerfile**
-```dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-EXPOSE 8000
-CMD ["gunicorn", "ParcInfo.wsgi:application"]
-```
-
-2. **Docker Compose**
-```yaml
-version: '3.8'
-services:
-  web:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://user:password@db/parcinfo
-    depends_on:
-      - db
-  db:
-    image: postgres:13
-    environment:
-      - POSTGRES_DB=parcinfo
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-```
-
-### Déploiement Cloud
-
-#### Heroku
-```bash
-# Installer Heroku CLI
-heroku create parcinfo-app
-heroku config:set SECRET_KEY=votre-secret-key
-git push heroku main
-```
-
-#### AWS
-- **EC2** : Serveur d'application
-- **RDS** : Base de données PostgreSQL
-- **S3** : Stockage des fichiers
-- **CloudFront** : CDN pour les assets
-
-## 🔧 Maintenance
+## 🛠️ Maintenance
 
 ### Sauvegarde
 ```bash
-# Sauvegarde de la base de données
-python manage.py dumpdata > backup.json
+# Sauvegarder la base de données
+docker-compose exec db pg_dump -U parcinfo_user parcinfo > backup.sql
 
-# Restauration
-python manage.py loaddata backup.json
+# Restaurer
+docker-compose exec -T db psql -U parcinfo_user parcinfo < backup.sql
 ```
 
 ### Mise à Jour
 ```bash
-# Mettre à jour les dépendances
-pip install -r requirements.txt --upgrade
-
-# Appliquer les migrations
-python manage.py migrate
+# Reconstruire les images
+docker-compose build --no-cache
 
 # Redémarrer les services
-sudo systemctl restart parcinfo
+docker-compose up -d --force-recreate
 ```
 
-### Monitoring
-- **Logs** : Django logging configuré
-- **Métriques** : Performance monitoring
-- **Alertes** : Notifications d'erreurs
+## 🎯 Pour votre Soutenance
 
-## 📚 Documentation
+### Démonstration Live
+1. **Démarrage rapide** : `docker-compose up -d`
+2. **Accès à l'application** : http://localhost:8000
+3. **Fonctionnalités** : Dashboard, demandes, chatbot
+4. **Admin** : http://localhost:8000/admin/
 
-### Guides Utilisateur
-- [Guide d'Utilisation](docs/GUIDE_UTILISATEUR.md)
-- [Guide Administrateur](docs/GUIDE_ADMINISTRATEUR.md)
-- [Guide Technique](docs/GUIDE_TECHNIQUE.md)
-
-### API Documentation
-- [API REST](docs/API.md)
-- [Endpoints](docs/ENDPOINTS.md)
-- [Authentification](docs/AUTH.md)
-
-### Développement
-- [Architecture](docs/ARCHITECTURE.md)
-- [Contributing](docs/CONTRIBUTING.md)
-- [Changelog](docs/CHANGELOG.md)
-
-### Diagrammes Gantt (Mermaid)
-
-Les plans Gantt du projet se trouvent dans `gantt_parcinfo.mmd` (version courte) et `gantt_parcinfo_detailed.mmd` (version détaillée inspirée de votre exemple).
-
-Visualisation rapide:
-
-```bash
-# Option 1: Extension VS Code/Cursor "Markdown Preview Mermaid Support"
-# Ouvrir le fichier .mmd et afficher l'aperçu
-
-# Option 2: Exporter en PNG/SVG via mermaid-cli
-npm i -g @mermaid-js/mermaid-cli
-mmdc -i gantt_parcinfo_detailed.mmd -o gantt_parcinfo_detailed.png -t default
-```
-
-Astuce: modifiez les dates/durées directement dans le fichier `.mmd` (format `YYYY-MM-DD`, durées `Xd` ou `Xw`).
-
-## 🤝 Contribution
-
-### Comment Contribuer
-1. Fork le projet
-2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
-
-### Standards de Code
-- **Python** : PEP 8, Black, Flake8
-- **JavaScript** : ESLint, Prettier
-- **Tests** : Coverage > 80%
-- **Documentation** : Docstrings, README
+### Points Techniques
+- ✅ **Architecture Docker** : Microservices
+- ✅ **Base de données** : PostgreSQL
+- ✅ **Frontend moderne** : React + TypeScript
+- ✅ **IA intégrée** : Chatbot intelligent
+- ✅ **Déploiement cloud** : Azure/Railway ready
+- ✅ **Monitoring** : Logs et métriques
 
 ## 📄 Licence
 
-Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+Ce projet est sous licence MIT.
 
-## 👥 Équipe
-
-- **Développeur Principal** : [Votre Nom]
-- **Designer UI/UX** : [Nom du Designer]
-- **DevOps** : [Nom DevOps]
-
-## 📞 Support
+## 👥 Support
 
 - **Email** : support@parcinfo.com
-- **Documentation** : [docs.parcinfo.com](https://docs.parcinfo.com)
-- **Issues** : [GitHub Issues](https://github.com/votre-repo/parcinfo/issues)
+- **Documentation** : Voir les fichiers .md du projet
+- **Issues** : GitHub Issues
 
 ---
 
-**ParcInfo** - Gestion intelligente de votre parc informatique 🚀
+**🎉 ParcInfo - Gestion intelligente de votre parc informatique !**
