@@ -1,0 +1,62 @@
+# Dockerfile Railway EXTREME-optimisé - Image < 4GB
+FROM python:3.11-slim
+
+# Variables d'environnement
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PIP_NO_CACHE_DIR=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Installation des dépendances système minimales
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    gettext \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean \
+    && apt-get autoremove -y \
+    && apt-get autoclean
+
+# Répertoire de travail
+WORKDIR /app
+
+# Copie des requirements
+COPY requirements.txt /app/
+
+# Installation des dépendances Python (EXTREME-optimisé)
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir \
+    sentence-transformers \
+    transformers \
+    torch --index-url https://download.pytorch.org/whl/cpu \
+    numpy \
+    scikit-learn && \
+    pip uninstall -y pip setuptools wheel && \
+    rm -rf /root/.cache/pip /root/.cache/pip-tools
+
+# Copie du code source
+COPY . /app/
+
+# Création des répertoires nécessaires
+RUN mkdir -p /app/staticfiles /app/media
+
+# Collecte des fichiers statiques
+RUN python manage.py collectstatic --noinput --settings=ParcInfo.settings
+
+# Script de démarrage EXTREME-optimisé
+COPY railway-start-extreme-optimized.sh /app/railway-start-extreme-optimized.sh
+RUN chmod +x /app/railway-start-extreme-optimized.sh
+
+# Nettoyage EXTREME
+RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/.cache/* \
+    /usr/share/doc/* /usr/share/man/* /usr/share/locale/* \
+    /var/log/* /var/cache/* /usr/lib/python3.11/__pycache__/* \
+    /usr/local/lib/python3.11/dist-packages/*/__pycache__/*
+
+# Exposition du port
+EXPOSE 8000
+
+# Commande de démarrage
+CMD ["/app/railway-start-extreme-optimized.sh"]

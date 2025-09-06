@@ -1,2 +1,0 @@
-Requirement already satisfied: pgvector in ./rag_env/lib/python3.13/site-packages (0.4.1)
-Requirement already satisfied: numpy in ./rag_env/lib/python3.13/site-packages (from pgvector) (2.3.2)

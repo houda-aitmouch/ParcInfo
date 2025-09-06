@@ -1,3 +1,0 @@
-Requirement already satisfied: reportlab in ./rag_env/lib/python3.13/site-packages (4.4.3)
-Requirement already satisfied: pillow>=9.0.0 in ./rag_env/lib/python3.13/site-packages (from reportlab) (11.3.0)
-Requirement already satisfied: charset-normalizer in ./rag_env/lib/python3.13/site-packages (from reportlab) (3.4.3)

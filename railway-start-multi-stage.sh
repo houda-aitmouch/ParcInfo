@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Script de démarrage Railway
-echo "🚀 Démarrage de ParcInfo sur Railway..."
+# Script de démarrage Railway multi-stage
+echo "🚀 Démarrage de ParcInfo sur Railway (multi-stage)..."
 
 # Attendre que la base de données soit prête
 echo "⏳ Attente de la base de données..."
@@ -15,10 +15,6 @@ echo "✅ Base de données connectée"
 echo "🔄 Exécution des migrations..."
 python manage.py migrate --settings=ParcInfo.settings
 
-# Collecte des fichiers statiques
-echo "📁 Collecte des fichiers statiques..."
-python manage.py collectstatic --noinput --settings=ParcInfo.settings
-
 # Création du superutilisateur si nécessaire
 echo "👤 Vérification du superutilisateur..."
 python manage.py shell --settings=ParcInfo.settings << EOF
@@ -31,12 +27,18 @@ else:
     print('Superutilisateur admin existe déjà')
 EOF
 
-# Démarrage de Nginx en arrière-plan
-echo "🌐 Démarrage de Nginx..."
-nginx -g "daemon off;" &
-
-# Démarrage de Django
-echo "🐍 Démarrage de Django..."
-python manage.py runserver 0.0.0.0:8001 --settings=ParcInfo.settings
+# Démarrage de Django avec Gunicorn
+echo "🐍 Démarrage de Django avec Gunicorn..."
+gunicorn ParcInfo.wsgi:application \
+    --bind 0.0.0.0:8000 \
+    --workers 1 \
+    --worker-class sync \
+    --worker-connections 1000 \
+    --max-requests 1000 \
+    --max-requests-jitter 100 \
+    --timeout 30 \
+    --keep-alive 2 \
+    --preload \
+    --log-level warning
 
 echo "✅ ParcInfo démarré avec succès sur Railway!"
