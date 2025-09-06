@@ -15,16 +15,15 @@ python manage.py migrate --settings=ParcInfo.settings
 echo "Collecte des fichiers statiques..."
 python manage.py collectstatic --noinput --settings=ParcInfo.settings
 
-# Créer un superutilisateur si nécessaire
-echo "Création du superutilisateur..."
+# Vérifier l'existence du superutilisateur
+echo "Vérification du superutilisateur..."
 python manage.py shell --settings=ParcInfo.settings << EOF
 from django.contrib.auth import get_user_model
 User = get_user_model()
-if not User.objects.filter(username='admin').exists():
-    User.objects.create_superuser('admin', 'admin@parcinfo.com', 'admin123')
-    print('Superutilisateur créé: admin/admin123')
+if User.objects.filter(username='admin').exists():
+    print('Superutilisateur admin existe déjà')
 else:
-    print('Superutilisateur existe déjà')
+    print('Aucun superutilisateur trouvé - veuillez en créer un manuellement')
 EOF
 
 # Démarrer le serveur Django
