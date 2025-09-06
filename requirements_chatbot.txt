@@ -1,0 +1,44 @@
+# Chatbot-specific requirements for ParcInfo
+# These are additional dependencies specifically for the chatbot functionality
+
+# Core AI/ML libraries
+sentence-transformers>=2.2.2,<3.0.0
+transformers>=4.40.2,<5.0.0
+huggingface-hub>=0.19.4,<1.0.0
+tokenizers>=0.19.1,<1.0.0
+safetensors>=0.5.0
+torch>=2.3.0,<3.0.0
+torchvision>=0.18.0,<1.0.0
+torchaudio>=2.3.0,<3.0.0
+
+# Vector databases and embeddings
+chromadb==0.4.22
+faiss-cpu==1.7.4
+pgvector>=0.4.0
+
+# LangChain ecosystem
+langchain==0.1.0
+langchain-community==0.0.10
+langchain-core==0.1.10
+llama-cpp-python==0.2.23
+
+# Text processing and NLP
+nltk>=3.9.1,<4.0.0
+sentencepiece>=0.2.1,<1.0.0
+rapidfuzz>=3.13.0,<4.0.0
+scikit-learn>=1.6.0,<2.0.0
+scipy>=1.15.0,<2.0.0
+numpy>=2.0.0,<3.0.0
+
+# Data processing
+pandas>=2.2.0
+python-dateutil>=2.9.0
+
+# Utilities
+tqdm>=4.67.0
+accelerate==0.24.1
+
+# Testing for chatbot
+pytest>=7.0.0
+pytest-django>=4.5.0
+pytest-cov>=4.0.0
