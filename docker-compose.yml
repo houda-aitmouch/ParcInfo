@@ -61,6 +61,22 @@ services:
       - ~/.cache/huggingface:/root/.cache/huggingface
     restart: unless-stopped
 
+  # Service Streamlit Dashboard
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    environment:
+      - DEBUG=False
+      - DATABASE_URL=postgresql://parcinfo:parcinfo_password@db:5432/parcinfo
+      - SECRET_KEY=your-secret-key-here
+    ports:
+      - "8501:8501"
+    depends_on:
+      - db
+      - backend
+    restart: unless-stopped
+
   # Nginx (reverse proxy)
   nginx:
     image: nginx:alpine

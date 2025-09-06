@@ -72,20 +72,86 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const foundUser = mockUsers.find(u => u.username === username);
-    if (foundUser && password === 'admin123') {
-      setUser(foundUser);
-      return true;
+    try {
+      // Utiliser la nouvelle API de login
+      const formData = new FormData();
+      formData.append('username', username);
+      formData.append('password', password);
+
+      const response = await fetch('/api/login/', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Définir directement l'utilisateur avec les données reçues
+          setUser({
+            id: data.user.id.toString(),
+            username: data.user.username,
+            email: data.user.email,
+            name: `${data.user.first_name} ${data.user.last_name}`.trim() || data.user.username,
+            role: data.user.role as UserRole,
+            department: data.user.groups?.[0] || 'Service'
+          });
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error('Erreur de connexion:', error);
+      return false;
     }
-    return false;
   };
 
-  const logout = () => {
-    setUser(null);
+  const fetchUserInfo = async () => {
+    try {
+      const response = await fetch('/api/user-info/', {
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        const userData = await response.json();
+        setUser({
+          id: userData.id.toString(),
+          username: userData.username,
+          email: userData.email,
+          name: `${userData.first_name} ${userData.last_name}`.trim() || userData.username,
+          role: userData.role as UserRole,
+          department: userData.groups?.[0] || 'Service'
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des informations utilisateur:', error);
+    }
   };
+
+  const logout = async () => {
+    try {
+      await fetch('/accounts/logout/', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    } finally {
+      setUser(null);
+    }
+  };
+
+  // Fonction pour récupérer le token CSRF
+  const getCsrfToken = (): string => {
+    const cookies = document.cookie.split(';');
+    const csrfCookie = cookies.find(cookie => cookie.trim().startsWith('csrftoken='));
+    return csrfCookie ? csrfCookie.split('=')[1] : '';
+  };
+
+  // Vérifier l'authentification au chargement de la page
+  React.useEffect(() => {
+    fetchUserInfo();
+  }, []);
 
   const value: AuthContextType = {
     user,

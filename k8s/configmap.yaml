@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: parcinfo-config
+  namespace: parcinfo
+data:
+  DEBUG: "False"
+  DATABASE_URL: "postgresql://parcinfo:parcinfo_password@postgres-service:5432/parcinfo"
+  SECRET_KEY: "your-secret-key-here-change-in-production"
+  ALLOWED_HOSTS: "localhost,127.0.0.1,parcinfo.local"
+  CSRF_TRUSTED_ORIGINS: "http://localhost,http://127.0.0.1,http://parcinfo.local"

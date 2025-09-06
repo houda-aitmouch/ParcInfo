@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: parcinfo
+  labels:
+    app: backend
+spec:
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    app: backend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: parcinfo
+  labels:
+    app: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: parcinfo/backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: DEBUG
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: DATABASE_URL
+        - name: SECRET_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: SECRET_KEY
+        - name: ALLOWED_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: ALLOWED_HOSTS
+        - name: CSRF_TRUSTED_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: CSRF_TRUSTED_ORIGINS
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health/
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5

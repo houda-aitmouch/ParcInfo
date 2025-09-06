@@ -26,6 +26,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copie du code source
 COPY . /app/
 
+# Créer les répertoires nécessaires
+RUN mkdir -p /app/staticfiles /app/media
+
 # Collecte des fichiers statiques
 RUN python manage.py collectstatic --noinput --settings=ParcInfo.settings
 

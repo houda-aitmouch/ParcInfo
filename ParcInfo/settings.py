@@ -53,7 +53,36 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,0.0.0.0').split(
 AUTH_USER_MODEL = 'users.CustomUser'
 
 # Optional: CSRF trusted origins (comma-separated)
-CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if origin.strip()]
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:3000,http://localhost:8000,http://localhost:8001,http://127.0.0.1:3000,http://127.0.0.1:8000,http://127.0.0.1:8001,http://frontend-service:3000,http://backend-service:8000,http://nginx-service:80').split(',') if origin.strip()]
+
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://localhost:8001",
+    "http://127.0.0.1:8001",
+    "http://frontend-service:3000",
+    "http://backend-service:8000",
+    "http://nginx-service:80",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only allow all origins in debug mode
+
+# Additional CORS settings for better compatibility
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # FORCER HTTP UNIQUEMENT - Supprimer HTTPS définitivement
 SECURE_SSL_REDIRECT = False
@@ -93,6 +122,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'corsheaders',  # Add CORS support
     'apps.users.apps.UsersConfig',
     'apps.fournisseurs',
     'apps.commande_informatique',
@@ -113,6 +143,7 @@ INSTALLED_APPS = [
 if DEBUG:
     # En mode développement, pas de SecurityMiddleware pour éviter les redirections HTTPS
     MIDDLEWARE = [
+        "corsheaders.middleware.CorsMiddleware",  # Add CORS middleware first
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.middleware.locale.LocaleMiddleware",  # Add this for language switching
         "django.middleware.common.CommonMiddleware",
@@ -124,6 +155,7 @@ if DEBUG:
 else:
     # En production, SecurityMiddleware activé + WhiteNoise pour les fichiers statiques
     MIDDLEWARE = [
+        "corsheaders.middleware.CorsMiddleware",  # Add CORS middleware first
         "django.middleware.security.SecurityMiddleware",
         "whitenoise.middleware.WhiteNoiseMiddleware",
         "django.contrib.sessions.middleware.SessionMiddleware",
@@ -209,7 +241,7 @@ USE_TZ = True  # Enable timezone support
 
 
 # Authentication settings
-LOGIN_REDIRECT_URL = '/redirect-user/'
+LOGIN_REDIRECT_URL = '/'  # Rediriger vers la page d'accueil (frontend React)
 LOGIN_URL = '/accounts/login/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 

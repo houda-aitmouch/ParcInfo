@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.contrib.auth import logout
@@ -15,6 +15,7 @@ from django.utils import timezone
 from typing import List, Dict
 from django.http import JsonResponse
 from django.db.models import Q
+from django.views.decorators.csrf import csrf_exempt
 
 from apps.commande_bureau.models import CommandeBureau
 from apps.commande_informatique.models import Commande
@@ -251,24 +252,96 @@ def home_view(request):
     if request.user.is_authenticated:
         return redirect_user(request)
     else:
-        # Rediriger vers la page de login HTTP (pas admin)
-        return redirect('login')
+        # Rediriger vers la page de login Django standard
+        return redirect('/accounts/login/')
 
 @login_required
 def redirect_user(request):
+    """Redirige l'utilisateur vers le dashboard Django approprié selon son rôle"""
     user = request.user
     
-    # Utiliser les groupes Django par défaut
+    # Utiliser la fonction existante pour obtenir l'URL du dashboard
+    dashboard_url = get_user_dashboard_url(user)
+    return redirect(dashboard_url)
+
+@login_required
+def get_user_info(request):
+    """API endpoint pour récupérer les informations de l'utilisateur connecté"""
+    user = request.user
+    
+    # Déterminer le rôle de l'utilisateur
+    role = 'employe'  # Par défaut
     if user.is_superuser:
-        return redirect('users:superadmin_dashboard')
+        role = 'superadmin'
     elif user.groups.filter(name='Gestionnaire Informatique').exists():
-        return redirect('users:gestionnaire_info_dashboard')
+        role = 'gestionnaire_info'
     elif user.groups.filter(name='Gestionnaire Bureau').exists():
-        return redirect('users:gestionnaire_bureau_dashboard')
+        role = 'gestionnaire_bureau'
     elif user.groups.filter(name__in=['Employé', 'Employe']).exists():
-        return redirect('users:employe_dashboard')
-    else:
-        return redirect('users:employe_dashboard')
+        role = 'employe'
+    
+    # Préparer les données de l'utilisateur
+    user_data = {
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'role': role,
+        'is_authenticated': True,
+        'groups': [group.name for group in user.groups.all()],
+        'is_superuser': user.is_superuser,
+        'is_staff': user.is_staff,
+    }
+    
+    return JsonResponse(user_data)
+
+@csrf_exempt
+def api_login(request):
+    """API endpoint pour la connexion via AJAX"""
+    if request.method == 'POST':
+        from django.contrib.auth import authenticate, login
+        
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        if username and password:
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                
+                # Déterminer le rôle de l'utilisateur
+                role = 'employe'  # Par défaut
+                if user.is_superuser:
+                    role = 'superadmin'
+                elif user.groups.filter(name='Gestionnaire Informatique').exists():
+                    role = 'gestionnaire_info'
+                elif user.groups.filter(name='Gestionnaire Bureau').exists():
+                    role = 'gestionnaire_bureau'
+                elif user.groups.filter(name__in=['Employé', 'Employe']).exists():
+                    role = 'employe'
+                
+                return JsonResponse({
+                    'success': True,
+                    'user': {
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'role': role,
+                        'is_authenticated': True,
+                        'groups': [group.name for group in user.groups.all()],
+                        'is_superuser': user.is_superuser,
+                        'is_staff': user.is_staff,
+                    }
+                })
+            else:
+                return JsonResponse({'success': False, 'error': 'Identifiants incorrects'}, status=401)
+        else:
+            return JsonResponse({'success': False, 'error': 'Nom d\'utilisateur et mot de passe requis'}, status=400)
+    
+    return JsonResponse({'success': False, 'error': 'Méthode non autorisée'}, status=405)
 
 @login_required
 def superadmin_dashboard(request):
@@ -1029,8 +1102,8 @@ def dashboard_garantie(request):
         return redirect('users:profil')
     
     try:
-        # Essayer d'abord le dashboard complet (8502), puis secours sur 8501
-        candidate_bases = ['http://localhost:8502', 'http://localhost:8501']
+        # Essayer d'abord l'URL interne Docker, puis localhost
+        candidate_bases = ['http://streamlit:8501', 'http://localhost:8501']
 
         for base_url in candidate_bases:
             try:
@@ -1042,9 +1115,11 @@ def dashboard_garantie(request):
                 username = request.user.username
                 import urllib.parse
                 encoded_username = urllib.parse.quote(username)
-                streamlit_url = f"{base_url}/?username={encoded_username}"
+                # Utiliser l'URL publique pour la redirection
+                public_url = 'http://localhost:8501'
+                streamlit_url = f"{public_url}/?username={encoded_username}"
                 logger.info(
-                    f"Redirection vers Streamlit {base_url} avec utilisateur: {username} (encodé: {encoded_username})"
+                    f"Redirection vers Streamlit {public_url} avec utilisateur: {username} (encodé: {encoded_username})"
                 )
                 return redirect(streamlit_url)
 

@@ -1,17 +1,76 @@
-# Dockerfile pour le frontend React - Utilise les fichiers déjà construits
+# Dockerfile pour servir les fichiers statiques Django et React
+FROM node:18-alpine AS builder
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Copier les fichiers de configuration des dépendances
+COPY frontend/package*.json ./
+
+# Installer toutes les dépendances (dev + prod)
+RUN npm ci
+
+# Copier le code source du frontend
+COPY frontend/ ./
+
+# Construire l'application React avec Vite
+RUN npm run build
+
+# Stage de production avec Nginx
 FROM nginx:alpine
 
-# Copie des fichiers construits localement
-COPY static/react/ /usr/share/nginx/html/
+# Installer des outils pour la gestion des fichiers
+RUN apk add --no-cache curl
 
-# Configuration nginx
+# Créer les répertoires nécessaires
+RUN mkdir -p /usr/share/nginx/html/static /usr/share/nginx/html/media
+
+# Copier les fichiers statiques Django
+COPY static/ /usr/share/nginx/html/static/
+
+# Copier les fichiers construits React depuis le stage builder
+COPY --from=builder /app/../static/react/ /usr/share/nginx/html/static/react/
+
+# Configuration nginx pour servir les fichiers statiques Django et React
 RUN echo 'server { \
     listen 3000; \
     server_name localhost; \
     root /usr/share/nginx/html; \
     index index.html; \
+    \
+    # Gestion des fichiers statiques Django \
+    location /static/ { \
+        alias /usr/share/nginx/html/static/; \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+        access_log off; \
+    } \
+    \
+    # Gestion des fichiers média Django \
+    location /media/ { \
+        alias /usr/share/nginx/html/media/; \
+        expires 1y; \
+        add_header Cache-Control "public"; \
+        access_log off; \
+    } \
+    \
+    # Gestion des fichiers React (si nécessaire) \
+    location /static/react/ { \
+        alias /usr/share/nginx/html/static/react/; \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+        access_log off; \
+    } \
+    \
+    # Page de test pour vérifier que le service fonctionne \
+    location = /health { \
+        return 200 "Frontend static files server is running"; \
+        add_header Content-Type text/plain; \
+    } \
+    \
+    # Redirection par défaut vers le backend \
     location / { \
-        try_files $uri $uri/ /index.html; \
+        return 301 http://backend:8000$request_uri; \
     } \
 }' > /etc/nginx/conf.d/default.conf
 

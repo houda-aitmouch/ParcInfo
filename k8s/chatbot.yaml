@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: chatbot-service
+  namespace: parcinfo
+  labels:
+    app: chatbot
+spec:
+  ports:
+  - port: 8001
+    targetPort: 8001
+  selector:
+    app: chatbot
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatbot
+  namespace: parcinfo
+  labels:
+    app: chatbot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chatbot
+  template:
+    metadata:
+      labels:
+        app: chatbot
+    spec:
+      containers:
+      - name: chatbot
+        image: parcinfo/chatbot:latest
+        ports:
+        - containerPort: 8001
+        env:
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: DEBUG
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: DATABASE_URL
+        - name: SECRET_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: SECRET_KEY
+        - name: ALLOWED_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: ALLOWED_HOSTS
+        - name: CSRF_TRUSTED_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: CSRF_TRUSTED_ORIGINS
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health/
+            port: 8001
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health/
+            port: 8001
+          initialDelaySeconds: 30
+          periodSeconds: 10

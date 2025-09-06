@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: streamlit-service
+  namespace: parcinfo
+  labels:
+    app: streamlit
+spec:
+  ports:
+  - port: 8501
+    targetPort: 8501
+  selector:
+    app: streamlit
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streamlit
+  namespace: parcinfo
+  labels:
+    app: streamlit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: streamlit
+  template:
+    metadata:
+      labels:
+        app: streamlit
+    spec:
+      containers:
+      - name: streamlit
+        image: parcinfo/streamlit:latest
+        ports:
+        - containerPort: 8501
+        env:
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: DEBUG
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: DATABASE_URL
+        - name: SECRET_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: parcinfo-config
+              key: SECRET_KEY
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8501
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8501
+          initialDelaySeconds: 10
+          periodSeconds: 5

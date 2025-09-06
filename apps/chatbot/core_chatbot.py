@@ -11012,7 +11012,7 @@ Bureautique : {etage1_office.count()} matériels
                 # Date de création
                 created_date = user.date_joined.strftime('%d/%m/%Y') if user.date_joined else "N/A"
                 
-                response += f"- {user.username} — {status}\n"
+                response += f"- {user.username} - {status}\n"
                 response += f"  Email: {user.email}\n"
                 response += f"  Rôles: {role_display}\n"
                 response += f"  Créé le: {created_date}\n\n"
